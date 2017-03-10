@@ -53,18 +53,18 @@ var UserSchema = mongoose.Schema({
   suspended:       { type: Boolean,  default: false                   },
   termsconditions: { type: Date,     default: null                    },
   updated_at:      { type: Date,     default: Date.now                },
-  username:        { type: String,     match: /^[a-zA-Z0-9_-]*$/      },
+  username:        { type: String,   match: /^[a-zA-Z0-9_-]*$/        },
 
   // ObjectId References
   // location_id:     { type: mongoose.Schema.Types.ObjectId, ref: 'Location', required: false },
 });
 
 // Validations
-// UserSchema.path('auth.basic.password').required(true);
-// UserSchema.path('email'              ).required(true);
-// UserSchema.path('email'              ).index( { unique: true } );
-// UserSchema.path('username'           ).required(true);
-// UserSchema.path('username'           ).index( { unique: true } );
+UserSchema.path('auth.basic.password').required(true);
+UserSchema.path('email'              ).required(true);
+UserSchema.path('email'              ).index( { unique: true } );
+UserSchema.path('username'           ).required(true);
+UserSchema.path('username'           ).index( { unique: true } );
 
 
 //--------------------------------- HOOKS --------------------------------------
