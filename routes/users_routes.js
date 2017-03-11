@@ -47,7 +47,7 @@ module.exports = function(router) {
             console.log(err);
             return res.status(500).json({ error: 'login' });
           }
-          res.json({ eat: eat });
+          res.json({ eat: eat, username: user.username, role: user.role, email: user.email });
         });
       });
     });
@@ -91,7 +91,7 @@ module.exports = function(router) {
               return res.status(500).json({ error: true });
           }
           console.log("Updated user is: ", user);
-          res.json({ success: true, user: user });
+          res.json({ success: true, user: {user} });
         }
       );
     }
