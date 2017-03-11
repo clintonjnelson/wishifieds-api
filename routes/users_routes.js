@@ -4,12 +4,13 @@ var bodyparser = require('body-parser'      );
 var contains   = require('lodash'           ).contains;
 var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
 var ownerAuth  = require('../lib/routes_middleware/owner_auth.js');
+var mongoose   = require('mongoose');
 var User       = require('../models/User.js');
 
 module.exports = function(router) {
   router.use(bodyparser.json());
 
-  // Get user
+  // Get users
   router.get('/users', function(req, res) {
     User.find({}, function(err, users) {
       if (err) {
@@ -17,6 +18,33 @@ module.exports = function(router) {
         return res.status(500).json({ error: 'user not found' });
       }
       res.json({users: users});
+    });
+  });
+
+  // Get user by ID (_id)
+  router.get('/users/:usernameOrId', function(req, res) {
+    var usernameOrId = req.params.usernameOrId;
+    var userQuery = mongoose.Types.ObjectId.isValid(usernameOrId) ?
+      {_id:      usernameOrId} :    // Matches as an ID type
+      {username: usernameOrId};      // Default as a username type
+    User.find(userQuery, function(err, user) {
+      if(err) {
+        console.log('Database error getting user by username or id:');
+        return res.status(500).json({error: true, msg: 'database error'});
+      }
+      if(!user) {
+        console.log('Tried to get user. User could not be found by: ', userQuery, '. User is: ', user);
+        return res.status(204).json({error: false, msg: 'no user found', user: {} });
+      }
+
+      console.log("USER FOUND: ", user);
+      res.json({
+        username:  user[0].username,
+        email:     user[0].email,
+        // THIS SHOULD BE REPLACED WITH STATUS
+        role:      user[0].role,
+        confirmed: user[0].confirmed
+      });
     });
   });
 
@@ -47,7 +75,13 @@ module.exports = function(router) {
             console.log(err);
             return res.status(500).json({ error: 'login' });
           }
-          res.json({ eat: eat, username: user.username, role: user.role, email: user.email });
+          console.log("EAT FOUND IS: ", eat);
+          res.json({
+            eat:      eat,  // encrypted version (user.eat is raw)
+            username: user.username,
+            role:     user.role,
+            email:    user.email,
+            userid:   user._id });
         });
       });
     });
@@ -57,6 +91,7 @@ module.exports = function(router) {
   router.patch('/users/:_id', eatAuth, ownerAuth('_id'), function(req, res) {
     var updUserData = req.body;
 
+    // We don't want it to try to update these values, so delete them off.
     delete updUserData._id;
     delete updUserData.eat;
 
@@ -106,7 +141,7 @@ module.exports = function(router) {
     delUser.save(function(err) {
       if (err) {
         console.log("Error saving deletion of user. Error: ", err);
-        return res.status(500).json({ error: true });
+        return res.status(500).json({ error: true, msg: 'error deleting user' });
       }
       res.json({ success: true });
     });
