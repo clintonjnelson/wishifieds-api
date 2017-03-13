@@ -44,15 +44,23 @@ require('./routes/signs_routes.js' )(signsRouter );
 require('./routes/users_routes.js' )(usersRouter );
 
 // Route middleware
-app.use(oauthRouter );
-app.use(authRouter  );
-app.use(searchRouter);
-app.use(signsRouter );
-app.use(usersRouter );
+app.use('/api', oauthRouter );
+app.use('/api', authRouter  );
+app.use('/api', searchRouter);
+app.use('/api', signsRouter );
+app.use('/api', usersRouter );
 
 // Static Resources
 var dir = process.env.WEBPACK_DIRECTORY || './client/dist';
 app.use(express.static(__dirname + '/' + dir));
+
+// This is so the UI doesn't get 404's for view URI's
+// Returning index.html allows view to render each time
+// This is called the PathLocationStrategy approach (vs having a # in the view path)
+// This goes last, because all other paths should be caught by the routes
+app.use('*/', function(req, res) {
+  res.sendFile(__dirname + '/' + dir + '/index.html');
+});
 
 // Start server
 app.listen(process.env.PORT || 3000, function() {
