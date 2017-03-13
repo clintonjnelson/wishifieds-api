@@ -10,17 +10,6 @@ var User       = require('../models/User.js');
 module.exports = function(router) {
   router.use(bodyparser.json());
 
-  // Get users
-  router.get('/users', function(req, res) {
-    User.find({}, function(err, users) {
-      if (err) {
-        console.log('Error finding user. Error: ', err);
-        return res.status(500).json({ error: 'user not found' });
-      }
-      res.json({users: users});
-    });
-  });
-
   // Get user by ID (_id)
   router.get('/users/:usernameOrId', function(req, res) {
     var usernameOrId = req.params.usernameOrId;
@@ -45,6 +34,17 @@ module.exports = function(router) {
         role:      user[0].role,
         confirmed: user[0].confirmed
       });
+    });
+  });
+
+  // Get users
+  router.get('/users', function(req, res) {
+    User.find({}, function(err, users) {
+      if (err) {
+        console.log('Error finding user. Error: ', err);
+        return res.status(500).json({ error: 'user not found' });
+      }
+      res.json({users: users});
     });
   });
 

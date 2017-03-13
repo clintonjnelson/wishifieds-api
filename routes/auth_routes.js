@@ -18,7 +18,13 @@ module.exports = function(router, passport) {
         console.log('Error logging in user. Error: ', err);
         return res.status(500).json({ error: true });
       }
-      res.json({eat: eat, user: req.user});
+      res.json({
+        eat:      eat,
+        username: req.user.username,
+        userid:   req.user._id,
+        email:    req.user.email,
+        role:     req.user.role
+      });
     });
   });
 
