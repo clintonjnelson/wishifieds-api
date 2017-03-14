@@ -93,6 +93,7 @@ module.exports = function(app) {
         return res.status(500).json({error: true, msg: 'could not save sign'});
       }
 
+      // CLEAN THIS UP, PROBABLY ALWAYS NEED TO RETURN OWNER & PICURL IN SCHEMA
       var returnSign = Object.assign({}, data);
       returnSign._doc.username = currUser.username;
       returnSign._doc.owner    = currUser.username;
