@@ -66,24 +66,24 @@ module.exports = function(app) {
       // custom avoids asking for info directly
   // If request for known :type param (user wants autoload), use that proceedure via oauth or API.
       // Procedure should be loaded via sign-creation-library supported by modules
-  app.post('/signs/:type?', eatAuth, function(req, res) {
+  app.post('/signs', eatAuth, function(req, res) {
     console.log('CREATING SIGN....');
     console.log('DATA IS: ', req.body);
 
-    var currUser = req.user;
-    var signData = req.body.sign;
-    var type     = req.params.type || 'custom';         // passed param or custom
-    var newSign;
+    var currUser    = req.user;
+    var signData    = req.body.sign;
+    signData.userId = currUser._id;
+    delete signData._id;
 
-
+    var type = signData.signType || 'custom';         // passed param or custom
     // catch wrong types
     if( !signBuilder[type] ) {
       console.log('Type ' + type + ' is not a valid build type.');
       return res.status(400).json({error: true, msg: 'type does not exist'});
     }
 
-    // build sign according to "type" (see above)
-    newSign        = signBuilder[type](signData);
+    // Mapping: build sign according to "type" (see above)
+    var newSign    = signBuilder[type](signData);
     newSign.userId = currUser.id;           // add userId before saving
     console.log("ABOUT TO SAVE SIGN...", newSign);
 
@@ -93,8 +93,12 @@ module.exports = function(app) {
         return res.status(500).json({error: true, msg: 'could not save sign'});
       }
 
-      console.log("SAVED SIGN IS: ", data);
-      return res.json({sign: data});
+      var returnSign = Object.assign({}, data);
+      returnSign._doc.username = currUser.username;
+      returnSign._doc.owner    = currUser.username;
+      returnSign._doc.picUrl   = '';
+      console.log("NEW SIGN TO RETURN IS: ", returnSign._doc);
+      return res.json({sign: returnSign._doc});
     });
   });
 
