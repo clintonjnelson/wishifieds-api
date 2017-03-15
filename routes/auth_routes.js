@@ -21,7 +21,7 @@ module.exports = function(router, passport) {
       res.json({
         eat:      eat,
         username: req.user.username,
-        userid:   req.user._id,
+        userId:   req.user._id,
         email:    req.user.email,
         role:     req.user.role
       });

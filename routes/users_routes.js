@@ -21,7 +21,7 @@ module.exports = function(router) {
         console.log('Database error getting user by username or id:');
         return res.status(500).json({error: true, msg: 'database error'});
       }
-      if(!user) {
+      if(!user || user.length === 0) {
         console.log('Tried to get user. User could not be found by: ', userQuery, '. User is: ', user);
         return res.status(204).json({error: false, msg: 'no user found', user: {} });
       }
@@ -30,6 +30,7 @@ module.exports = function(router) {
       res.json({
         username:  user[0].username,
         email:     user[0].email,
+        userid:    user[0]._id,
         // THIS SHOULD BE REPLACED WITH STATUS
         role:      user[0].role,
         confirmed: user[0].confirmed

@@ -31,6 +31,7 @@ module.exports = function(app) {
         console.log('User could not be found. User is: ', user);
         return res.status(204).json({msg: 'user not found', signs: []});
       }
+      console.log("USER FOUND IS: ", user);
 
       // user found => get signs
       Sign.find({userId: user._id}, function(err, signs) {
