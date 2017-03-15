@@ -13,7 +13,8 @@ function SignSchema() {
     description:    { type: String                                     }, // sign desc (opt)
     knownAs:        { type: String                                     }, // username ref
     linkUrl:        { type: String                                     }, // link to site
-    published:      { type: Boolean, default: true                     }, // remove from public
+    picUrl:         { type: String                                     }, // link to image (opt)
+    status:         { type: String, default: "A"                       }, // remove from public
     userId:         { type: mongoose.Schema.Types.ObjectId, ref: 'User' , required: true},  // needed for ALL Signs
   });
   // Fields for CUSTOM schemas: bgColor, signType, icon

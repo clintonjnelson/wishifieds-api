@@ -11,7 +11,6 @@ instagramSignSchema.add({
   bgColor:          { type: String, default: '#675144'     },
   icon:             { type: String, default: 'instagram'   },
   profileId:        { type: String, required: true         },
-  picUrl:           { type: String                         },
   signType:         { type: String, default: 'instagram'   },
 });
 

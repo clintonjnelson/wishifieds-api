@@ -12,7 +12,6 @@ googleSignSchema.add({
   circledByCount:  { type: String                              },
   icon:            { type: String, default: 'google-plus-box'  },
   profileId:       { type: String, required: true              },
-  picUrl:          { type: String                              },
   signType:        { type: String, default: 'google'           },
 });
 

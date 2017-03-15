@@ -12,7 +12,6 @@ wordpressSignSchema.add({
   icon:            { type: String, default: 'wordpress'   },
   profileId:       { type: String, required: true         },  // User ID
   siteId:          { type: String                         },  // id of site (can be shared)
-  picUrl:          { type: String                         },
   signType:        { type: String, default: 'wordpress'   },
 });
 

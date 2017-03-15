@@ -14,7 +14,6 @@ facebookSignSchema.add({
   email:          { type: String                                },  // fb ref email
   icon:           { type: String,  default: 'facebook-box'      },  // determines icon
   profileId:      { type: String, required: true                },  // fb #id
-  picUrl:         { type: String                                },  // picture url
   signType:       { type: String,  default: 'facebook'          },  // type reference
 });
 

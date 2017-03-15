@@ -13,7 +13,6 @@ linkedinSignSchema.add({
   icon:            { type: String, default: 'linkedin-box'     },
   location:        { type: String,                             },
   profileId:       { type: String, required: true              },
-  picUrl:          { type: String                              },
   signType:        { type: String, default: 'linkedin'         },
 });
 

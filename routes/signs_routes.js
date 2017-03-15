@@ -40,11 +40,9 @@ module.exports = function(app) {
         }
 
         // filter to show only Active (A)
-      var filteredSigns = signs.filter(function(elem) {
-        // BREAK THIS OUT INTO A STATUS FILTER FUNCTION
-        // TODO: CHANGE THIS TO STATUS!!! & FILTER NON-A SIGNS
-        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", elem);
-        return elem.published;
+      var filteredSigns = signs.filter(function(sign) {
+        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", sign);
+        return sign.status === 'A';
       });
       console.log("FINAL FILTERED SIGNS IS: ", filteredSigns);
       res.json({signs: filteredSigns, username: user.username});
@@ -64,11 +62,9 @@ module.exports = function(app) {
       console.log("SIGNS FOUND: ", signs);
 
       // filter to show only Active (A)
-      var filteredSigns = signs.filter(function(elem) {
-        // BREAK THIS OUT INTO A STATUS FILTER FUNCTION
-        // TODO: CHANGE THIS TO STATUS!!! & FILTER NON-A SIGNS
-        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", elem);
-        return elem.published;
+      var filteredSigns = signs.filter(function(sign) {
+        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", sign);
+        return sign.status === 'A';
       });
       console.log("FINAL FILTERED SIGNS IS: ", filteredSigns);
       res.json({signs: filteredSigns});
@@ -148,7 +144,7 @@ module.exports = function(app) {
     var delSignId = req.body.sign._id;
 
     // UPDATE THE STATUS, NOT THE PUBLISHED VALUE. Status should be D.
-    Sign.update({_id: delSignId}, {$set: {published: false}}, function(err, data) {
+    Sign.update({_id: delSignId}, {$set: {status: 'D'}}, function(err, data) {
       if(err) {
         console.log('Database error deleting sign.');
         return res.status(500).json({error: true, msg: 'database error'});

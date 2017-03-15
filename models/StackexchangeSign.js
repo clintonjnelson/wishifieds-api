@@ -12,7 +12,6 @@ stackexchangeSignSchema.add({
   bgColor:          { type: String, default: '#5184C1'         },
   icon:             { type: String, default: 'stackoverflow'   },
   location:         { type: String                             },
-  picUrl:           { type: String                             },
   profileId:        { type: String, required: true             },
   reputation:       { type: String                             },
   signIdentifier:   { type: String, required: true             },

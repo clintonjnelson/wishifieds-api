@@ -12,7 +12,6 @@ githubSignSchema.add({
   followersCount:  { type: String                         },
   icon:            { type: String, default: 'github-box'  },
   profileId:       { type: String, required: true         },
-  picUrl:          { type: String                         },
   signType:        { type: String, default: 'github'      },
 });
 
