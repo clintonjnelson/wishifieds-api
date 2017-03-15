@@ -39,8 +39,15 @@ module.exports = function(app) {
           return res.status(500).json({error: true, msg: 'Database error.'});
         }
 
-        console.log("SIGNS FOUND: ", signs);
-        res.json({signs: signs, username: user.username});
+        // filter to show only Active (A)
+      var filteredSigns = signs.filter(function(elem) {
+        // BREAK THIS OUT INTO A STATUS FILTER FUNCTION
+        // TODO: CHANGE THIS TO STATUS!!! & FILTER NON-A SIGNS
+        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", elem);
+        return elem.published;
+      });
+      console.log("FINAL FILTERED SIGNS IS: ", filteredSigns);
+      res.json({signs: filteredSigns, username: user.username});
       });
     });
   });
@@ -55,9 +62,17 @@ module.exports = function(app) {
       }
 
       console.log("SIGNS FOUND: ", signs);
-      res.json({signs: signs});
-    });
 
+      // filter to show only Active (A)
+      var filteredSigns = signs.filter(function(elem) {
+        // BREAK THIS OUT INTO A STATUS FILTER FUNCTION
+        // TODO: CHANGE THIS TO STATUS!!! & FILTER NON-A SIGNS
+        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", elem);
+        return elem.published;
+      });
+      console.log("FINAL FILTERED SIGNS IS: ", filteredSigns);
+      res.json({signs: filteredSigns});
+    });
   });
 
 
@@ -95,8 +110,8 @@ module.exports = function(app) {
 
       // CLEAN THIS UP, PROBABLY ALWAYS NEED TO RETURN OWNER & PICURL IN SCHEMA
       var returnSign = Object.assign({}, data);
-      returnSign._doc.username = currUser.username;
-      returnSign._doc.owner    = currUser.username;
+      returnSign._doc.username = currUser.username;  // REMOVE
+      returnSign._doc.owner    = currUser.username;  // REMOVE
       returnSign._doc.picUrl   = '';
       console.log("NEW SIGN TO RETURN IS: ", returnSign._doc);
       return res.json({sign: returnSign._doc});
@@ -120,6 +135,27 @@ module.exports = function(app) {
 
       console.log('UPDATE SUCCESSFUL!');
       res.json({error: false});
+    });
+  });
+
+  // Delete Sign
+  app.delete('/signs', eatAuth, signOwnerAuth, function(req, res) {
+    console.log('Made it to the server DELETE');
+    console.log('USER IS: ', req.user);
+    console.log('REQUEST BODY IS: ', req.body);
+
+    var currUser  = req.user;
+    var delSignId = req.body.sign._id;
+
+    // UPDATE THE STATUS, NOT THE PUBLISHED VALUE. Status should be D.
+    Sign.update({_id: delSignId}, {$set: {published: false}}, function(err, data) {
+      if(err) {
+        console.log('Database error deleting sign.');
+        return res.status(500).json({error: true, msg: 'database error'});
+      }
+
+      console.log("DELETION SUCCESSFUL. Data returned is: ", data);
+      res.json(true);
     });
   });
 };
