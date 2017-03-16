@@ -51,6 +51,7 @@ module.exports = function(app) {
     });
   });
 
+
   // Get users OWN signs (restricted route)
   app.get('/signs', eatAuth, function(req, res) {
 
@@ -115,25 +116,35 @@ module.exports = function(app) {
     });
   });
 
+
   // Update after verifying user & owner
   app.patch('/signs', eatAuth, signOwnerAuth, function(req, res) {
     console.log('MADE IT TO THE SERVER UPDATE.');
     console.log('USER IS: ', req.user);
     console.log('DATA IS: ', req.body);
 
-    var currUser = req.user;
-    var signData = req.body.sign;
+    var currUser  = req.user;
+    var signData  = req.body.sign;
+    var signId    = signData._id;
+    delete signData._id;  // Remove internal data
 
-    Sign.update({_id: signData._id}, signData, function(err, data) {
+    var SignModel = getModelFromSignType(signData.signType);
+    SignModel.update({'_id': signId }, {$set: signData}, function(err, data) {
       if(err) {
         console.log('Database error finding sign to update.');
         return res.status(500).json({error: true, msg: 'database error'});
       }
+      // CURRENTLY THIS IS ALWAYS THE CASE FOR ANY UPDATE ATTAMPTED - FIX!!!!!
+      if(data.nModified === 0) {
+        console.log('No updates made.');
+        return res.status(304).json({error: false, msg: 'no updates made'});
+      }
 
-      console.log('UPDATE SUCCESSFUL!');
+      console.log('UPDATE SUCCESSFUL! DATA IS: ', data);
       res.json({error: false});
     });
   });
+
 
   // Delete Sign
   app.delete('/signs', eatAuth, signOwnerAuth, function(req, res) {
@@ -155,5 +166,13 @@ module.exports = function(app) {
       res.json(true);
     });
   });
+
+
+  // MOVE THIS HELPER INTO A UTILS OR HELPERS MODULE FOR SHARING
+  function getModelFromSignType(signType) {
+    // Gets the model with the Sign-specific schema required for updating child fields
+    var modelPath = '../models/' + signType[0].toUpperCase() + signType.slice(1) + 'Sign.js';
+    return require(modelPath);
+  }
 };
 
