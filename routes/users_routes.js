@@ -11,7 +11,8 @@ module.exports = function(router) {
   router.use(bodyparser.json());
 
   // Get user by ID (_id)
-  router.get('/users/:usernameOrId', function(req, res) {
+  // TODO: BRING BACK OWNER AUTH!!!!!
+  router.get('/users/:usernameOrId', eatAuth, ownerAuth('usernameOrId'), function(req, res) {
     var usernameOrId = req.params.usernameOrId;
     var userQuery = mongoose.Types.ObjectId.isValid(usernameOrId) ?
       {_id:      usernameOrId} :    // Matches as an ID type
@@ -39,6 +40,7 @@ module.exports = function(router) {
   });
 
   // Get users
+  // !!!!!!!!!!! TODO: ADD EAT_AUTH & ADMIN_AUTH !!!!!!!!!!!!!
   router.get('/users', function(req, res) {
     User.find({}, function(err, users) {
       if (err) {
