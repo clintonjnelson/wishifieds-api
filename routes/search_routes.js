@@ -11,30 +11,30 @@ module.exports = function(router) {
   router.get('/search', function(req, res) {
     console.log("SEARCH STRING RECEIVED AS: ", req.query.searchStr);
 
-    var searchStr = req.query.searchStr.trim();
-    var regex     = new RegExp('^.*' + searchStr + '.*$', 'i');
-    var count     = 0;
-    var resCount  = 2;
-    var resObj    = {};
+    var searchStr         = req.query.searchStr.trim();
+    var partialMatchRegex = new RegExp('^.*' + searchStr + '.*$', 'i');  // ^.*George.*$
+    var currentCount      = 0;    // Count tracking
+    var totalSearchTypes  = 2;    // Total types of DB responses we'll expect
+    var searchResults     = {};   // Object to populate for response
 
 
     User.find({'username': {'$regex': regex} }, buildQueryCallback('users'));
     Sign.find({'knownAs':  {'$regex': regex} }, buildQueryCallback('signs'));
 
     function buildQueryCallback(type) {
-      return function queryCallback(err, data) {
+      return function queryCallback(err, results) {
         if(err) {return res.status(500).json({error: true, msg: 'database error'});}
         console.log(type + " FOUND AS: ", data);
 
-        resObj[type] = data;
-        count++;
-        responseCheck();
+        searchResults[type] = results;  // searchResults: {users: data}
+        currentCount++;                 // Track types iterated through
+        responseCheck();                // Return yet? Only if added all types.
       };
 
-      // ensure all searches run
+      // ensure all searches run; send when done
       function responseCheck() {
-        if(count === resCount) {
-          return res.json(resObj);  // send total response object
+        if(currentCount === totalSearchTypes) {
+          return res.json(searchResults);
         }
       }
     }
