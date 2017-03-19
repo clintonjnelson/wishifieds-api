@@ -4,6 +4,7 @@ var bodyparser = require('body-parser'      );
 var contains   = require('lodash'           ).contains;
 var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
 var ownerAuth  = require('../lib/routes_middleware/owner_auth.js');
+var adminAuth  = require('../lib/routes_middleware/admin_auth.js');
 var mongoose   = require('mongoose');
 var User       = require('../models/User.js');
 
@@ -39,9 +40,8 @@ module.exports = function(router) {
     });
   });
 
-  // Get users
-  // !!!!!!!!!!! TODO: ADD EAT_AUTH & ADMIN_AUTH !!!!!!!!!!!!!
-  router.get('/users', function(req, res) {
+  // Get users (requires login & Admin authorization role)
+  router.get('/users', eatAuth, adminAuth, function(req, res) {
     User.find({}, function(err, users) {
       if (err) {
         console.log('Error finding user. Error: ', err);
@@ -95,8 +95,9 @@ module.exports = function(router) {
     var updUserData = req.body;
 
     // We don't want it to try to update these values, so delete them off.
-    delete updUserData._id;
-    delete updUserData.eat;
+    delete updUserData._id;   // Unnecessary
+    delete updUserData.eat;   // Cannot manually change this
+    delete updUserData.role;  // Prevent Role Hacking
 
     if(updUserData.password) {
       console.log("ABOUT TO UPDATE USER & PASS... Current user is: ", updUserData);
