@@ -18,15 +18,15 @@ module.exports = function(router) {
     var searchResults     = {};   // Object to populate for response
 
 
-    User.find({'username': {'$regex': regex} }, buildQueryCallback('users'));
-    Sign.find({'knownAs':  {'$regex': regex} }, buildQueryCallback('signs'));
+    User.find({'username': {'$regex': partialMatchRegex} }, buildQueryCallback('users'));
+    Sign.find({'knownAs':  {'$regex': partialMatchRegex} }, buildQueryCallback('signs'));
 
     function buildQueryCallback(type) {
       return function queryCallback(err, results) {
         if(err) {return res.status(500).json({error: true, msg: 'database error'});}
-        console.log(type + " FOUND AS: ", data);
+        console.log(type + " FOUND AS: ", results);
 
-        searchResults[type] = results;  // searchResults: {users: data}
+        searchResults[type] = results;  // searchResults: {users: results}
         currentCount++;                 // Track types iterated through
         responseCheck();                // Return yet? Only if added all types.
       };
