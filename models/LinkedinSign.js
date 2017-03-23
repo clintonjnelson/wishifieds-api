@@ -10,7 +10,7 @@ var linkedinSignSchema = new SignSchema();
 linkedinSignSchema.add({
   bgColor:         { type: String, default: '#4875B4'          },
   connections:     { type: String                              },
-  icon:            { type: String, default: 'linkedin-box'     },
+  icon:            { type: String, default: 'linkedin'     },
   location:        { type: String,                             },
   profileId:       { type: String, required: true              },
   signType:        { type: String, default: 'linkedin'         },

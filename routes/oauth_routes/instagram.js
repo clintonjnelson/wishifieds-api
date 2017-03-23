@@ -2,11 +2,11 @@
 
 var oauth2Template = require('./oauth2_template.js');
 
-module.exports = function(app, passport) {
+module.exports = function(router, passport) {
   var instagramApiData = {
     passportType: 'instagram',
     scope: null,
   };
 
-  return oauth2Template(app, passport, instagramApiData);
+  return oauth2Template(router, passport, instagramApiData);
 };

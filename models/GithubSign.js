@@ -8,11 +8,11 @@ var githubSignSchema = new SignSchema();
 
 // BaseSchema: customBgColor, description, knownAs, linkUrl, published, userId
 githubSignSchema.add({
-  bgColor:         { type: String, default: '#333333'     },
-  followersCount:  { type: String                         },
-  icon:            { type: String, default: 'github-box'  },
-  profileId:       { type: String, required: true         },
-  signType:        { type: String, default: 'github'      },
+  bgColor:         { type: String, default: '#333333' },
+  followersCount:  { type: String                     },
+  icon:            { type: String, default: 'github'  },
+  profileId:       { type: String, required: true     },
+  signType:        { type: String, default: 'github'  },
 });
 
 // Validations

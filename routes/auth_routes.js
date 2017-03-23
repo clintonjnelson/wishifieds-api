@@ -2,12 +2,13 @@
 
 var bodyparser = require('body-parser');
 var eatAuth    = require('../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
+var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
 
 module.exports = function(router, passport) {
   router.use(bodyparser.json());
 
   // Send User Info IF logged in
-  router.get('/login/user', eatAuth, function(req, res) {
+  router.get('/login/user', eatOnReq, eatAuth, function(req, res) {
     res.json({user: req.user});
   });
 
@@ -29,7 +30,7 @@ module.exports = function(router, passport) {
   });
 
   // User signout
-  router.get('/logout', eatAuth, function(req, res) {
+  router.get('/logout', eatOnReq, eatAuth, function(req, res) {
     req.user.invalidateToken(function(err, result) {
       if (err) { return res.status(500).json({ error: true }); }
 

@@ -2,11 +2,11 @@
 
 var oauth2Template = require('./oauth2_template.js');
 
-module.exports = function(app, passport) {
+module.exports = function(router, passport) {
   var stackexchangeApiData = {
     passportType: 'stackexchange',
     scope: null,
   };
 
-  return oauth2Template(app, passport, stackexchangeApiData);
+  return oauth2Template(router, passport, stackexchangeApiData);
 };

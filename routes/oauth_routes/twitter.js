@@ -1,13 +1,14 @@
 'use strict';
 var bodyparser     = require('body-parser'         );
+var eatOnReq       = require('../../lib/routes_middleware/eat_on_req.js');
 var eatAuth        = require('../../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
 var loadEatUser    = require('../../lib/routes_middleware/load_eat_user.js')(process.env.AUTH_SECRET);
 var loadSendCookie = require('../../lib/routes_middleware/load_send_cookie.js');
 var User           = require('../../models/User.js');
 
 
-module.exports = function(app, passport) {
-  app.use(bodyparser.json());
+module.exports = function(router, passport) {
+  router.use(bodyparser.json());
 
   passport.serializeUser(function(oauth1, done) {
     done(null, '1');
@@ -18,7 +19,8 @@ module.exports = function(app, passport) {
 
 
   // Redirect to twitter for auth
-  app.get('/login/twitter',
+  router.get('/login/twitter',
+    // eatOnReq,
     passport.authenticate('twitter',
       {
       }
@@ -26,7 +28,8 @@ module.exports = function(app, passport) {
   );
 
   // Twitter redirects to here after auth
-  app.get('/auth/twitter/callback',
+  router.get('/auth/twitter/callback',
+    eatOnReq,
     loadEatUser,
     passport.authenticate('twitter',  // try to: hit api, find/make user, find/make sign
       {
@@ -37,7 +40,8 @@ module.exports = function(app, passport) {
   );
 
   //-------------------------------- AUTO SIGN ---------------------------------
-  app.get('/auto/twitter',
+  router.get('/auto/twitter',
+    eatOnReq,
     eatAuth,                                // verify & load user in req
     passport.authenticate('twitter',
       {

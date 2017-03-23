@@ -2,11 +2,11 @@
 
 var oauth2Template = require('./oauth2_template.js');
 
-module.exports = function(app, passport) {
+module.exports = function(router, passport) {
   var githubApiData = {
     passportType: 'github',
     scope: undefined,
   };
 
-  return oauth2Template(app, passport, githubApiData);
+  return oauth2Template(router, passport, githubApiData);
 };

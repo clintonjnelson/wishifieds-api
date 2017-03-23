@@ -2,6 +2,7 @@
 
 var bodyparser = require('body-parser'      );
 var contains   = require('lodash'           ).contains;
+var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
 var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
 var ownerAuth  = require('../lib/routes_middleware/owner_auth.js');
 var adminAuth  = require('../lib/routes_middleware/admin_auth.js');
@@ -13,7 +14,7 @@ module.exports = function(router) {
 
   // Get user by ID (_id)
   // TODO: BRING BACK OWNER AUTH!!!!!
-  router.get('/users/:usernameOrId', eatAuth, ownerAuth('usernameOrId'), function(req, res) {
+  router.get('/users/:usernameOrId', eatOnReq, eatAuth, ownerAuth('usernameOrId'), function(req, res) {
     var usernameOrId = req.params.usernameOrId;
     var userQuery = mongoose.Types.ObjectId.isValid(usernameOrId) ?
       {_id:      usernameOrId} :    // Matches as an ID type
@@ -41,7 +42,7 @@ module.exports = function(router) {
   });
 
   // Get users (requires login & Admin authorization role)
-  router.get('/users', eatAuth, adminAuth, function(req, res) {
+  router.get('/users', eatOnReq, eatAuth, adminAuth, function(req, res) {
     User.find({}, function(err, users) {
       if (err) {
         console.log('Error finding user. Error: ', err);
@@ -91,7 +92,7 @@ module.exports = function(router) {
   });
 
   // Update user
-  router.patch('/users/:_id', eatAuth, ownerAuth('_id'), function(req, res) {
+  router.patch('/users/:_id', eatOnReq, eatAuth, ownerAuth('_id'), function(req, res) {
     var updUserData = req.body;
 
     // We don't want it to try to update these values, so delete them off.
@@ -137,7 +138,7 @@ module.exports = function(router) {
   });
 
   // Destroy User (soft destroy)
-  router.delete('/users/:_id', eatAuth, ownerAuth('_id'), function(req, res) {
+  router.delete('/users/:_id', eatOnReq, eatAuth, ownerAuth('_id'), function(req, res) {
     var delUser;
 
     delUser = req.user;

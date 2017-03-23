@@ -141,7 +141,9 @@ UserSchema.methods.checkPassword = function checkPassword(password, callback) {
 };
 
 UserSchema.methods.generateToken = function generateToken(secret, callback) {
+  // USE DATE TO CREATE TOKEN? BAD IDEA!!! HACKING ALERT!!! USE RANDOM SHA.
   this.eat = Date.now();
+
   this.save(function(err, user) {
     if (err) {
       console.log('Error creating new token. Error: ', err);
@@ -153,7 +155,10 @@ UserSchema.methods.generateToken = function generateToken(secret, callback) {
         console.log('Error encoding eat. Error: ', err);
         return callback(err, null);
       }
-      callback(null, eatoken);
+      console.log("ABOUT TO ENCODE THIS TOKEN: ", eatoken);
+      var encodedToken = encodeURIComponent(eatoken)
+      console.log("NEWLY ENCODED TOKEN IS: ", encodedToken);
+      callback(null, encodedToken);
     });
   });
 };

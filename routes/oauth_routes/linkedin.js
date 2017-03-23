@@ -2,11 +2,11 @@
 
 var oauth2Template = require('./oauth2_template.js');
 
-module.exports = function(app, passport) {
+module.exports = function(router, passport) {
   var linkedinApiData = {
     passportType: 'linkedin',
     scope: 'r_basicprofile',
   };
 
-  return oauth2Template(app, passport, linkedinApiData);
+  return oauth2Template(router, passport, linkedinApiData);
 };

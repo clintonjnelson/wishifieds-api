@@ -9,19 +9,19 @@
 
 
 var bodyparser     = require('body-parser'         );
-var eatAuth        = require('../../lib/routes_middleware/eat_auth.js'     )(process.env.AUTH_SECRET);
-var loadEatUser    = require('../../lib/routes_middleware/load_eat_user.js')(process.env.AUTH_SECRET);
+var eatOnReq       = require('../../lib/routes_middleware/eat_on_req.js');
+var loadEatUser    = require('../../lib/routes_middleware/load_eat_user.js')( process.env.AUTH_SECRET);
 var loadSendCookie = require('../../lib/routes_middleware/load_send_cookie.js');
 var User           = require('../../models/User.js');
+var makeOauthReqWithEat = require('../../lib/routes_middleware/make_oauth_req_with_eat.js');
 
-
-module.exports = function(app, passport, apiData) {
-    app.use(bodyparser.json());
+module.exports = function(router, passport, apiData) {
+    router.use(bodyparser.json());
 
 
     //---------------------------------- LOGIN -----------------------------------
     // Redirect to API for auth
-    app.get('/login/' + apiData.passportType,
+    router.get('/login/' + apiData.passportType,
       passport.authenticate(apiData.passportType,  // type of passport to use
         { session: false,
           scope:   apiData.scope,
@@ -30,11 +30,12 @@ module.exports = function(app, passport, apiData) {
     );
 
     // API redirects to here after auth
-    app.get('/auth/' + apiData.passportType + '/callback',
+    router.get('/auth/' + apiData.passportType + '/callback',
+      eatOnReq,
       loadEatUser,                                // check for eat token, load if valid. For: AUTO-SIGN
       passport.authenticate(apiData.passportType, // try to: hit api, find/make user, find/make sign
         { session:         false,
-          failureRedirect: '/#/',                 // TODO: Error handle (client: guest(noEat), user(Eat))
+          failureRedirect: '/',                 // TODO: Error handle (client: guest(noEat), user(Eat))
         }
       ),
       loadSendCookie                              // Middleware to load eat cookie & send. For: SIGNUP/LOGIN
@@ -42,12 +43,9 @@ module.exports = function(app, passport, apiData) {
 
 
     //-------------------------------- AUTO SIGN ---------------------------------
-    app.get('/auto/' + apiData.passportType,
-      eatAuth,                                    // verify & load user in req
-      passport.authenticate(apiData.passportType,
-        { session: false,
-          scope:   apiData.scope,
-        }
-      )
+    router.get('/auto/' + apiData.passportType,
+      eatOnReq,
+      // eatAuth, // ADD THIS BACK IN
+      makeOauthReqWithEat(router, passport, apiData)   // Load values into middleware
     );
 };

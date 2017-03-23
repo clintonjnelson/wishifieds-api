@@ -2,6 +2,7 @@
 
 var bodyparser    = require('body-parser'              );
 var eatAuth       = require('../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
+var eatOnReq      = require('../lib/routes_middleware/eat_on_req.js');
 var signOwnerAuth = require('../lib/routes_middleware/sign_owner_auth.js');
 var FacebookSign  = require('../models/FacebookSign.js');
 var mongoose      = require('mongoose'                 );
@@ -53,7 +54,7 @@ module.exports = function(app) {
 
 
   // Get users OWN signs (restricted route)
-  app.get('/signs', eatAuth, function(req, res) {
+  app.get('/signs', eatOnReq, eatAuth, function(req, res) {
 
     Sign.find({userId: req.user._id}, function(err, signs) {
       if(err) {
@@ -79,7 +80,7 @@ module.exports = function(app) {
       // custom avoids asking for info directly
   // If request for known :type param (user wants autoload), use that proceedure via oauth or API.
       // Procedure should be loaded via sign-creation-library supported by modules
-  app.post('/signs', eatAuth, function(req, res) {
+  app.post('/signs', eatOnReq, eatAuth, function(req, res) {
     console.log('CREATING SIGN....');
     console.log('DATA IS: ', req.body);
 
@@ -118,7 +119,7 @@ module.exports = function(app) {
 
 
   // Update after verifying user & owner
-  app.patch('/signs', eatAuth, signOwnerAuth, function(req, res) {
+  app.patch('/signs', eatOnReq, eatAuth, signOwnerAuth, function(req, res) {
     console.log('MADE IT TO THE SERVER UPDATE.');
     console.log('USER IS: ', req.user);
     console.log('DATA IS: ', req.body);
@@ -147,7 +148,7 @@ module.exports = function(app) {
 
 
   // Delete Sign
-  app.delete('/signs', eatAuth, signOwnerAuth, function(req, res) {
+  app.delete('/signs', eatOnReq, eatAuth, signOwnerAuth, function(req, res) {
     console.log('Made it to the server DELETE');
     console.log('USER IS: ', req.user);
     console.log('REQUEST BODY IS: ', req.body);
