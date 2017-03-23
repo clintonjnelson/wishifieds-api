@@ -4,6 +4,7 @@ var eatOnReq       = require('../../lib/routes_middleware/eat_on_req.js');
 var eatAuth        = require('../../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
 var loadEatUser    = require('../../lib/routes_middleware/load_eat_user.js')(process.env.AUTH_SECRET);
 var loadSendCookie = require('../../lib/routes_middleware/load_send_cookie.js');
+var makeOauthReqWithEat = require('../../lib/routes_middleware/make_oauth_req_with_eat.js');
 var User           = require('../../models/User.js');
 
 
@@ -20,7 +21,7 @@ module.exports = function(router, passport) {
 
   // Redirect to twitter for auth
   router.get('/login/twitter',
-    // eatOnReq,
+    eatOnReq,
     passport.authenticate('twitter',
       {
       }
@@ -33,7 +34,7 @@ module.exports = function(router, passport) {
     loadEatUser,
     passport.authenticate('twitter',  // try to: hit api, find/make user, find/make sign
       {
-        failureRedirect: '/#/'   // only redirect for failure
+        failureRedirect: '/'   // only redirect for failure
       }
     ),
     loadSendCookie    // Middleware to load Eat cookie & send upon success
@@ -43,10 +44,11 @@ module.exports = function(router, passport) {
   router.get('/auto/twitter',
     eatOnReq,
     eatAuth,                                // verify & load user in req
-    passport.authenticate('twitter',
-      {
-      }
-    )
+    makeOauthReqWithEat(router, passport, {passportType: 'twitter', scope: null})
+    // passport.authenticate('twitter'),
+    //   {
+    //   }
+    // )
   );
 };
 
