@@ -3,7 +3,7 @@
 var bodyparser           = require('body-parser');
 var setCors              = require('../lib/routes_middleware/set_cors_permissions.js');
 var removePassptSessions = require('../lib/routes_middleware/remove_passport_sessions.js');
-var loadOauthRoutes      = require('./oauth_routes/oauth_template.js'); // raw function
+var loadOauthRoutes      = require('./support/oauth_template.js'); // raw function
 
 
 module.exports = function(router, passport) {
@@ -13,14 +13,6 @@ module.exports = function(router, passport) {
   router.use(removePassptSessions);  // bypass oauth1 sessions if exist
 
   // Require routes by provider
-  // require('./oauth_routes/facebook.js'     )(router, passport);
-  // require('./oauth_routes/github.js'       )(router, passport);
-  // require('./oauth_routes/google.js'       )(router, passport);
-  // require('./oauth_routes/instagram.js'    )(router, passport);
-  // require('./oauth_routes/linkedin.js'     )(router, passport);
-  // require('./oauth_routes/stackexchange.js')(router, passport);
-  // require('./oauth_routes/twitter.js'      )(router, passport);
-  // require('./oauth_routes/wordpress.js'    )(router, passport);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.facebook);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.github);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.google);
