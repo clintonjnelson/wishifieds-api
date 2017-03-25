@@ -32,19 +32,19 @@ module.exports = function(router, passport, apiData) {
     passport.authenticate(apiData.passportType,
       {
         session: apiData.session,
-        failureRedirect: '/'        // will this work in oauth1????
+        failureRedirect: '/errors/oauthlogin'  // will this work in oauth1????
       }
     )
   );
 
-  // Twitter redirects to here after auth
+  // Redirects to here after auth
   router.get('/auth/' + apiData.passportType + '/callback',
     eatOnReq,
     loadEatUser,
     passport.authenticate(apiData.passportType,  // try to: hit api, find/make user, find/make sign
       {
         session: apiData.session,
-        failureRedirect: '/'   // only redirect for failure
+        failureRedirect: '/errors/oauth'   // only redirect for failure
       }
     ),
     loadSendCookie    // Middleware to load Eat cookie & send upon success
@@ -55,9 +55,5 @@ module.exports = function(router, passport, apiData) {
     eatOnReq,
     eatAuth,                                // verify & load user in req
     makeOauthReqWithEat(router, passport, apiData)
-    // passport.authenticate('twitter'),
-    //   {
-    //   }
-    // )
   );
 };
