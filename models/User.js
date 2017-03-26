@@ -3,6 +3,7 @@
 var bcrypt   = require('bcrypt-nodejs');
 var eat      = require('eat'          );
 var mongoose = require('mongoose'     );
+var crypto   = require('crypto'       );
 
 // db schema for User
 var UserSchema = mongoose.Schema({
@@ -44,7 +45,7 @@ var UserSchema = mongoose.Schema({
     },
                                                                       },
   confirmed:       { type: Boolean,  default: false                   },
-  eat:             { type: Number,   default: null                    },
+  eat:             { type: String,   default: null                    },
   email:           { type: String,   default: null                    },
   permissions:     { type: Array,    default: ['user']                },
   prt:             { type: String,   default: null                    },  // HOOK THIS UP TO EMAIL
@@ -142,8 +143,8 @@ UserSchema.methods.checkPassword = function checkPassword(password, callback) {
 };
 
 UserSchema.methods.generateToken = function generateToken(secret, callback) {
-  // USE DATE TO CREATE TOKEN? BAD IDEA!!! HACKING ALERT!!! USE RANDOM SHA.
-  this.eat = Date.now();
+  this.eat = crypto.randomBytes(32).toString('hex');
+  console.log("CRYPTO GENERATED EAT IS: ", this.eat);
 
   this.save(function(err, user) {
     if (err) {
