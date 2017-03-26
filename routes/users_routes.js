@@ -34,7 +34,7 @@ module.exports = function(router) {
         username:  user[0].username,
         email:     user[0].email,
         userid:    user[0]._id,
-        // THIS SHOULD BE REPLACED WITH STATUS
+        status:    user[0].status,
         role:      user[0].role,
         confirmed: user[0].confirmed
       });
@@ -131,7 +131,14 @@ module.exports = function(router) {
               return res.status(500).json({ error: true });
           }
           console.log("Updated user is: ", user);
-          res.json({ success: true, user: {user} });
+          res.json({ success: true,
+                     user: {username:  user.username,
+                            email:     user.email,
+                            userid:    user._id,
+                            status:    user.status,
+                            role:      user.role,
+                            confirmed: user.confirmed}
+                   });
         }
       );
     }

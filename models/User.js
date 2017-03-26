@@ -44,13 +44,12 @@ var UserSchema = mongoose.Schema({
     },
                                                                       },
   confirmed:       { type: Boolean,  default: false                   },
-  deleted:         { type: Date,     default: null                    },
   eat:             { type: Number,   default: null                    },
   email:           { type: String,   default: null                    },
   permissions:     { type: Array,    default: ['user']                },
-  prt:             { type: String,   default: null                    },
+  prt:             { type: String,   default: null                    },  // HOOK THIS UP TO EMAIL
   role:            { type: String,   default: null                    },
-  suspended:       { type: Boolean,  default: false                   },
+  status:          { type: String,   default: 'A'                     },  // A=Active, D=Deleted, P=Pending, S=Suspended
   termsconditions: { type: Date,     default: null                    },
   updated_at:      { type: Date,     default: Date.now                },
   username:        { type: String,   match: /^[a-zA-Z0-9_-]*$/        },
@@ -60,6 +59,7 @@ var UserSchema = mongoose.Schema({
 });
 
 // Validations
+// NEED A CREATE_DATE WITH ON_CREATE HOOK
 // ONLY NEED THESE TO BE REQUIRED ON BASIC AUTH!!!
 // UserSchema.path('auth.basic.password').required(true);
 // UserSchema.path('email'              ).required(true);
