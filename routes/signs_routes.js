@@ -41,15 +41,25 @@ module.exports = function(app) {
           return res.status(500).json({error: true, msg: 'Database error.'});
         }
 
-        // filter to show only Active (A)
-      var filteredSigns = signs.filter(function(sign) {
-        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", sign);
-        return sign.status === 'A';
-      });
-      console.log("FINAL FILTERED SIGNS IS: ", filteredSigns);
-      res.json({signs: filteredSigns, username: user.username});
+      // filter to show only Active (A)
+      var filteredSigns = signs.filter(keepOnlyActive);
+      console.log("FINAL FILTERED_SIGNS IS: ", filteredSigns);
+      // Order array by sign order number, with null values at end
+      var orderedFilteredSigns = filteredSigns.sort(arrangeSignsByOrder);
+      console.log("FINAL ORDERED_FILTERED_SIGNS IS: ", orderedFilteredSigns);
+
+      res.json({signs: orderedFilteredSigns, username: user.username});
       });
     });
+
+    function keepOnlyActive(sign) {
+      return sign.status === 'A';
+    }
+    function arrangeSignsByOrder(signA, signB) {
+      if(signA.order === null) { return  1; }
+      if(signB.order === null) { return -1; }
+      return (signA.order - signB.order);
+    }
   });
 
 
@@ -66,7 +76,6 @@ module.exports = function(app) {
 
       // filter to show only Active (A)
       var filteredSigns = signs.filter(function(sign) {
-        console.log("CHECKING SIGN FOR FILTERING. SIGN IS: ", sign);
         return sign.status === 'A';
       });
       console.log("FINAL FILTERED SIGNS IS: ", filteredSigns);
@@ -117,6 +126,46 @@ module.exports = function(app) {
     });
   });
 
+  app.patch('/signs/order', eatOnReq, eatAuth, function(req, res) {
+    var orderedSignIds = req.body.order;
+    var ownerId = req.user._id.toString();
+    console.log("MADE IT TO SIGNS UPDATE ORDER...");
+    // CHECK OWNER AUTH AS GO
+    console.log("RECEIVED SIGNS IS: ", req.body);
+    // First check all signs have this owner
+    Sign.find({'_id': {$in: orderedSignIds}}, function(err, signs) {
+      if(err) {
+        console.log("Error finding signs to update.");
+        return res.status(404).json({error: true, msg: 'could not find requested sign(s)'});
+      }
+      if(!signs || ( signs && !signs.length) ) {
+        console.log("Error finding signs to update.");
+        return res.status(404).json({error: true, msg: 'could not find requested sign(s)'});
+      }
+      // Verify each sign owner matches current user
+      var isOwnerVerified = signs.every(function(sign) {
+        console.log("THE SIGN_USER_ID IS: ", sign.userId);
+        console.log("THE REQ_USER_ID IS: ", req.user._id);
+
+        return sign.userId.toString() === ownerId;
+      });
+      console.log("IS_OWNER_VERIFIED: ", isOwnerVerified);
+      if(!isOwnerVerified) {
+        console.log("OWNER DID NOT MATCH CURRENT USER ON ALL SIGNS");
+        return res.status(403).json({error: true, msg: 'sign owner did not match current user at least one sign'})
+      }
+
+      signs.forEach(function(sign, ind, origArr) {
+        console.log("ORDERED_SIGNS IS: ", orderedSignIds);
+        console.log("CURRENT SIGN IS: ", sign);
+        console.log("IT IS AT INDEX: ", orderedSignIds.indexOf( sign._id.toString() ) );
+
+        sign.order = orderedSignIds.indexOf( sign._id.toString() );
+        sign.save();
+      });
+      return res.json({success: true});
+    });
+  });
 
   // Update after verifying user & owner
   app.patch('/signs', eatOnReq, eatAuth, signOwnerAuth, function(req, res) {

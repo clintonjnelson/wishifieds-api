@@ -32,6 +32,8 @@ module.exports = function(router, passport, apiData) {
     passport.authenticate(apiData.passportType,
       {
         session: apiData.session,
+        scope: apiData.scope,
+        state: apiData.state,
         failureRedirect: '/errors/oauthloginerror'  // will this work in oauth1????
       }
     )

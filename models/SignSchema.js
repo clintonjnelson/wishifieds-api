@@ -9,10 +9,11 @@ function SignSchema() {
 
   // Schema fields
   this.add({
-    customBgColor:  { type: String,  default: null                     }, // custom sign color
+    customBgColor:  { type: String, default: null                      }, // custom sign color
     description:    { type: String                                     }, // sign desc (opt)
     knownAs:        { type: String                                     }, // username ref
     linkUrl:        { type: String                                     }, // link to site
+    order:          { type: Number, default: null                      }, // for ordering signs
     picUrl:         { type: String                                     }, // link to image (opt)
     status:         { type: String, default: "A"                       }, // remove from public
     userId:         { type: mongoose.Schema.Types.ObjectId, ref: 'User' , required: true},  // needed for ALL Signs
