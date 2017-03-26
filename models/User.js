@@ -60,9 +60,10 @@ var UserSchema = mongoose.Schema({
 });
 
 // Validations
-UserSchema.path('auth.basic.password').required(true);
-UserSchema.path('email'              ).required(true);
-UserSchema.path('email'              ).index( { unique: true } );
+// ONLY NEED THESE TO BE REQUIRED ON BASIC AUTH!!!
+// UserSchema.path('auth.basic.password').required(true);
+// UserSchema.path('email'              ).required(true);
+// UserSchema.path('email'              ).index( { unique: true } );
 UserSchema.path('username'           ).required(true);
 UserSchema.path('username'           ).index( { unique: true } );
 

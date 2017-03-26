@@ -13,20 +13,34 @@ module.exports = function(router, passport) {
   });
 
   // Existing user login
-  router.get('/login', passport.authenticate('basic', { session: false }), function(req, res) {
-    req.user.generateToken(process.env.AUTH_SECRET, function(err, eat) {  // passport strat adds req.user
-      if (err) {
-        console.log('Error logging in user. Error: ', err);
-        return res.status(500).json({ error: true });
+  router.get('/login', function(req, res, next) {
+    console.log("IN LOGIN...")
+    //passport.authenticate('basic', { session: false })
+    passport.authenticate('basic', function(error, user, info) {
+      console.log("AUTHENTICATING WITH BASIC...")
+      if(error) {
+        console.log('Error in basic auth. Error: ', error);
+        return res.status(400).json({ error: true, msg: error});
       }
-      res.json({
-        eat:      eat,
-        username: req.user.username,
-        userId:   req.user._id,
-        email:    req.user.email,
-        role:     req.user.role
+      if(!user) {
+        console.log('Error in getting user. User is: ', user);
+        return res.status(404).json({ error: true, msg: 'user not found'});
+      }
+
+      user.generateToken(process.env.AUTH_SECRET, function(err, eat) {  // passport strat adds req.user
+        if (err) {
+          console.log('Error logging in user. Error: ', err);
+          return res.status(404).json({ error: true, msg: 'user not found' });
+        }
+        res.json({
+          eat:      eat,
+          username: user.username,
+          userId:   user._id,
+          email:    user.email,
+          role:     user.role
+        });
       });
-    });
+    })(req, res, next);
   });
 
   // User signout

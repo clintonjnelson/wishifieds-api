@@ -28,7 +28,7 @@ module.exports = function(router, passport, apiData) {
 
   // Redirect to twitter for auth
   router.get('/login/' + apiData.passportType,
-    eatOnReq,
+    // eatOnReq,
     passport.authenticate(apiData.passportType,
       {
         session: apiData.session,
