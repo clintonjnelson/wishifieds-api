@@ -9,7 +9,13 @@ module.exports = function(router, passport) {
 
   // Send User Info IF logged in
   router.get('/login/user', eatOnReq, eatAuth, function(req, res) {
-    res.json({user: req.user});
+    res.json({
+      eat:      req.eat,
+      username: user.username,
+      userId:   user._id,
+      email:    user.email,
+      role:     user.role
+    });
   });
 
   // Existing user login
