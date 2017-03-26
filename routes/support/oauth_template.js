@@ -32,7 +32,7 @@ module.exports = function(router, passport, apiData) {
     passport.authenticate(apiData.passportType,
       {
         session: apiData.session,
-        failureRedirect: '/errors/oauthlogin'  // will this work in oauth1????
+        failureRedirect: '/errors/oauthloginerror'  // will this work in oauth1????
       }
     )
   );
@@ -44,7 +44,7 @@ module.exports = function(router, passport, apiData) {
     passport.authenticate(apiData.passportType,  // try to: hit api, find/make user, find/make sign
       {
         session: apiData.session,
-        failureRedirect: '/errors/oauth'   // only redirect for failure
+        failureRedirect: '/errors/oautherror'   // only redirect for failure
       }
     ),
     loadSendCookie    // Middleware to load Eat cookie & send upon success
