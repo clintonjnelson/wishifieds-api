@@ -1,11 +1,12 @@
 'use strict';
-var bodyparser     = require('body-parser'         );
-var eatOnReq       = require('../../lib/routes_middleware/eat_on_req.js');
-var eatAuth        = require('../../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
-var loadEatUser    = require('../../lib/routes_middleware/load_eat_user.js')(process.env.AUTH_SECRET);
-var loadSendCookie = require('../../lib/routes_middleware/load_send_cookie.js');
+var bodyparser          = require('body-parser'         );
+var eatOnReq            = require('../../lib/routes_middleware/eat_on_req.js');
+var eatAuth             = require('../../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
+var loadEatUser         = require('../../lib/routes_middleware/load_eat_user.js')(process.env.AUTH_SECRET);
+var loadSendCookie      = require('../../lib/routes_middleware/load_send_cookie.js');
+var checkUndeleteSign   = require('../../lib/routes_middleware/check_undelete_sign.js');
 var makeOauthReqWithEat = require('../../lib/routes_middleware/make_oauth_req_with_eat.js');
-var User           = require('../../models/User.js');
+var User                = require('../../models/User.js');
 
 
 module.exports = function(router, passport, apiData) {
@@ -56,6 +57,7 @@ module.exports = function(router, passport, apiData) {
   router.get('/auto/' + apiData.passportType,
     eatOnReq,
     eatAuth,                                // verify & load user in req
+    checkUndeleteSign,
     makeOauthReqWithEat(router, passport, apiData)
   );
 };

@@ -143,7 +143,7 @@ UserSchema.methods.checkPassword = function checkPassword(password, callback) {
 };
 
 UserSchema.methods.generateToken = function generateToken(secret, callback) {
-  this.eat = crypto.randomBytes(32).toString('hex');
+  this.eat = crypto.randomBytes(24).toString('hex');
   console.log("CRYPTO GENERATED EAT IS: ", this.eat);
 
   this.save(function(err, user) {
@@ -151,7 +151,7 @@ UserSchema.methods.generateToken = function generateToken(secret, callback) {
       console.log('Error creating new token. Error: ', err);
       return callback(err, null);
     }
-
+    console.log("AFTER SAVING, EAT IS: ", user.eat, " WHICH SHOULD BE SAME AS THE CRYPTO EAT ABOVE");
     eat.encode({eat: user.eat}, secret, function encodeEat(err, eatoken) {
       if (err) {
         console.log('Error encoding eat. Error: ', err);
