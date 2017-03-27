@@ -1,13 +1,14 @@
 'use strict';
 
-var bodyparser = require('body-parser'      );
-var contains   = require('lodash'           ).contains;
-var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
-var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
-var ownerAuth  = require('../lib/routes_middleware/owner_auth.js');
-var adminAuth  = require('../lib/routes_middleware/admin_auth.js');
-var mongoose   = require('mongoose');
-var User       = require('../models/User.js');
+var bodyparser  = require('body-parser'      );
+var contains    = require('lodash'           ).contains;
+var eatOnReq    = require('../lib/routes_middleware/eat_on_req.js');
+var eatAuth     = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
+var ownerAuth   = require('../lib/routes_middleware/owner_auth.js');
+var adminAuth   = require('../lib/routes_middleware/admin_auth.js');
+var mongoose    = require('mongoose');
+var User        = require('../models/User.js');
+var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
 module.exports = function(router) {
   router.use(bodyparser.json());
@@ -54,10 +55,15 @@ module.exports = function(router) {
 
   // Create new user
   router.post('/users', function(req, res) {
+    var newEmail = req.body.email;
     var newUser = new User({  // Explicitly populate to avoid exploit
-      username: req.body.username,
-      email:    req.body.email
+      // username: req.body.username,
+      email: newEmail
     });
+
+    if(!newEmail || !EMAIL_REGEX.test(newEmail)) {
+      return res.status(400).json({error: 'email'});
+    }
 
     newUser.generateHash(req.body.password, function(err, hash) {
       if (err) { return res.status(500).json({ error: true }); }
@@ -94,6 +100,10 @@ module.exports = function(router) {
   // Update user
   router.patch('/users/:_id', eatOnReq, eatAuth, ownerAuth('_id'), function(req, res) {
     var updUserData = req.body;
+
+    if(!updUserData.email || !EMAIL_REGEX.test(updUserData.email)) {
+      return res.status(400).json({error: 'email'});
+    }
 
     // We don't want it to try to update these values, so delete them off.
     delete updUserData._id;   // Unnecessary
