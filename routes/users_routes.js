@@ -34,7 +34,7 @@ module.exports = function(router) {
       res.json({
         username:  user[0].username,
         email:     user[0].email,
-        userid:    user[0]._id,
+        userId:    user[0]._id,
         status:    user[0].status,
         role:      user[0].role,
         confirmed: user[0].confirmed
@@ -98,45 +98,75 @@ module.exports = function(router) {
   });
 
   // Update user
-  router.patch('/users/:_id', eatOnReq, eatAuth, ownerAuth('_id'), function(req, res) {
-    var updUserData = req.body;
-
-    if(!updUserData.email || !EMAIL_REGEX.test(updUserData.email)) {
-      return res.status(400).json({error: 'email'});
+  router.patch('/users/:id', eatOnReq, eatAuth, ownerAuth('id'), function(req, res) {
+    console.log("BODY ON UPDATE REQUEST IS: ", req.body);
+    var updSettings = req.body.userSettings;
+    var updUserData = {
+      username: updSettings.username,
+      email:    updSettings.email,
     }
 
-    // We don't want it to try to update these values, so delete them off.
-    delete updUserData._id;   // Unnecessary
-    delete updUserData.eat;   // Cannot manually change this
-    delete updUserData.role;  // Prevent Role Hacking
+    var userId = updSettings.userId;
+    console.log("ABOUT TO UPDATE USER... Current user is: ", updUserData);
+    verifyAvailabilityAndUpdateUser(userId, updUserData);
 
-    if(updUserData.password) {
-      console.log("ABOUT TO UPDATE USER & PASS... Current user is: ", updUserData);
 
-      req.user.generateHash(updUserData.password, function(err, hash) {
-        if(err) { return res.status(500).json({error: true}); }
-        updUserData.auth.basic.password = hash;
+    // ------------- Helper Methods ---------------
+    // Validation doesn't always work, and neither do these checks. With both, works better.
+    function verifyAvailabilityAndUpdateUser(userId, userData) {
+      switch(true) {
+        case(!userData.email):                    return respond400ErrorMsg('email missing');
+        case(!EMAIL_REGEX.test(userData.email)):  return respond400ErrorMsg('email-format');
+        case(!userData.username):                 return respond400ErrorMsg('username missing');
+        case(!userData.email):                    return respond400ErrorMsg('email missing');
+      }
 
-        updateUser(updUserData);
+      User.findOne({username: userData.username}, function(error, user) {
+        if(error) {
+          console.log("Error checking username for availability: ", error);
+          return res.status(500).json({error: true});
+        }
+        // Check if user found & NOT the same user
+        if(user && (user._id.toString() !== userId.toString()) ) {
+          console.log("Username has already been used: ", userData.username);
+          return respond400ErrorMsg('username');
+        }
+        User.findOne({email: userData.email}, function(err, usr) {
+          if(err) {
+            console.log("Error checking email for availability: ", error);
+            return res.status(500).json({error: true});
+          }
+          // Check if user found & NOT the same user
+          if(user && (user._id.toString() !== userId.toString()) ) {
+            console.log("Email has already been used: ", userData.email);
+            return respond400ErrorMsg('email');
+          }
+          // All clear, continue...
+          updateUser(userId, userData);
+        });
       });
-    } else {
-      console.log("ABOUT TO UPDATE USER... Current user is: ", updUserData);
-      updateUser(updUserData);
+
+      function respond400ErrorMsg(errorMsg) {
+        console.log('Error in settings data. Sending 400 msg: ', errorMsg);
+        return res.status(400).json({error: true, msg: errorMsg});
+      }
     }
 
-    function updateUser(userData) {
+    function updateUser(userId, userData) {
       console.log("ID TO UPDATE IS: ", req.user._id);
       User.findByIdAndUpdate(
-        req.user._id,                      // id to find
+        userId,                            // id to find
         {$set: userData},                  // values to update
         {runValidators: true, new: true},  // mongoose options
         function(err, user) {              // callback
           if (err) { console.log('Error updating user. Error: ', err); }
           switch(true) {
-            case !!(err && err.code === 11000):  // unique validation
-              return res.status(400).json({ error: 'username already exists' });
-            case !!(err && err.username): // required error
-              return res.status(400).json({ error: err.username.message.replace('Path', '') });
+            // Username uniqueness error
+            case !!(err && err.code === 11000 && err.message.includes('username')):  // unique validation
+              return respond400ErrorMsg('username');
+            // Email uniqueness error
+            case !!(err && err.code === 11000 && err.message.includes('email')):  // unique validation
+              return respond400ErrorMsg('email');
             case !!(err):
               return res.status(500).json({ error: true });
           }

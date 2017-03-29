@@ -46,14 +46,15 @@ var UserSchema = mongoose.Schema({
                                                                       },
   confirmed:       { type: Boolean,  default: false                   },
   eat:             { type: String,   default: null                    },
-  email:           { type: String,   default: null                    },
+  email:           { type: String,   default: null, lowercase: true   },
   permissions:     { type: Array,    default: ['user']                },
   prt:             { type: String,   default: null                    },  // HOOK THIS UP TO EMAIL
   role:            { type: String,   default: null                    },
   status:          { type: String,   default: 'A'                     },  // A=Active, D=Deleted, P=Pending, S=Suspended
   termsconditions: { type: Date,     default: null                    },
-  updated_at:      { type: Date,     default: Date.now                },
-  username:        { type: String,   match: /^[a-zA-Z0-9_-]*$/        },
+  updated_at:      { type: Date,     default: Date.now()              },
+  created_at:      { type: Date,     default: Date.now()              },
+  username:        { type: String,   match: /^[a-zA-Z0-9_-]*$/, lowercase: true},
 
   // ObjectId References
   // location_id:     { type: mongoose.Schema.Types.ObjectId, ref: 'Location', required: false },
@@ -73,7 +74,6 @@ UserSchema.path('email'   ).index( { unique: true } );
 UserSchema.pre('validate', function(next) {
   var user = this;
   makeAndValidateUsername(next);
-
 
   // Helper functions
   function makeAndValidateUsername(next) {
@@ -111,12 +111,11 @@ UserSchema.pre('validate', function(next) {
   }
 });
 
-UserSchema.pre('save', function(next) {
-  this.udpated_at = Date.now();
-  next();
-});
+// UserSchema.pre('save', function(next) {
+//   this.udpated_at = Date.now();
+//   next();
+// });
 
-// ADD ANOTHER UserSchema.pre('????', .....) IN HERE FOR POPULATING A CREATE-DATE
 
 
 
