@@ -211,16 +211,41 @@ module.exports = function(app) {
       removeAuthLoginFromUser(currUser, sign.signType);
     }
 
-    // UPDATE THE STATUS, NOT THE PUBLISHED VALUE. Status should be D.
-    Sign.update({_id: delSignId}, {$set: {status: 'D'}}, function(err, data) {
-      if(err) {
-        console.log('Database error deleting sign.');
+    // Find sign to update values on for deletion
+    Sign.findOne({_id: delSignId}, function(error, sign) {
+      if(error) {
+        console.log('Database error finding sign to delete.');
         return res.status(500).json({error: true, msg: 'database error'});
       }
+      // Set deletion values
+      if(shouldDeleteOauth) {
+        var profileId = sign.profileId;
+        sign.description = profileId;
+        sign.profileId   = 'D';
+      }
+      sign.status = 'D';  // deleted
 
-      console.log("DELETION SUCCESSFUL. Data returned is: ", data);
-      res.json(true);
-    });
+      console.log("ABOUT TO SAVE SIGN DELETION AS SIGN: ", sign);
+      sign.save(function(err, success) {
+        if(err) {
+          console.log('Database error deleting sign: ', err);
+          return res.status(500).json({error: true, msg: 'database error'});
+        }
+
+        console.log("DELETION SUCCESSFUL. Data returned is: ", success);
+        res.json(true);
+      });
+    })
+    // UPDATE THE STATUS, NOT THE PUBLISHED VALUE. Status should be D.
+    // Sign.update({_id: delSignId}, {$set: {status: 'D'}}, function(err, data) {
+    //   if(err) {
+    //     console.log('Database error deleting sign.');
+    //     return res.status(500).json({error: true, msg: 'database error'});
+    //   }
+
+    //   console.log("DELETION SUCCESSFUL. Data returned is: ", data);
+    //   res.json(true);
+    // });
 
     function removeAuthLoginFromUser(user, signType) {
       console.log("ABOUT TO REMOVE AUTHENTICATION LOGIN ACCESS FROM USER");
