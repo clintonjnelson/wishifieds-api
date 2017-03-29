@@ -65,33 +65,43 @@ module.exports = function(router) {
       return res.status(400).json({error: 'email'});
     }
 
-    newUser.generateHash(req.body.password, function(err, hash) {
-      if (err) { return res.status(500).json({ error: true }); }
-      newUser.auth.basic.password = hash;
+    // Validate Email is not Duplicate
+    User.findOne({email: newEmail}, function(err, match) {
+      if(err) { throw 'database error' };
+      if(match) {  // match found - email TAKEN!
+        console.log("VALIDATING EMAIL - NO USER FOUND WITH SAME EMAIL - OK!");
+        return respond400ErrorMsg(res, 'email-taken');
+      }
 
-      newUser.save(function(err, user) {
-        if (err) { console.log('Error creating user. Error: ', err); }
-        switch(true) {
-          case !!(err && contains(err.errmsg, 'E11000')):
-            return res.status(400).json({ error: 'username'  });
-          case !!(err && contains(err.errmsg, '.email')):
-            return res.status(400).json({ error: 'email'     });
-          case !!(err):
-            return res.status(400).json({ error: true        });
-        }
+      // No match, continue
+      newUser.generateHash(req.body.password, function(err, hash) {
+        if (err) { return res.status(500).json({ error: true }); }
+        newUser.auth.basic.password = hash;
 
-        user.generateToken(process.env.AUTH_SECRET, function(err, eat) {
-          if(err) {
-            console.log(err);
-            return res.status(500).json({ error: 'login' });
+        newUser.save(function(err, user) {
+          if (err) { console.log('Error creating user. Error: ', err); }
+          switch(true) {
+            case !!(err && contains(err.errmsg, 'E11000')):
+              return res.status(400).json({ error: 'username'  });
+            case !!(err && contains(err.errmsg, '.email')):
+              return res.status(400).json({ error: 'email'     });
+            case !!(err):
+              return res.status(400).json({ error: true        });
           }
-          console.log("EAT FOUND IS: ", eat);
-          res.json({
-            eat:      eat,  // encrypted version (user.eat is raw)
-            username: user.username,
-            role:     user.role,
-            email:    user.email,
-            userid:   user._id });
+
+          user.generateToken(process.env.AUTH_SECRET, function(err, eat) {
+            if(err) {
+              console.log(err);
+              return res.status(500).json({ error: 'login' });
+            }
+            console.log("EAT FOUND IS: ", eat);
+            res.json({
+              eat:      eat,  // encrypted version (user.eat is raw)
+              username: user.username,
+              role:     user.role,
+              email:    user.email,
+              userid:   user._id });
+          });
         });
       });
     });
@@ -115,10 +125,10 @@ module.exports = function(router) {
     // Validation doesn't always work, and neither do these checks. With both, works better.
     function verifyAvailabilityAndUpdateUser(userId, userData) {
       switch(true) {
-        case(!userData.email):                    return respond400ErrorMsg('email missing');
-        case(!EMAIL_REGEX.test(userData.email)):  return respond400ErrorMsg('email-format');
-        case(!userData.username):                 return respond400ErrorMsg('username missing');
-        case(!userData.email):                    return respond400ErrorMsg('email missing');
+        case(!userData.email):                    return respond400ErrorMsg(res, 'email missing');
+        case(!EMAIL_REGEX.test(userData.email)):  return respond400ErrorMsg(res, 'email-format');
+        case(!userData.username):                 return respond400ErrorMsg(res, 'username missing');
+        case(!userData.email):                    return respond400ErrorMsg(res, 'email missing');
       }
 
       User.findOne({username: userData.username}, function(error, user) {
@@ -129,7 +139,7 @@ module.exports = function(router) {
         // Check if user found & NOT the same user
         if(user && (user._id.toString() !== userId.toString()) ) {
           console.log("Username has already been used: ", userData.username);
-          return respond400ErrorMsg('username');
+          return respond400ErrorMsg(res, 'username-taken');
         }
         User.findOne({email: userData.email}, function(err, usr) {
           if(err) {
@@ -139,17 +149,17 @@ module.exports = function(router) {
           // Check if user found & NOT the same user
           if(user && (user._id.toString() !== userId.toString()) ) {
             console.log("Email has already been used: ", userData.email);
-            return respond400ErrorMsg('email');
+            return respond400ErrorMsg(res, 'email-taken');
           }
           // All clear, continue...
           updateUser(userId, userData);
         });
       });
 
-      function respond400ErrorMsg(errorMsg) {
-        console.log('Error in settings data. Sending 400 msg: ', errorMsg);
-        return res.status(400).json({error: true, msg: errorMsg});
-      }
+      // function respond400ErrorMsg(res, errorMsg) {
+      //   console.log('Error in settings data. Sending 400 msg: ', errorMsg);
+      //   return res.status(400).json({error: true, msg: errorMsg});
+      // }
     }
 
     function updateUser(userId, userData) {
@@ -163,10 +173,10 @@ module.exports = function(router) {
           switch(true) {
             // Username uniqueness error
             case !!(err && err.code === 11000 && err.message.includes('username')):  // unique validation
-              return respond400ErrorMsg('username');
+              return respond400ErrorMsg(res, 'username-taken');
             // Email uniqueness error
             case !!(err && err.code === 11000 && err.message.includes('email')):  // unique validation
-              return respond400ErrorMsg('email');
+              return respond400ErrorMsg(res, 'email-taken');
             case !!(err):
               return res.status(500).json({ error: true });
           }
@@ -198,6 +208,11 @@ module.exports = function(router) {
       res.json({ success: true });
     });
   });
+
+  function respond400ErrorMsg(res, errorMsg) {
+    console.log('Error in settings data. Sending 400 msg: ', errorMsg);
+    return res.status(400).json({error: true, msg: errorMsg});
+  }
 };
 
 

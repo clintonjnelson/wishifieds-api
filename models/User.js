@@ -43,18 +43,18 @@ var UserSchema = mongoose.Schema({
       wordpressId:          { type: String,   default: null },
       wordpressAccessToken: { type: String,   default: null },
     },
-                                                                      },
-  confirmed:       { type: Boolean,  default: false                   },
-  eat:             { type: String,   default: null                    },
-  email:           { type: String,   default: null, lowercase: true   },
-  permissions:     { type: Array,    default: ['user']                },
-  prt:             { type: String,   default: null                    },  // HOOK THIS UP TO EMAIL
-  role:            { type: String,   default: null                    },
-  status:          { type: String,   default: 'A'                     },  // A=Active, D=Deleted, P=Pending, S=Suspended
-  termsconditions: { type: Date,     default: null                    },
-  updated_at:      { type: Date,     default: Date.now()              },
-  created_at:      { type: Date,     default: Date.now()              },
-  username:        { type: String,   match: /^[a-zA-Z0-9_-]*$/, lowercase: true},
+                                                                     },
+  confirmed:       { type: Boolean, default: false                   },
+  eat:             { type: String,  default: null                    },
+  email:           { type: String,  default: null, lowercase: true   },  // sparse: true,
+  permissions:     { type: Array,   default: ['user']                },
+  prt:             { type: String,  default: null                    },  // HOOK THIS UP TO EMAIL
+  role:            { type: String,  default: null                    },
+  status:          { type: String,  default: 'A'                     },  // A=Active, D=Deleted, P=Pending, S=Suspended
+  termsconditions: { type: Date,    default: null                    },
+  updated_at:      { type: Date,    default: Date.now()              },
+  created_at:      { type: Date,    default: Date.now()              },
+  username:        { type: String,  match: /^[a-zA-Z0-9_-]*$/, lowercase: true},
 
   // ObjectId References
   // location_id:     { type: mongoose.Schema.Types.ObjectId, ref: 'Location', required: false },
@@ -67,7 +67,7 @@ var UserSchema = mongoose.Schema({
 // UserSchema.path('email'              ).required(true);
 UserSchema.path('username').required(true);
 UserSchema.path('username').index( { unique: true } );
-UserSchema.path('email'   ).index( { unique: true } );
+// UserSchema.path('email'   ).index( { unique: true } );  // REALLY WANT THIS BUT IT WON"T ALLOW NULL VALUES!!!! ARRRRRGHHHH.
 
 
 //--------------------------------- HOOKS --------------------------------------
@@ -109,6 +109,33 @@ UserSchema.pre('validate', function(next) {
     username = (username.length <= 20 ? username : username.slice(0, 20) );
     return username;
   }
+});
+
+UserSchema.pre('validate', function(next) {
+  var user = this;
+  console.log("VALIDATING EMAIL FOR USER: ", user);
+  // Blank email is OK
+  if(!user.email) {
+    console.log("VALIDATING EMAIL - BLANK EMAIL OK!");
+    return next();
+  }
+  // If has value, ensure NO DUPLICATE
+  user.constructor.findOne({email: user.email}, function(err, match) {
+    if(err) { throw 'database error' };
+    if(!match || !match.email) {  // no matching user found => NEXT!
+      console.log("VALIDATING EMAIL - NO USER FOUND WITH SAME EMAIL - OK!");
+      return next();
+    }
+    if(String(match._id) === String(user._id)) {
+      console.log("VALIDATING EMAIL - USER FOUND ITSELF - OK!");
+      return next();  // found itself
+    }
+
+    console.log("VALIDATING EMAIL - USER FOUND ITSELF - OK!");
+    user.email = null;
+    next();
+  });
+
 });
 
 // UserSchema.pre('save', function(next) {
