@@ -130,7 +130,6 @@ module.exports = function(app) {
     var orderedSignIds = req.body.order;
     var ownerId = req.user._id.toString();
     console.log("MADE IT TO SIGNS UPDATE ORDER...");
-    // CHECK OWNER AUTH AS GO
     console.log("RECEIVED SIGNS IS: ", req.body);
     // First check all signs have this owner
     Sign.find({'_id': {$in: orderedSignIds}}, function(err, signs) {
@@ -203,7 +202,14 @@ module.exports = function(app) {
     console.log('REQUEST BODY IS: ', req.body);
 
     var currUser  = req.user;
-    var delSignId = req.body.sign._id;
+    var sign      = req.body.sign;
+    var delSignId = sign._id;
+    var shouldDeleteOauth = req.body.deleteOauth;
+
+    console.log("DELETE OAUTH IS: ", shouldDeleteOauth);
+    if(shouldDeleteOauth) {
+      removeAuthLoginFromUser(currUser, sign.signType);
+    }
 
     // UPDATE THE STATUS, NOT THE PUBLISHED VALUE. Status should be D.
     Sign.update({_id: delSignId}, {$set: {status: 'D'}}, function(err, data) {
@@ -215,6 +221,16 @@ module.exports = function(app) {
       console.log("DELETION SUCCESSFUL. Data returned is: ", data);
       res.json(true);
     });
+
+    function removeAuthLoginFromUser(user, signType) {
+      console.log("ABOUT TO REMOVE AUTHENTICATION LOGIN ACCESS FROM USER");
+      var idRef          = signType + 'Id';
+      var accessTokenRef = signType + 'AccessToken';
+      user['auth'][signType][idRef]          = null;
+      user['auth'][signType][accessTokenRef] = null;
+      console.log("ABOUT TO SAVE AUTHENTICATION LOGIN ACCESS REMOVAL FROM USER: ", user);
+      user.save();
+    }
   });
 
 

@@ -116,6 +116,8 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
+// ADD ANOTHER UserSchema.pre('????', .....) IN HERE FOR POPULATING A CREATE-DATE
+
 
 
 
@@ -143,9 +145,10 @@ UserSchema.methods.checkPassword = function checkPassword(password, callback) {
 };
 
 UserSchema.methods.generateToken = function generateToken(secret, callback) {
-  this.eat = crypto.randomBytes(24).toString('hex');
+  this.eat = crypto.randomBytes(24).toString('hex').toString();
   console.log("CRYPTO GENERATED EAT IS: ", this.eat);
 
+  // FOR SOME REASON, SAVE DOESNT ALWAYS WORK WITH OAUTH SIGN SIGN-IN
   this.save(function(err, user) {
     if (err) {
       console.log('Error creating new token. Error: ', err);
