@@ -20,6 +20,10 @@ facebookSignSchema.add({
     // TODO: GET THIS BACK & KEEP IT FROM BLOCKING OTHER SIGN TYPE CREATION DUE TO INDEX
     // MAYBE VERIFY MANUALLY NO DUPLICATES BEFORE SAVING...
 // Validations
+facebookSignSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
     // facebookSignSchema.path('facebookId').index({unique: true});
 
 // Export as Discriminator

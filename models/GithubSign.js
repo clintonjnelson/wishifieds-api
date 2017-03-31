@@ -16,7 +16,10 @@ githubSignSchema.add({
 });
 
 // Validations
-
+githubSignSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
 // Export as Discriminator
 module.exports = Sign.discriminator('GithubSign', githubSignSchema);

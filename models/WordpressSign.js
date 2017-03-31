@@ -16,7 +16,10 @@ wordpressSignSchema.add({
 });
 
 // Validations
-
+wordpressSignSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
 // Export as Discriminator
 module.exports = Sign.discriminator('WordpressSign', wordpressSignSchema);

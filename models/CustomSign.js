@@ -18,7 +18,11 @@ customSignSchema.add({
 });
 
 // Validations?
-
+// Always update when saving
+customSignSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
 // Export as Discriminator
 module.exports = Sign.discriminator('CustomSign', customSignSchema);

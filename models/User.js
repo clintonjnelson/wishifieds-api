@@ -52,8 +52,8 @@ var UserSchema = mongoose.Schema({
   role:            { type: String,  default: null                    },
   status:          { type: String,  default: 'A'                     },  // A=Active, D=Deleted, P=Pending, S=Suspended
   termsconditions: { type: Date,    default: null                    },
-  updated_at:      { type: Date,    default: Date.now()              },
-  created_at:      { type: Date,    default: Date.now()              },
+  updatedAt:       { type: Date,    default: Date.now()              },
+  createdAt:       { type: Date,    default: Date.now()              },
   username:        { type: String,  match: /^[a-zA-Z0-9_-]*$/, lowercase: true},
 
   // ObjectId References
@@ -138,10 +138,10 @@ UserSchema.pre('validate', function(next) {
 
 });
 
-// UserSchema.pre('save', function(next) {
-//   this.udpated_at = Date.now();
-//   next();
-// });
+UserSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
 
 

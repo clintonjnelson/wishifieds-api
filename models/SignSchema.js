@@ -17,11 +17,12 @@ function SignSchema() {
     picUrl:         { type: String                                     }, // link to image (opt)
     status:         { type: String, default: "A"                       }, // remove from public
     userId:         { type: mongoose.Schema.Types.ObjectId, ref: 'User' , required: true},  // needed for ALL Signs
+    createdAt:      { type: Date,   default: Date.now()                },
+    updatedAt:      { type: Date,   default: Date.now()                },
   });
   // Fields for CUSTOM schemas: bgColor, signType, icon
-
-
 }
+
 util.inherits(SignSchema, mongoose.Schema);  // extend mongoose Schema
 
 // Export Schema for use

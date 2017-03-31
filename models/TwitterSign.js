@@ -18,7 +18,10 @@ twitterSignSchema.add({
 });
 
 // Validations
-
+twitterSignSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
 // Export as Discriminator
 module.exports = Sign.discriminator('TwitterSign', twitterSignSchema);
