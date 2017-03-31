@@ -86,7 +86,7 @@
     "express": "^4.12.4",
     "express-session": "^1.11.3",
     "lodash": "^3.9.2",
-    "mongoose": "^4.9.0",
+    "mongoose": "^4.9.2",
     "passport": "^0.2.2",
     "passport-facebook": "^2.0.0",
     "passport-github": "^0.1.5",
