@@ -19,6 +19,7 @@ module.exports = function(router) {
     var currentCount      = 0;    // Count tracking
     var searchResults     = {};   // Object to populate for response
     var resultsLimit      = 100;
+    var resultsStatus     = 'A';
 
     // MAY HAVE TO GO BACK TO THIS AS SEARCHES GET MORE COMPLEX
     // var totalSearchTypes  = 2;    // Total DB queries before response
@@ -26,8 +27,8 @@ module.exports = function(router) {
     // Sign.find({'knownAs':  {'$regex': partialMatchRegex} }, buildQueryCallback('signs'));
 
     var searches = [
-      { Model: User, query: { username: regexQuery }, queryField: 'username', resultsType: 'users' },
-      { Model: Sign, query: { knownAs:  regexQuery }, queryField: 'knownAs' , resultsType: 'signs' }
+      { Model: User, query: { username: regexQuery, status: resultsStatus }, queryField: 'username', resultsType: 'users' },
+      { Model: Sign, query: { knownAs:  regexQuery, status: resultsStatus }, queryField: 'knownAs' , resultsType: 'signs' }
     ];
 
     searches.forEach(function(search) {
@@ -52,8 +53,8 @@ module.exports = function(router) {
         console.log(type + " FOUND AS: ", results);
 
         // Return only Active (LATER MAYBE PROVIDE OTHER OPTIONS BASED ON REQUEST);
-        var filteredResults = results.filter( function(result) { return result.status === 'A' } );
-        searchResults[type] = filteredResults;  // searchResults: {users: results}
+        // var filteredResults = results.filter( function(result) { return result.status === 'A' } );
+        searchResults[type] = results;  // searchResults: {users: results}
         currentCount++;                         // Track types iterated through
         responseCheck();                        // Return yet? Only if added all types.
       };
