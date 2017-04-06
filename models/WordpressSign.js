@@ -10,8 +10,8 @@ var wordpressSignSchema = new SignSchema();
 wordpressSignSchema.add({
   bgColor:         { type: String, default: '#21759b'     }, //#21759b (blue) #d54e21 (orange)
   icon:            { type: String, default: 'wordpress'   },
-  profileId:       { type: String, required: true         },  // User ID
-  siteId:          { type: String                         },  // id of site (can be shared)
+  profileId:       { type: String, required: true         },  // Primary Wordpress Shared User ID
+  siteId:          { type: String                         },  // ID of specific multi sign site; can be shared among multiple people...
   signType:        { type: String, default: 'wordpress'   },
 });
 

@@ -35,7 +35,7 @@ module.exports = function(app) {
       console.log("USER FOUND IS: ", user);
 
       // user found => get signs
-      Sign.find({userId: user._id}, function(err, signs) {
+      Sign.find({userId: user._id, status: 'A'}, function(err, signs) {
         if(err) {
           console.log("Error getting signs: ", err);
           return res.status(500).json({error: true, msg: 'Database error.'});
