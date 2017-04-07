@@ -1,0 +1,530 @@
+
+
+
+/*
+------------------------------ Sample of GITHUB Data ---------------------------
+{ provider: 'github',
+id: 0000001,
+displayName: 'Clint Nelson',
+username: 'clintonjnelson',
+profileUrl: 'https://github.com/clintonjnelson',
+emails: [ { value: '' } ],
+_raw: '{"login":"clintonjnelson","id":0000001,"avatar_url":"https://avatars.githubusercontent.com/u/5673158?v=3","gravatar_id":"","url":"https…
+_json:
+ { login: 'clintonjnelson',
+   id: 0000001,
+   avatar_url: 'https://avatars.githubusercontent.com/u/0000001?v=3',
+   gravatar_id: '',
+   url: 'https://api.github.com/users/clintonjnelson',
+   html_url: 'https://github.com/clintonjnelson',
+   followers_url: 'https://api.github.com/users/clintonjnelson/followers',
+   following_url: 'https://api.github.com/users/clintonjnelson/following{/other_user}',
+   gists_url: 'https://api.github.com/users/clintonjnelson/gists{/gist_id}',
+   starred_url: 'https://api.github.com/users/clintonjnelson/starred{/owner}{/repo}',
+   subscriptions_url: 'https://api.github.com/users/clintonjnelson/subscriptions',
+   organizations_url: 'https://api.github.com/users/clintonjnelson/orgs',
+   repos_url: 'https://api.github.com/users/clintonjnelson/repos',
+   events_url: 'https://api.github.com/users/clintonjnelson/events{/privacy}',
+   received_events_url: 'https://api.github.com/users/clintonjnelson/received_events',
+   type: 'User',
+   site_admin: false,
+   name: 'Clint Nelson',
+   company: '',
+   blog: '',
+   location: 'Seattle, WA',
+   email: '',
+   hireable: true,
+   bio: null,
+   public_repos: 35,
+   public_gists: 2,
+   followers: 8,
+   following: 8,
+   created_at: '2013-10-12T20:54:09Z',
+   updated_at: '2015-07-14T01:09:06Z' }
+ }
+
+*/
+
+
+
+//----------------------- Sample of Data in Google PROFILE ---------------------
+/*
+{ provider: 'google',
+  id: '106631224798962932409',
+  displayName: 'C Nelson',
+  name: { familyName: 'Nelson', givenName: 'C' },
+  photos: [ { value: 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg?sz=50' } ],
+  gender: 'male',
+  _raw: '{\n "kind": "plus#person",\n "etag": "\\"gLJf7LwN3wOpLHXk4IeQ9ES9mEc/OQAfcpfY1RiZ-m4NLUoY8d8DebY\\"",\n "gender": "male",\n "objectType": "person",\n "id": "1066312247989629324…
+  _json:
+   { kind: 'plus#person',
+     etag: '"gLJf7LwN3wOpLHXk4IeQ9ES9mEc/OQAfcpfY1RiZ-m4NLUoY8d8DebY"',
+     gender: 'male',
+     objectType: 'person',
+     id: '106631224798962932409',
+     displayName: 'C Nelson',
+     name: { familyName: 'Nelson', givenName: 'C' },
+     url: 'https://plus.google.com/106631224798962932409',
+     image:
+      { url: 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg?sz=50',
+        isDefault: true },
+     isPlusUser: true,
+     language: 'en',
+     ageRange: { min: 21 },
+     circledByCount: 0,
+     verified: false } }
+*/
+
+
+
+//--------------------- Sample of Data in Instagram PROFILE --------------------
+/*
+{ provider: 'instagram',
+  id: '2131966332',
+  displayName: 'Clint Nelson',
+  name: { familyName: undefined, givenName: undefined },
+  username: 'clintonjnelson',
+  _raw: '{"meta":{"code":200},"data":{"username":"clintonjnelson","bio":"","website":"","profile_picture":"https:\\/\\/instagramimages-a.akamaihd.net\\/profiles\\/anonymousUser.jpg","fu…
+  _json:
+   { meta: { code: 200 },
+     data:
+      { username: 'clintonjnelson',
+        bio: '',
+        website: '',
+        profile_picture: 'https://instagramimages-a.akamaihd.net/profiles/anonymousUser.jpg',
+        full_name: 'Clint Nelson',
+        counts: [Object],
+        id: '2131966332' } } }
+*/
+
+
+
+
+//---------------------- Sample of Data in Linkedin PROFILE --------------------
+/*
+{ provider: 'linkedin',
+  id: '_roGa3fds9',
+  displayName: 'Clint Nelson',
+  name: { familyName: 'Nelson, PE', givenName: 'Clint' },
+  emails: [ { value: undefined } ],
+  photos: [ 'https://media.licdn.com/mpr/mprx/0_m1fIsdOh28KLjjkjT1cI-oNhecS9YDXl2AcIpjl3DQ2BRjzy31BItd03oK3BR2ZADczwtfyT3KAcZdNj38octjgSkKAnZdll38oHMpe87lXVt0EDSAyQJeQlXLIQAd68eiOGrTM…
+  _raw: '{\n  "apiStandardProfileRequest": {\n    "headers": {\n      "_total": 1,\n      "values": [{\n        "name": "x-li-auth-token",\n        "value": "name:54E"\n      }]\n    }…
+  _json:
+   { apiStandardProfileRequest:
+      { headers: [Object],
+        url: 'https://api.linkedin.com/v1/people/_roGa3fds9' },
+     distance: 0,
+     firstName: 'Clint',
+     formattedName: 'Clint Nelson, PE',
+     headline: 'Software Engineer, Business Developer, Efficiency Advocate',
+     id: '_roGa3fds9',
+     industry: 'Computer Software',
+     lastName: 'Nelson, PE',
+     location: { country: [Object], name: 'Greater Seattle Area' },
+     numConnections: 229,
+     numConnectionsCapped: false,
+     pictureUrl: 'https://media.licdn.com/mpr/mprx/0_m1fIsdOh28KLjjkjT1cI-oNhecS9YDXl2AcIpjl3DQ2BRjzy31BItd03oK3BR2ZADczwtfyT3KAcZdNj38octjgSkKAnZdll38oHMpe87lXVt0EDSAQJeQlXLIQAd68eimF…
+     positions: { _total: 1, values: [Object] },
+     publicProfileUrl: 'https://www.linkedin.com/in/clintonjnelson',
+     relationToViewer: { distance: 0 },
+     siteStandardProfileRequest: { url: 'https://www.linkedin.com/profile/view?id=298084646&authType=name&authToken=54EU&trk=api*a4592171*s4908891*' },
+     summary: 'I\'m a software developer with experience in engineering, management, and business development. \nI love efficiency, readable code, and helping grow great companies. \n\n…
+*/
+
+
+
+
+/*
+------------------------- Sample of Stackexchange Data -------------------------
+{ badge_counts: { bronze: 10, silver: 3, gold: 0 },
+  account_id: 4192634,
+  is_employee: false,
+  last_modified_date: 1440223317,
+  last_access_date: 1440536461,
+  reputation_change_year: 55,
+  reputation_change_quarter: 0,
+  reputation_change_month: 0,
+  reputation_change_week: 0,
+  reputation_change_day: 0,
+  reputation: 315,
+  creation_date: 1394249542,
+  user_type: 'registered',
+  user_id: 3395069,
+  accept_rate: 100,
+  location: 'Seattle, WA',
+  website_url: '',
+  link: 'http://stackoverflow.com/users/3395069/cjn',
+  profile_image: 'https://www.gravatar.com/avatar/4571f75b2226b1f6b8cd5fa8e4b44ecf?s=128&d=identicon&r=PG',
+  display_name: 'cjn',
+  provider: 'stackexchange' }
+*/
+
+
+
+
+//----------------------- Sample of Data in Twitter PROFILE --------------------
+/*
+{ id: '3308855084',
+  username: 'clintonjnelson',
+  displayName: 'clintonjnelson',
+  photos: [ { value: 'https://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png' } ],
+  provider: 'twitter',
+  _raw: '{"id":3308855084,"id_str":"3308855084","name":"clintonjnelson","screen_name":"clintonjnelson","location":"","profile_location":null,"description":"","url…"'
+  _json: { id: 3308855084,
+    id_str: '3308855084',
+    name: 'clintonjnelson',
+    screen_name: 'clintonjnelson',
+    location: '',
+    profile_location: null,
+    description: '',
+    url: null,
+    entities: {
+      description: [Object]
+    },
+    protected: false,
+    followers_count: 0,
+    friends_count: 0,
+    listed_count: 0,
+    created_at: 'Fri Aug 07 14:56:09 +0000 2015',
+    favourites_count: 0,
+    utc_offset: null,
+    time_zone: null,
+    geo_enabled: false,
+    verified: false,
+    statuses_count: 0,
+    lang: 'en',
+    contributors_enabled: false,
+    is_translator: false,
+    is_translation_enabled: false,
+    profile_background_color: 'C0DEED',
+    profile_background_image_url: 'http://abs.twimg.com/images/themes/theme1/bg.png',
+    profile_background_image_url_https: 'https://abs.twimg.com/images/themes/theme1/bg.png',
+    profile_background_tile: false,
+    profile_image_url: 'http://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png',
+    profile_image_url_https: 'https://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png',
+    profile_link_color: '0084B4',
+    profile_sidebar_border_color: 'C0DEED',
+    profile_sidebar_fill_color: 'DDEEF6',
+    profile_text_color: '333333',
+    profile_use_background_image: true,
+    has_extended_profile: false,
+    default_profile: true,
+    default_profile_image: true,
+    following: false,
+    follow_request_sent: false,
+    notifications: false,
+    suspended: false,
+    needs_phone_verification: false },
+  _accessLevel: 'read' }
+*/
+
+
+//----------------------- Sample of Twitter Data in Access Token Request --------------------
+/*
+  var apiInfo = {
+    apiName: 'twitter',
+    url: 'https://api.twitter.com/1.1/users/show.json',
+    queryString: {user_id: twitterId},  // identifier should be the twitterId
+  };
+  request(accessToken, apiInfo, callback);
+
+
+{ id: 2244994945,
+  id_str: '2244994945',
+  name: 'TwitterDev',
+  screen_name: 'TwitterDev',
+  location: 'Internet',
+  profile_location: null,
+  description: 'Developer and Platform Relations @Twitter. We are developer advocates. We can\'t answer all your questions, but we listen to all of them!',
+  url: 'https://t.co/66w26cua1O',
+  entities: { url: { urls: [Object] }, description: { urls: [] } },
+  protected: false,
+  followers_count: 216354,
+  friends_count: 1488,
+  listed_count: 571,
+  created_at: 'Sat Dec 14 04:35:55 +0000 2013',
+  favourites_count: 833,
+  utc_offset: -25200,
+  time_zone: 'Pacific Time (US & Canada)',
+  geo_enabled: true,
+  verified: true,
+  statuses_count: 1438,
+  lang: 'en',
+  status:
+   { created_at: 'Thu Aug 06 16:28:36 +0000 2015',
+     id: 629328226939056100,
+     id_str: '629328226939056128',
+     text: 'We’re excited to pilot new data and functionality with @SproutSocial and @Oracle: https://t.co/yUbL0aHtPo',
+     source: '<a href="http://twitter.com" rel="nofollow">Twitter Web Client</a>',
+     truncated: false,
+     in_reply_to_status_id: null,
+     in_reply_to_status_id_str: null,
+     in_reply_to_user_id: null,
+     in_reply_to_user_id_str: null,
+     in_reply_to_screen_name: null,
+     geo: null,
+     coordinates: null,
+     place: null,
+     contributors: null,
+     retweet_count: 13,
+     favorite_count: 16,
+     entities:
+      { hashtags: [],
+        symbols: [],
+        user_mentions: [Object],
+        urls: [Object] },
+     favorited: false,
+     retweeted: false,
+     possibly_sensitive: false,
+     lang: 'en' },
+  contributors_enabled: false,
+  is_translator: false,
+  is_translation_enabled: false,
+  profile_background_color: 'FFFFFF',
+  profile_background_image_url: 'http://abs.twimg.com/images/themes/theme1/bg.png',
+  profile_background_image_url_https: 'https://abs.twimg.com/images/themes/theme1/bg.png',
+  profile_background_tile: false,
+  profile_image_url: 'http://pbs.twimg.com/profile_images/530814764687949824/npQQVkq8_normal.png',
+  profile_image_url_https: 'https://pbs.twimg.com/profile_images/530814764687949824/npQQVkq8_normal.png',
+  profile_banner_url: 'https://pbs.twimg.com/profile_banners/2244994945/1396995246',
+  profile_link_color: '0084B4',
+  profile_sidebar_border_color: 'FFFFFF',
+  profile_sidebar_fill_color: 'DDEEF6',
+  profile_text_color: '333333',
+  profile_use_background_image: false,
+  has_extended_profile: false,
+  default_profile: false,
+  default_profile_image: false,
+  following: false,
+  follow_request_sent: false,
+  notifications: false }
+*/
+
+
+
+
+// --------------------- Example of WORDPRESS Profile -----------------------
+/*
+ { ID: 58451710,
+   display_name: 'clintonjnelson',
+   username: 'clintonjnelson',
+   email: 'clintonjnelson@live.com',
+   primary_blog: 61259707,
+   primary_blog_url: 'http://clintonjnelson.wordpress.com',
+   language: 'en',
+   locale_variant: '',
+   token_site_id: false,
+   token_scope: [ 'global' ],
+   avatar_URL: 'https://1.gravatar.com/avatar/4571f75b2226b1f6b8cd5fa8e4b44ecf?s=96&d=identicon',
+   profile_URL: 'http://en.gravatar.com/clintonjnelson',
+   verified: true,
+   email_verified: true,
+   date: '2013-11-28T02:01:11+00:00',
+   site_count: 2,
+   visible_site_count: 2,
+   has_unseen_notes: false,
+   newest_note_type: '',
+   phone_account: false,
+   meta: { links: [Object] },
+   is_valid_google_apps_country: true,
+   is_new_reader: false }
+*/
+
+
+
+
+// ---------- WORDPRESS Example API Data (EXCLUDING Profile) - Array of Wordpress MultiSigns ---------
+/*
+ [ { ID: 61259707,
+   name: 'Foundation Blocs',
+   description: 'Laying the foundation one bloc at a time.',
+   URL: 'https://clintonjnelson.wordpress.com',
+   user_can_manage: false,
+   capabilities:
+    { edit_pages: true,
+      edit_posts: true,
+      edit_others_posts: true,
+      edit_others_pages: true,
+      delete_posts: true,
+      delete_others_posts: true,
+      edit_theme_options: true,
+      edit_users: false,
+      list_users: true,
+      manage_categories: true,
+      manage_options: true,
+      activate_wordads: true,
+      promote_users: true,
+      publish_posts: true,
+      upload_files: true,
+      delete_users: false,
+      remove_users: true,
+      view_stats: true },
+   jetpack: false,
+   is_multisite: true,
+   post_count: 4,
+   subscribers_count: 1,
+   lang: 'en',
+   logo: { id: 0, sizes: [], url: '' },
+   visible: true,
+   is_private: false,
+   single_user_site: true,
+   is_vip: false,
+   is_following: false,
+   options:
+    { timezone: '',
+      gmt_offset: 0,
+      videopress_enabled: false,
+      upgraded_filetypes_enabled: false,
+      login_url: 'https://clintonjnelson.wordpress.com/wp-login.php',
+      admin_url: 'https://clintonjnelson.wordpress.com/wp-admin/',
+      is_mapped_domain: false,
+      is_redirect: false,
+      unmapped_url: 'https://clintonjnelson.wordpress.com',
+      featured_images_enabled: false,
+      theme_slug: 'pub/writr',
+      header_image: false,
+      background_color: '303030',
+      image_default_link_type: 'file',
+      image_thumbnail_width: 150,
+      image_thumbnail_height: 150,
+      image_thumbnail_crop: 0,
+      image_medium_width: 300,
+      image_medium_height: 300,
+      image_large_width: 1024,
+      image_large_height: 1024,
+      permalink_structure: '/%year%/%monthnum%/%day%/%postname%/',
+      post_formats: [],
+      default_post_format: '0',
+      default_category: 1,
+      allowed_file_types: [Object],
+      show_on_front: 'posts',
+      default_likes_enabled: true,
+      default_sharing_status: true,
+      default_comment_status: true,
+      default_ping_status: true,
+      software_version: '4.7.3',
+      created_at: '2013-12-04T06:22:08+00:00',
+      wordads: false,
+      publicize_permanently_disabled: false,
+      frame_nonce: '12a99d324d',
+      headstart: false,
+      headstart_is_fresh: false,
+      ak_vp_bundle_enabled: null,
+      advanced_seo_front_page_description: '',
+      advanced_seo_title_formats: [],
+      verification_services_codes: null,
+      podcasting_archive: null,
+      is_domain_only: false,
+      is_automated_transfer: false },
+   plan:
+    { product_id: 1,
+      product_slug: 'free_plan',
+      product_name_short: 'Free',
+      free_trial: false,
+      expired: false,
+      user_is_owner: false },
+   meta: { links: [Object] },
+   quota:
+    { space_allowed: 3221225472,
+      space_used: 0,
+      percent_used: 0,
+      space_available: 3221225472 } },
+ { ID: 98113129,
+   name: 'testsitecjn',
+   description: '',
+   URL: 'https://testsitecjn.wordpress.com',
+   user_can_manage: false,
+   capabilities:
+    { edit_pages: true,
+      edit_posts: true,
+      edit_others_posts: true,
+      edit_others_pages: true,
+      delete_posts: true,
+      delete_others_posts: true,
+      edit_theme_options: true,
+      edit_users: false,
+      list_users: true,
+      manage_categories: true,
+      manage_options: true,
+      activate_wordads: true,
+      promote_users: true,
+      publish_posts: true,
+      upload_files: true,
+      delete_users: false,
+      remove_users: true,
+      view_stats: true },
+   jetpack: false,
+   is_multisite: true,
+   post_count: 1,
+   subscribers_count: 0,
+   lang: 'en',
+   logo: { id: 0, sizes: [], url: '' },
+   visible: true,
+   is_private: false,
+   single_user_site: true,
+   is_vip: false,
+   is_following: false,
+   options:
+    { timezone: '',
+      gmt_offset: 0,
+      videopress_enabled: false,
+      upgraded_filetypes_enabled: false,
+      login_url: 'https://testsitecjn.wordpress.com/wp-login.php',
+      admin_url: 'https://testsitecjn.wordpress.com/wp-admin/',
+      is_mapped_domain: false,
+      is_redirect: false,
+      unmapped_url: 'https://testsitecjn.wordpress.com',
+      featured_images_enabled: false,
+      theme_slug: 'pub/edin',
+      header_image: false,
+      background_color: false,
+      image_default_link_type: 'file',
+      image_thumbnail_width: 150,
+      image_thumbnail_height: 150,
+      image_thumbnail_crop: 0,
+      image_medium_width: 300,
+      image_medium_height: 300,
+      image_large_width: 1024,
+      image_large_height: 1024,
+      permalink_structure: '/%year%/%monthnum%/%day%/%postname%/',
+      post_formats: [],
+      default_post_format: '0',
+      default_category: 1,
+      allowed_file_types: [Object],
+      show_on_front: 'posts',
+      default_likes_enabled: true,
+      default_sharing_status: true,
+      default_comment_status: true,
+      default_ping_status: true,
+      software_version: '4.7.3',
+      created_at: '2015-08-24T20:30:15+00:00',
+      wordads: false,
+      publicize_permanently_disabled: false,
+      frame_nonce: '9dff8b5189',
+      headstart: false,
+      headstart_is_fresh: false,
+      ak_vp_bundle_enabled: null,
+      advanced_seo_front_page_description: '',
+      advanced_seo_title_formats: [],
+      verification_services_codes: null,
+      podcasting_archive: null,
+      is_domain_only: false,
+      is_automated_transfer: false },
+   plan:
+    { product_id: 1,
+      product_slug: 'free_plan',
+      product_name_short: 'Free',
+      free_trial: false,
+      expired: false,
+      user_is_owner: false },
+   meta: { links: [Object] },
+   quota:
+    { space_allowed: 3221225472,
+      space_used: 0,
+      percent_used: 0,
+      space_available: 3221225472 } } ]
+*/
+
+
+
+
