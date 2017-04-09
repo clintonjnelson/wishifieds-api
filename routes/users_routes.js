@@ -8,6 +8,7 @@ var ownerAuth   = require('../lib/routes_middleware/owner_auth.js');
 var adminAuth   = require('../lib/routes_middleware/admin_auth.js');
 var mongoose    = require('mongoose');
 var User        = require('../models/User.js');
+// relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
 module.exports = function(router) {

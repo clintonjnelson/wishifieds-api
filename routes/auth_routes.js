@@ -1,8 +1,13 @@
 'use strict';
 
-var bodyparser = require('body-parser');
-var eatAuth    = require('../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
-var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
+var bodyparser  = require('body-parser');
+var eatAuth     = require('../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
+var eatOnReq    = require('../lib/routes_middleware/eat_on_req.js');
+var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+var Mailer      = require('../lib/mailing/mail_service.js');
+var EmailBuilder = require('../lib/mailing/email_content_builder');
+var Utils       = require('../lib/signpost_utils.js');
+var User        = require('../models/User.js');
 
 module.exports = function(router, passport) {
   router.use(bodyparser.json());
@@ -36,7 +41,7 @@ module.exports = function(router, passport) {
       user.generateToken(process.env.AUTH_SECRET, function(err, eat) {  // passport strat adds req.user
         if (err) {
           console.log('Error logging in user. Error: ', err);
-          return res.status(404).json({ error: true, msg: 'user not found' });
+          return res.status(404).json({ error: true, msg: 'error logging in' });
         }
         res.json({
           eat:      eat,
@@ -55,6 +60,124 @@ module.exports = function(router, passport) {
       if (err) { return res.status(500).json({ error: true }); }
 
       res.json({ success: true });
+    });
+  });
+
+
+  // ------------------- Password Reset Routes -------------------
+
+  // Password Reset
+  router.get('/passwordresetrequest', function(req, res) {
+    var passwordResetEmail = req.query.email && req.query.email.trim();  // if exists, trim whitespace
+    console.log("EMAIL RECEIVED IS: ", passwordResetEmail);
+    console.log("RESULT OF TEST EMAIL IS: ", EMAIL_REGEX.test(passwordResetEmail));
+
+    // Verify user exists from email requested
+    User.findOne({email: passwordResetEmail}, function(error, user) {
+      if(error || !user) {
+        console.log('Could not find user by email: ', email);
+        return res.status(404).json({error: true, msg: 'email-not-found'});
+      }
+      console.log("USER FOUND FOR PASSWORD RESET IS: ", user);
+
+      // User found => generate password reset token & hash
+      Utils.generateUrlSafeTokenAndHash(function(err, resetToken, tokenHash) {
+        if(err) {
+          console.log("Error generating token & hash for password reset. Error is: ", err);
+          return res.status(500).json({error: true, msg: 'error-generating-reset'});
+        }
+
+        // Add hash & expiration to user's PasswordResetInfo
+        user.auth.basic.passwordReset.tokenHash  = tokenHash;
+        user.auth.basic.passwordReset.expiration = Utils.expirationDateHoursFromNow(2)
+        user.save();
+
+        // configure mail for sending
+        var mailOptions = {
+          from: 'Syynpost Password Reset <syynpost@gmail.com>',
+          to:   passwordResetEmail,   // Email provided by user
+          subject: 'Syynpost Password Change Request',
+          // text: EmailBuilder.buildPlainTextEmail(),
+          html: EmailBuilder.buildHtmlEmail({ resetToken: resetToken, email: user.email })
+        };
+
+        Mailer.sendPasswordResetEmail(mailOptions, function(errr, result) {
+          if(errr) {
+            console.log("Error sending email: ", errr);
+            return res.status(500).json({error: true, msg: 'email-failure'});
+          }
+
+          console.log('Email sent with result of: ', result);
+          res.json({success: true});
+        });
+
+      });
+    });
+  });
+
+  router.put('/resetpassword', function(req, res) {
+    console.log("MADE IT TO PASSWORD RESET WITH BODY: ", req.body);
+    var email      = req.body.email;
+    var resetToken = req.body.resetToken;
+    var password   = req.body.password;
+
+    if(!email || !resetToken || !password) {
+      console.log("DATA MISSING FROM REQUEST");
+      return res.status(400).json({error: true, msg: 'invalid-info'});
+    }
+
+    // First find user from email
+    User.findOne({email: email}, function(err, user) {
+      if(err || !user) {
+        console.log('Could not find user by email: ', email);
+        return res.status(404).json({error: true, msg: 'email-not-found'});
+      }
+
+      // Token expired?
+      if(user.isResetTokenExpired()) {
+        console.log('Password reset token has already expired.');
+        return res.status(400).json({error: true, msg: 'reset-token-expired'});
+      }
+
+      // User found & token not expired => check token
+      user.checkPasswordResetToken(resetToken, function(errr, result) {
+        // Error or match failed
+        if(errr || !result) {
+          console.log('Token did not match when hashed. Password reset aborted.');
+          return res.status(400).json({error: true, msg: 'reset-token-invalid'});
+        }
+
+        // Token matched => allow password reset
+        user.generateHash(password, function(errrr, hash) {
+          if(errrr || !hash) {
+            console.log('Password could not be hashed. Password reset aborted.');
+            return res.status(500).json({error: true, msg: 'password-reset-failed'});
+          }
+
+          user.auth.basic.password = hash;
+          user.auth.basic.passwordReset.expiration = Utils.generateInvalidTimestamp();
+
+          // Save user password & clear out reset info
+          user.save(function(errrrr, updatedUser) {
+            if(errrrr || !updatedUser) {
+              console.log('User could not be saved with new password. Password reset aborted.');
+              return res.status(500).json({error: true, msg: 'password-reset-failed'});
+            }
+
+            // User saved => Login user & pass back login info
+            console.log("SAVED USER IS: ", updatedUser);
+            updatedUser.generateToken(process.env.AUTH_SECRET, function(errrrrr, eat) {
+              res.json({success: true,
+                        user: { eat:      eat,
+                                username: updatedUser.username,
+                                userId:   updatedUser._id,
+                                email:    updatedUser.email,
+                                role:     updatedUser.role }
+                      });
+            });
+          });
+        });
+      });
     });
   });
 };

@@ -4,12 +4,17 @@ var bcrypt   = require('bcrypt-nodejs');
 var eat      = require('eat'          );
 var mongoose = require('mongoose'     );
 var crypto   = require('crypto'       );
+var Utils    = require('../lib/signpost_utils.js');
 
 // db schema for User
 var UserSchema = mongoose.Schema({
   auth: {
     basic: {
       password:             { type: String,   default: null },
+      passwordReset: {
+        tokenHash:  { type: String, default: null},
+        expiration: { type: String, default: null}
+      }
     },
     facebook: {
       facebookId:           { type: String,   default: null },
@@ -204,6 +209,17 @@ UserSchema.methods.invalidateToken = function invalidateToken(callback) {
     callback(null, user);
   });
 };
+
+UserSchema.methods.isResetTokenExpired = function isResetTokenStillValid() {
+  var timestamp = this.auth.basic.passwordReset.expiration;
+
+  return !Utils.isTimestampStillValid(timestamp);
+}
+
+UserSchema.methods.checkPasswordResetToken = function checkPasswordResetToken(tokenToCheck, callback) {
+  var hash = this.auth.basic.passwordReset.tokenHash;
+  Utils.checkUrlSafeTokenAgainstHash(tokenToCheck, hash, callback);
+}
 
 
 // Export mongoose model/schems
