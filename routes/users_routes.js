@@ -1,15 +1,15 @@
 'use strict';
 
-var bodyparser  = require('body-parser'      );
-var contains    = require('lodash'           ).contains;
-var eatOnReq    = require('../lib/routes_middleware/eat_on_req.js');
-var eatAuth     = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
-var ownerAuth   = require('../lib/routes_middleware/owner_auth.js');
-var adminAuth   = require('../lib/routes_middleware/admin_auth.js');
-var mongoose    = require('mongoose');
-var User        = require('../models/User.js');
-var MailService = require('../lib/mailing/mail_service.js');
-var EmailContent = require('../lib/mailing/email_content_builder.js');
+var bodyparser   = require('body-parser'      );
+var contains     = require('lodash'           ).contains;
+var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
+var eatAuth      = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
+var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
+var adminAuth    = require('../lib/routes_middleware/admin_auth.js');
+var mongoose     = require('mongoose');
+var User         = require('../models/User.js');
+var MailService  = require('../lib/mailing/mail_service.js');
+var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var Utils        = require('../lib/signpost_utils.js');
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
@@ -18,7 +18,6 @@ module.exports = function(router) {
   router.use(bodyparser.json());
 
   // Get user by ID (_id)
-  // TODO: BRING BACK OWNER AUTH!!!!!
   router.get('/users/:usernameOrId', eatOnReq, eatAuth, ownerAuth('usernameOrId'), function(req, res) {
     var usernameOrId = req.params.usernameOrId;
     var userQuery = mongoose.Types.ObjectId.isValid(usernameOrId) ?
@@ -106,7 +105,7 @@ module.exports = function(router) {
               from:    'Syynpost Confirmation <syynpost@gmail.com>',
               to:      user.email,      // User-provided basic-auth email
               subject: 'Syynpost Confirmation',
-              html: EmailContent.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email}),
+              html: EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email}),
               // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
             };
             MailService.sendEmail(mailOptions, function(errrr, result){

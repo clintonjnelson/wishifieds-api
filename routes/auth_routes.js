@@ -1,10 +1,10 @@
 'use strict';
 
 var bodyparser  = require('body-parser');
-var eatAuth     = require('../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
 var eatOnReq    = require('../lib/routes_middleware/eat_on_req.js');
+var eatAuth     = require('../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-var Mailer      = require('../lib/mailing/mail_service.js');
+var MailService = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder');
 var Utils       = require('../lib/signpost_utils.js');
 var User        = require('../models/User.js');
@@ -101,7 +101,7 @@ module.exports = function(router, passport) {
           // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
         };
 
-        Mailer.sendEmail(mailOptions, function(errr, result) {
+        MailService.sendEmail(mailOptions, function(errr, result) {
           if(errr) {
             console.log("Error sending email: ", errr);
             return res.status(500).json({error: true, msg: 'email-failure'});
@@ -177,6 +177,44 @@ module.exports = function(router, passport) {
                       });
             });
           });
+        });
+      });
+    });
+  });
+
+  router.get('/auth/resendconfirmation', eatOnReq, eatAuth, function(req, res) {
+    console.log("MADE IT TO RESEND CONFIRMATION WITH REQ.QUERY: ", req.query);
+    var userId = req.query['id'];
+
+    User.findById(userId, function(error, user) {
+      if(error || !user) {
+        console.log("Error finding user by ID: ", error);
+        return res.status(404).json({error: true, msg: 'invalid-user'});
+      }
+
+      console.log("ABOUT TO GO INTO SEND EMAIL SECTION...");
+      // Generate confirmation token & send email (ASYNC)
+      Utils.generateUrlSafeTokenAndHash(function(err, urlSafeToken, tokenHash) {
+        if(err) {
+          console.log('Error creating token & hash for resending confirmation.');
+          res.status(500).json({error: true, msg: 'confirmation-resend-error'});
+        }
+
+        user.confirmed = tokenHash;
+        user.save();
+
+        console.log("USER SAVED, NOW TO SEND EMAIL...");
+        // Send confirmation email
+        var mailOptions = {
+          from:    'Syynpost Confirmation <syynpost@gmail.com>',
+          to:      user.email,      // User-provided basic-auth email
+          subject: 'Syynpost Confirmation',
+          html:    EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email}),
+          // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
+        };
+        MailService.sendEmail(mailOptions, function(errr, result){
+          console.log("RESULT OF SENDING EMAIL IS: ", result);
+          res.json({success: true});
         });
       });
     });
