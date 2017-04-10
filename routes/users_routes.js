@@ -8,6 +8,9 @@ var ownerAuth   = require('../lib/routes_middleware/owner_auth.js');
 var adminAuth   = require('../lib/routes_middleware/admin_auth.js');
 var mongoose    = require('mongoose');
 var User        = require('../models/User.js');
+var MailService = require('../lib/mailing/mail_service.js');
+var EmailContent = require('../lib/mailing/email_content_builder.js');
+var Utils        = require('../lib/signpost_utils.js');
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
@@ -78,6 +81,7 @@ module.exports = function(router) {
       newUser.generateHash(req.body.password, function(err, hash) {
         if (err) { return res.status(500).json({ error: true }); }
         newUser.auth.basic.password = hash;
+        newUser.status = 'P';   // pending
 
         newUser.save(function(err, user) {
           if (err) { console.log('Error creating user. Error: ', err); }
@@ -90,6 +94,27 @@ module.exports = function(router) {
               return res.status(400).json({ error: true        });
           }
 
+          console.log("ABOUT TO GO INTO SEND EMAIL SECTION...");
+          // Generate confirmation token & send email (ASYNC)
+          Utils.generateUrlSafeTokenAndHash(function(errr, urlSafeToken, tokenHash) {
+            user.confirmed = tokenHash;
+            user.save();
+
+            console.log("USER SAVED, NOW TO SEND EMAIL...");
+            // Send confirmation email
+            var mailOptions = {
+              from:    'Syynpost Confirmation <syynpost@gmail.com>',
+              to:      user.email,      // User-provided basic-auth email
+              subject: 'Syynpost Confirmation',
+              html: EmailContent.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email}),
+              // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
+            };
+            MailService.sendEmail(mailOptions, function(errrr, result){
+              console.log("RESULT OF SENDING EMAIL IS: ", result);
+            });
+          });
+
+          // Generate & send auth info to the UI (ASYNC)
           user.generateToken(process.env.AUTH_SECRET, function(err, eat) {
             if(err) {
               console.log(err);

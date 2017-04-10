@@ -49,7 +49,7 @@ var UserSchema = mongoose.Schema({
       wordpressAccessToken: { type: String,   default: null },
     },
                                                                      },
-  confirmed:       { type: Boolean, default: false                   },
+  confirmed:       { type: String,  default: null                    },  // Gets date when confirmed
   eat:             { type: String,  default: null                    },
   email:           { type: String,  default: null, lowercase: true   },  // sparse: true,
   permissions:     { type: Array,   default: ['user']                },

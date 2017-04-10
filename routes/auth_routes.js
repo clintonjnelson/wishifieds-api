@@ -94,14 +94,14 @@ module.exports = function(router, passport) {
 
         // configure mail for sending
         var mailOptions = {
-          from: 'Syynpost Password Reset <syynpost@gmail.com>',
-          to:   passwordResetEmail,   // Email provided by user
+          from:    'Syynpost Password Reset <syynpost@gmail.com>',
+          to:      passwordResetEmail,   // Email provided by user
           subject: 'Syynpost Password Change Request',
-          // text: EmailBuilder.buildPlainTextEmail(),
-          html: EmailBuilder.buildHtmlEmail({ resetToken: resetToken, email: user.email })
+          html: EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email }),
+          // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
         };
 
-        Mailer.sendPasswordResetEmail(mailOptions, function(errr, result) {
+        Mailer.sendEmail(mailOptions, function(errr, result) {
           if(errr) {
             console.log("Error sending email: ", errr);
             return res.status(500).json({error: true, msg: 'email-failure'});
@@ -115,6 +115,7 @@ module.exports = function(router, passport) {
     });
   });
 
+  // Password Change with Token
   router.put('/resetpassword', function(req, res) {
     console.log("MADE IT TO PASSWORD RESET WITH BODY: ", req.body);
     var email      = req.body.email;
@@ -176,6 +177,46 @@ module.exports = function(router, passport) {
                       });
             });
           });
+        });
+      });
+    });
+  });
+
+  router.get('/auth/emailconfirmation', function(req, res) {
+    console.log("MADE IT TO EMAIL CONFIRMATION ROUTE. QueryParams are", req.query);
+
+    var confirmationToken = req.query['confirmationtoken'];
+    var email             = req.query['email'];
+
+    if(!confirmationToken || !email) {
+      console.log('No token provided for email confirmation');
+      return res.status(400).json({error: true, msg: 'missing-token'});
+    }
+
+    // Find user by email
+    User.findOne({email: email}, function(error, user) {
+      if(error) {
+        console.log('Error finding user from email. Error: ', error, '. User: ', user);
+        return res.status(400).json({error: true, msg: 'invalid-email'});
+      }
+
+      // User found => now compare token to user's confirmation hash
+      Utils.checkUrlSafeTokenAgainstHash(confirmationToken, user.confirmed, function(err, result) {
+        if(err || !result) {
+          console.log('Error hashing token. Error: ', err, '. Result: ', result);
+          return res.status(400).json({error: true, msg: 'invalid-token'});
+        }
+
+        // Successful match => confirm user
+        user.confirmed = 'true';
+        user.status    = 'A';        // Change from 'P' Pending to 'A' Active
+        user.save(function(errr, updatedUser) {
+          if(errr || !updatedUser) {
+            console.log('Error saving user after confirmation. Error: ', errr, '. User: ', updatedUser);
+            return res.status(500).json({error: true, msg: 'internal-error'});
+          }
+
+          res.json({success: true});
         });
       });
     });
