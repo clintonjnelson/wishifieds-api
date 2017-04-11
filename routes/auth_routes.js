@@ -197,7 +197,7 @@ module.exports = function(router, passport) {
       Utils.generateUrlSafeTokenAndHash(function(err, urlSafeToken, tokenHash) {
         if(err) {
           console.log('Error creating token & hash for resending confirmation.');
-          res.status(500).json({error: true, msg: 'confirmation-resend-error'});
+          return res.status(500).json({error: true, msg: 'confirmation-resend-error'});
         }
 
         user.confirmed = tokenHash;
@@ -213,6 +213,10 @@ module.exports = function(router, passport) {
           // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
         };
         MailService.sendEmail(mailOptions, function(errr, result){
+          if(errr || !result) {
+            console.log('Error sending email. Error is: ', errr, '. Result is: ', result);
+            return res.status(500).json({error: true, msg: 'mail-resend-failure'});
+          }
           console.log("RESULT OF SENDING EMAIL IS: ", result);
           res.json({success: true});
         });
