@@ -258,7 +258,7 @@ module.exports = function(router, passport) {
             return res.status(500).json({error: true, msg: 'internal-error'});
           }
 
-          res.json({success: true});
+          res.json({success: true, username: user.username});
         });
       });
     });
