@@ -10,7 +10,7 @@ var googleSignSchema = new SignSchema();
 googleSignSchema.add({
   bgColor:         { type: String, default: '#dd4b39'          },
   circledByCount:  { type: String                              },
-  icon:            { type: String, default: 'google-plus'      },
+  icon:            { type: String, default: 'google'           },
   profileId:       { type: String, required: true              },
   signType:        { type: String, default: 'google'           },
 });

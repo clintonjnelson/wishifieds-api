@@ -48,6 +48,10 @@ var UserSchema = mongoose.Schema({
       wordpressId:          { type: String,   default: null },
       wordpressAccessToken: { type: String,   default: null },
     },
+    youtube: {
+      youtubeId:          { type: String,   default: null },
+      youtubeAccessToken: { type: String,   default: null },
+    },
                                                                      },
   confirmed:       { type: String,  default: null                    },  // Gets date when confirmed
   eat:             { type: String,  default: null                    },

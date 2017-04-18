@@ -74,6 +74,12 @@ function getOauthConfigsLibrary() {
       scope: 'global',
       session: false,
     },
+    youtube: {
+      oauthVersion: '2',
+      passportType: 'youtube',
+      scope: 'https://www.googleapis.com/auth/youtube.readonly',
+      session: false,
+    }
   };
 }
 
