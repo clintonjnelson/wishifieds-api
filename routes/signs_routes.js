@@ -9,6 +9,7 @@ var mongoose      = require('mongoose'                 );
 var Sign          = require('../models/Sign.js'        );
 var signBuilder   = require('../lib/sign_builder.js'   );
 var User          = require('../models/User.js'        );
+var MONGO_OBJ_REGEX = new RegExp(/^[a-fA-F0-9]{24}$/);
 
 module.exports = function(app) {
   app.use(bodyparser.json());
@@ -16,12 +17,17 @@ module.exports = function(app) {
 
   // Get by username OR userId
   app.get('/signs/:usernameOrId', function(req, res) {
-
     // set query for username OR id
     var paramVal = req.params.usernameOrId;
-    var queryObj = mongoose.Types.ObjectId.isValid(paramVal) ?
+    // var queryObj = mongoose.Types.ObjectId.isValid(paramVal) ?
+    var queryObj = MONGO_OBJ_REGEX.test(paramVal) ?
       {_id:      paramVal} :
       {username: paramVal};
+
+    console.log("IS IT VALID?: ", mongoose.Types.ObjectId.isValid(paramVal));
+    console.log("IS IT VALID?: ", MONGO_OBJ_REGEX.test(paramVal) );
+    console.log("USERNAME OR ID IS: ", paramVal);
+    console.log("QUERY_OBJECT IS: ", queryObj);
 
     User.findOne(queryObj, function(err, user) {
       if(err) {

@@ -18,9 +18,11 @@ module.exports = function(router, passport) {
   loadOauthRoutes(router, passport, OAUTH_CONFIG.google);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.instagram);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.linkedin);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.reddit);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.stackexchange);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.twitter);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.wordpress);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.youtube);
 };
 
 
@@ -56,6 +58,11 @@ function getOauthConfigsLibrary() {
       passportType: 'linkedin',
       scope: 'r_basicprofile',
       session: false,
+    },
+    reddit: {
+      oauthVersion: '2',
+      passportType: 'reddit',
+      scope: 'identity'
     },
     stackexchange: {
       oauthVersion: '2',

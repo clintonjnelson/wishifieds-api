@@ -32,9 +32,11 @@ require('./lib/passport_strategies/github.js'       )(passport);
 require('./lib/passport_strategies/google.js'       )(passport);
 require('./lib/passport_strategies/instagram.js'    )(passport);
 require('./lib/passport_strategies/linkedin.js'     )(passport);
+require('./lib/passport_strategies/reddit.js'       )(passport);
 require('./lib/passport_strategies/stackexchange.js')(passport);
 require('./lib/passport_strategies/twitter.js'      )(passport);
 require('./lib/passport_strategies/wordpress.js'    )(passport);
+require('./lib/passport_strategies/youtube.js'      )(passport);
 
 // Populate Routes
 require('./routes/oauth_routes.js')(oauthRouter, passport);

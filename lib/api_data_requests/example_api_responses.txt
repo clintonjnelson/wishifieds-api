@@ -526,5 +526,33 @@ _json:
 */
 
 
+/*
+{ provider: 'youtube',
+  id: 'UCfmeWS8Q8Th7I44I1XdRQqQ',
+  displayName: 'clinton j',
+  _raw: '{\n "kind": "youtube#channelListResponse",\n "etag": "\\"m2yskBQFythfE4irbTIeOgYYfBU/0yeqQsuw8HIviegItkyFztEChDY\\"",\n "pageInfo": {\n  "total…
+  _json:{
+    kind: 'youtube#channelListResponse',
+    etag: '"m2yskBQFythfE4irbTIeOgYYfBU/0yeqQsuw8HIviegItkyFztEChDY"',
+    pageInfo: { totalResults: 1, resultsPerPage: 1 },
+    items: [
+      {
+        kind: 'youtube#channel',
+        etag: '"m2yskBQFythfE4irbTIeOgYYfBU/smYUlTcA0VYr5p-orrQXRhxZ5kc"',
+        id: 'UCfmeWS8Q8Th7I44I1XdRQqQ',
+        snippet:
+         { title: 'clinton j',
+           description: '',
+           publishedAt: '2014-09-04T02:13:57.000Z',
+           thumbnails: {
+             default: { url: 'https://yt3.ggpht.com/-2K6ljhIHwLk/AAAAAAAAAAI/AAAAAAAAAAA/vjiD6QxQ6cY/s88-c-k-no-mo-rj-c0xffffff/photo.jpg' …},
+             medium: { url: 'https://yt3.ggpht.com/-2K6ljhIHwLk/AAAAAAAAAAI/AAAAAAAAAAA/vjiD6QxQ6cY/s240-c-k-no-mo-rj-c0xffffff/photo.jpg' },
+             high: { url: 'https://yt3.ggpht.com/-2K6ljhIHwLk/AAAAAAAAAAI/AAAAAAAAAAA/vjiD6QxQ6cY/s240-c-k-no-mo-rj-c0xffffff/photo.jpg' } },
+           localized: [Object]
+         }
+      }
+    ]
+  }
+}
 
-
+*/

@@ -4,21 +4,21 @@ var SignSchema = require('./SignSchema.js');
 var Sign       = require('./Sign.js');
 
 // New schema ffrom base
-var youtubeSignSchema = new SignSchema();
+var redditSignSchema = new SignSchema();
 
 // BaseSchema: customBgColor, description, knownAs, linkUrl, published, userId
-youtubeSignSchema.add({
-  bgColor:     { type: String, default: '#bb0000' },
-  icon:        { type: String, default: 'youtube' },
-  signType:    { type: String, default: 'google'  },
+redditSignSchema.add({
+  bgColor:     { type: String, default: '#FF5700' },
+  icon:        { type: String, default: 'reddit' },
+  signType:    { type: String, default: 'reddit'  },
   profileId:   { type: String, required: true     },
 });
 
 // Validations
-youtubeSignSchema.pre('save', function(next) {
+redditSignSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
 
 // Export as Discriminator
-module.exports = Sign.discriminator('YoutubeSign', youtubeSignSchema);
+module.exports = Sign.discriminator('RedditSign', redditSignSchema);
