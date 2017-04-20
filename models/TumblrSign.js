@@ -12,7 +12,8 @@ tumblrSignSchema.add({
   icon:            { type: String, default: 'tumblr'      },
   profileId:       { type: String, required: true         },
   signType:        { type: String, default: 'tumblr'      },
-  following:       { type: String, default: null          },
+  followers:       { type: String, default: null          },
+  siteId:          { type: String                         },
 });
 
 // Validations
