@@ -134,6 +134,144 @@ _json:
 
 
 
+
+
+/*
+OAUTH CALL
+{ provider: 'pinterest',
+  id: '462252486661512618',
+  displayName: 'Clint Nelson',
+  emails: [],
+  email: undefined,
+  _raw: '{"data": {"url": "https://www.pinterest.com/clintonjnelson/", "first_name": "Clint", "last_name": "Nelson", "id": "462252486661512618"}}',
+  _json:
+   { data:
+      { url: 'https://www.pinterest.com/clintonjnelson/',
+        first_name: 'Clint',
+        last_name: 'Nelson',
+        id: '462252486661512618' } },
+  apiWasCalled: true }
+
+
+API DIRECT DATA REQUEST CALL
+{
+   "data":{
+      "username":"clintonjnelson",
+      "counts":{
+         "pins":6,
+         "following":5,
+         "followers":0,
+         "boards":3,
+         "likes":1
+      },
+      "id":"462252486661512618",
+      "image":{
+         "60x60":{
+            "url":"https://s.pinimg.com/images/user/default_60.png",
+            "width":60,
+            "height":60
+         }
+      }
+   }
+}
+*/
+
+
+
+
+
+//---------------------- Sample of Data in Reddit PROFILE --------------------
+/*
+{ provider: 'reddit',
+  id: '176ltj',
+  name: 'clintonjnelson',
+  link_karma: 1,
+  comment_karma: 0,
+  _raw: '{"is_employee": false, "features": {"do_not_track": true, "live_happening_now": true, "adserver_reporting": true, "legacy_search_pref":…
+  _json:
+   { is_employee: false,
+     features:
+      { do_not_track: true,
+        live_happening_now: true,
+        adserver_reporting: true,
+        legacy_search_pref: true,
+        mobile_web_targeting: true,
+        default_srs_holdout: [Object],
+        adzerk_do_not_track: true,
+        show_user_sr_name: true,
+        whitelisted_pms: true,
+        show_rules_on_submit_page: [Object],
+        sticky_comments: true,
+        upgrade_cookies: true,
+        ads_prefs: true,
+        block_user_by_report: true,
+        ads_auto_refund: true,
+        orangereds_as_emails: true,
+        expando_events: true,
+        eu_cookie_policy: true,
+        programmatic_ads: true,
+        force_https: true,
+        mobile_native_banner: true,
+        ads_auction: true,
+        reddituploads_redirect: true,
+        outbound_clicktracking: true,
+        image_uploads: true,
+        new_loggedin_cache_policy: true,
+        inbox_push: true,
+        scroll_events: true,
+        https_redirect: true,
+        mweb_xpromo_interstitial_comments_ios: true,
+        pause_ads: true,
+        utm_comment_links: true,
+        give_hsts_grants: true,
+        show_recommended_link: true,
+        mweb_xpromo_interstitial_comments_android: true,
+        screenview_events: true,
+        new_report_dialog: true,
+        moat_tracking: true,
+        subreddit_rules: true,
+        mobile_settings: true,
+        adzerk_reporting_2: true,
+        activity_service_write: true,
+        ads_auto_extend: true,
+        interest_targeting: true,
+        post_embed: true,
+        new_ads_styles: [Object],
+        adblock_test: true,
+        activity_service_read: true },
+     is_suspended: false,
+     subreddit: null,
+     gold_expiration: null,
+     id: '176ltj',
+     suspension_expiration_utc: null,
+     verified: false,
+     over_18: false,
+     is_gold: false,
+     is_mod: false,
+     has_verified_email: true,
+     oauth_client_id: 'svuJsJWSRaWQLA',
+     hide_from_robots: false,
+     link_karma: 1,
+     inbox_count: 1,
+     name: 'clintonjnelson',
+     created: 1492556091,
+     gold_creddits: 0,
+     created_utc: 1492527291,
+     in_beta: false,
+     comment_karma: 0 },
+  apiWasCalled: true }
+*/
+
+
+
+
+
+
+
+
+
+
+
 /*
 ------------------------- Sample of Stackexchange Data -------------------------
 { badge_counts: { bronze: 10, silver: 3, gold: 0 },
@@ -158,6 +296,63 @@ _json:
   display_name: 'cjn',
   provider: 'stackexchange' }
 */
+
+
+
+
+{ provider: 'tumblr',
+  username: 'clintonjnelson',
+  _raw: '{"meta":{"status":200,"msg":"OK"},"response":{"user":{"name":"clintonjnelson","likes":0,"following":1,"default_post_format":"html","blogs":[{"admin…
+  _json: {
+    meta: { status: 200, msg: 'OK' },
+    response:
+     { user:
+        { name: 'clintonjnelson',
+          likes: 0,
+          following: 1,
+          default_post_format: 'html',
+          blogs: [
+            { admin: true,
+              ask: false,
+              ask_anon: false,
+              ask_page_title: 'Ask me anything',
+              can_send_fan_mail: true,
+              can_subscribe: false,
+              description: '',
+              drafts: 0,
+              facebook: 'N',
+              facebook_opengraph_enabled: 'N',
+              followed: false,
+              followers: 0,
+              is_adult: false,
+              is_blocked_from_primary: false,
+              is_nsfw: false,
+              likes: 0,
+              messages: 0,
+              name: 'clintonjnelson',
+              placement_id: '',
+              posts: 0,
+              primary: true,
+              queue: 0,
+              reply_conditions: 3,
+              share_likes: true,
+              subscribed: false,
+              title: 'Untitled',
+              total_posts: 0,
+              tweet: 'N',
+              twitter_enabled: false,
+              twitter_send: false,
+              type: 'public',
+              updated: 0,
+              url: 'https://clintonjnelson.tumblr.com/'
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
 
 
 
@@ -526,6 +721,11 @@ _json:
 */
 
 
+
+
+
+
+//---------------------- Sample of Data in Youtube PROFILE --------------------
 /*
 { provider: 'youtube',
   id: 'UCfmeWS8Q8Th7I44I1XdRQqQ',

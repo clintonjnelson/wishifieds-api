@@ -36,9 +36,21 @@ var UserSchema = mongoose.Schema({
       linkedinId:           { type: String,   default: null },
       linkedinAccessToken:  { type: String,   default: null },
     },
+    pinterest: {
+      pinterestId:           { type: String,   default: null },
+      pinterestAccessToken:  { type: String,   default: null },
+    },
+    reddit: {
+      redditId:             { type: String,   default: null },
+      redditAccessToken:    { type: String,   default: null },
+    },
     stackexchange: {
       stackexchangeId:          { type: String,   default: null },
       stackexchangeAccessToken: { type: String,   default: null },
+    },
+    tumblr: {
+      tumblrId:             { type: String,   default: null },
+      tumblrAccessToken:    { type: String,   default: null },
     },
     twitter: {
       twitterId:            { type: String,   default: null },

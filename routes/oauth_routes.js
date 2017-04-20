@@ -18,8 +18,10 @@ module.exports = function(router, passport) {
   loadOauthRoutes(router, passport, OAUTH_CONFIG.google);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.instagram);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.linkedin);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.pinterest);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.reddit);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.stackexchange);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.tumblr);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.twitter);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.wordpress);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.youtube);
@@ -59,15 +61,28 @@ function getOauthConfigsLibrary() {
       scope: 'r_basicprofile',
       session: false,
     },
+    pinterest: {
+      oauthVersion: '2',
+      passportType: 'pinterest',
+      scope: 'read_public',
+      session: false,
+    },
     reddit: {
       oauthVersion: '2',
       passportType: 'reddit',
-      scope: 'identity'
+      scope: 'identity',
+      state: 'PLACEHOLDERFORNOW',
     },
     stackexchange: {
       oauthVersion: '2',
       passportType: 'stackexchange',
       scope: null,
+    },
+    tumblr: {
+      oauthVersion: '1',
+      passportType: 'tumblr',
+      scope: null,
+      session: false,
     },
     twitter: {
       oauthVersion: '1',

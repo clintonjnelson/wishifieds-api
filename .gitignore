@@ -9,6 +9,7 @@
 ## General Files
 *.DS_Store
 *bundle.js
+*.pem
 
 ## Specific Files
 .env

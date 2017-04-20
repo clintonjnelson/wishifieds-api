@@ -1,9 +1,11 @@
 'use strict';
 
 var express  = require('express'        );
+var fs       = require('fs'             );
+var https    = require('https'          );
 var mongoose = require('mongoose'       );
 var passport = require('passport'       );
-var session  = require('express-session');
+var session  = require('express-session');  // Oauth1 provider workaround
 var app      = express();
 
 // Routers
@@ -32,8 +34,10 @@ require('./lib/passport_strategies/github.js'       )(passport);
 require('./lib/passport_strategies/google.js'       )(passport);
 require('./lib/passport_strategies/instagram.js'    )(passport);
 require('./lib/passport_strategies/linkedin.js'     )(passport);
+require('./lib/passport_strategies/pinterest.js'    )(passport);
 require('./lib/passport_strategies/reddit.js'       )(passport);
 require('./lib/passport_strategies/stackexchange.js')(passport);
+require('./lib/passport_strategies/tumblr.js'       )(passport);
 require('./lib/passport_strategies/twitter.js'      )(passport);
 require('./lib/passport_strategies/wordpress.js'    )(passport);
 require('./lib/passport_strategies/youtube.js'      )(passport);
@@ -64,8 +68,17 @@ app.use('*/', function(req, res) {
   res.sendFile(__dirname + '/' + dir + '/index.html');
 });
 
+// SSL Cert
+var sslOptions = { key: fs.readFileSync('key.pem'),
+                   cert: fs.readFileSync('cert.pem'),
+                   passphrase: process.env.SSL_CERT_PASSWORD };
+
 // Start server
 app.listen(process.env.PORT || 3000, function() {
   console.log('server running on port ' + (process.env.PORT || 3000));
+});
+
+https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 4433, '127.0.0.1', function() {
+  console.log("https server running on port " + (process.env.HTTPS_PORT || 4433));
 });
 
