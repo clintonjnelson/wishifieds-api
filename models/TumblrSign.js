@@ -13,7 +13,7 @@ tumblrSignSchema.add({
   profileId:       { type: String, required: true         },
   signType:        { type: String, default: 'tumblr'      },
   followers:       { type: String, default: null          },
-  siteId:          { type: String                         },
+  siteId:          { type: String, required: true         },
 });
 
 // Validations
