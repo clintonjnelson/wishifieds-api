@@ -1,6 +1,61 @@
 
 
 
+
+/*
+------------------------------ Sample of FOURSQUARE Data ---------------------------
+{ id: '412326279',
+  name: { familyName: 'Nelson', givenName: 'Clint' },
+  gender: 'none',
+  emails: [ { value: 'clintonjnelson@live.com' } ,
+  provider: 'foursquare',
+  _raw: '{"meta":{"code":200,"requestId":"58fbb81b4434b92f34fbb7c4"},"notifications":[{"type":"notificationTray","item":{"unreadCount":0}}],"response"…
+  _json: {
+    meta: { code: 200, requestId: '58fbbb4c351e3d29ec524444' },
+    notifications: [ { type: 'notificationTray', item: [Object] } ],
+    response:
+     { user:
+        { id: '412326279',
+          firstName: 'Clint',
+          lastName: 'Nelson',
+          gender: 'none',
+          relationship: 'self',
+          canonicalUrl: 'https://foursquare.com/user/412326279',
+          photo: {
+            prefix: 'https://igx.4sqi.net/img/user/',
+            suffix: '/412326279_JXrOmzFp_5qjl94kd1qeUojhZJMtODHUv2eu-knc1JZ8_ga0yjwnEKO9Um2mvHvgjQI49-86K'
+          },
+          friends: { count: 0,
+            groups: [
+               { type: 'friends', name: 'Mutual friends', count: 0, items: [] },
+               { type: 'others', name: 'Other friends', count: 0, items: [] }
+            ]
+          },
+          birthday: 450921600,
+          tips: [Object],
+          homeCity: 'Bellevue, WA',
+          bio: '',
+          contact: [Object],
+          photos: [Object],
+          checkinPings: 'off',
+          pings: false,
+          type: 'user',
+          mayorships: [Object],
+          checkins: [Object],
+          requests: [Object],
+          lists: [Object],
+          blockedStatus: 'none',
+          createdAt: 1492788050,
+          lenses: [],
+          referralId: 'u-412326279' } } }
+     LOGIN SIGNUP HANDLER FOR LOGGING IN.,
+  apiWasCalled: true } }
+*/
+
+
+
+
+
 /*
 ------------------------------ Sample of GITHUB Data ---------------------------
 { provider: 'github',
@@ -74,6 +129,30 @@ _json:
      circledByCount: 0,
      verified: false } }
 */
+
+
+
+//--------------------- Sample of Data in Imgur PROFILE --------------------
+/*
+{ provider: 'imgur',
+  id: 59466261,
+  url: 'clintonjnelson',
+  bio: null,
+  reputation: 0,
+  pro_expiration: false,
+  created: 1492788994,
+  email: 'clintonjnelson@live.com',
+  high_quality: false,
+  public_images: false,
+  album_privacy: 'public',
+  accepted_gallery_terms: false,
+  active_emails: [],
+  messaging_enabled: true,
+  blocked_users: [],
+  show_mature: false }
+}
+*/
+
 
 
 
@@ -260,6 +339,26 @@ API DIRECT DATA REQUEST CALL
      in_beta: false,
      comment_karma: 0 },
   apiWasCalled: true }
+*/
+
+
+
+
+
+//---------------------- Sample of Data in Spotify PROFILE --------------------
+/*
+{ provider: 'spotify',
+  id: 'clintonjnelson',
+  username: 'clintonjnelson',
+  displayName: null,
+  profileUrl: 'https://open.spotify.com/user/clintonjnelson',
+  photos: [],
+  country: null,
+  followers: 0,
+  product: null,
+  _raw: '{\n  "display_name" : null,\n  "external_urls" : {\n    "spotify" : "https://open.spotify.com/user/clintonjnelson"\n  },\n  "followers" : {\n…
+  _json: [Object],
+  apiWasCalled: true } }
 */
 
 

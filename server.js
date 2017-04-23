@@ -30,12 +30,15 @@ app.use(passport.session());            // only for oauth1 to work
 // Load passport with strategies
 require('./lib/passport_strategies/basic.js'        )(passport);
 require('./lib/passport_strategies/facebook.js'     )(passport);
+require('./lib/passport_strategies/foursquare.js'   )(passport);
 require('./lib/passport_strategies/github.js'       )(passport);
 require('./lib/passport_strategies/google.js'       )(passport);
+require('./lib/passport_strategies/imgur.js'        )(passport);
 require('./lib/passport_strategies/instagram.js'    )(passport);
 require('./lib/passport_strategies/linkedin.js'     )(passport);
 require('./lib/passport_strategies/pinterest.js'    )(passport);
 require('./lib/passport_strategies/reddit.js'       )(passport);
+require('./lib/passport_strategies/spotify.js'      )(passport);
 require('./lib/passport_strategies/stackexchange.js')(passport);
 require('./lib/passport_strategies/tumblr.js'       )(passport);
 require('./lib/passport_strategies/twitter.js'      )(passport);

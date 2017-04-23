@@ -20,6 +20,10 @@ var UserSchema = mongoose.Schema({
       facebookId:           { type: String,   default: null },
       facebookAccessToken:  { type: String,   default: null },
     },
+    foursquare: {
+      foursquareId:           { type: String,   default: null },
+      foursquareAccessToken:  { type: String,   default: null },
+    },
     github: {
       githubId:             { type: String,   default: null },
       githubAccessToken:    { type: String,   default: null },
@@ -27,6 +31,10 @@ var UserSchema = mongoose.Schema({
     google: {
       googleId:             { type: String,   default: null },
       googleAccessToken:    { type: String,   default: null },
+    },
+    imgur: {
+      imgurId:             { type: String,   default: null },
+      imgurAccessToken:    { type: String,   default: null },
     },
     instagram: {
       instagramId:          { type: String,   default: null },
@@ -43,6 +51,10 @@ var UserSchema = mongoose.Schema({
     reddit: {
       redditId:             { type: String,   default: null },
       redditAccessToken:    { type: String,   default: null },
+    },
+    spotify: {
+      spotifyId:             { type: String,   default: null },
+      spotifyAccessToken:    { type: String,   default: null },
     },
     stackexchange: {
       stackexchangeId:          { type: String,   default: null },
