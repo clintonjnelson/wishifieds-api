@@ -18,9 +18,6 @@ var usersRouter  = new express.Router();
 // TEMP ENVIRONMENT VARIABLE
 process.env.AUTH_SECRET = process.env.AUTH_SECRET || 'setThisVarInENV';
 
-// Set mongoose connection
-mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://127.0.0.1/signpost');
-
 // Initialize passport middleware & configure with passport_strategy.js
 app.use(session({secret: 'oauth1sucks', id: 'oauth', maxAge: null}));
 app.use(passport.initialize());
@@ -77,16 +74,26 @@ app.use('*/', function(req, res) {
 });
 
 // SSL Cert
-var sslOptions = { key: fs.readFileSync('key.pem'),
+var sslOptions = { key:  fs.readFileSync('key.pem'),
                    cert: fs.readFileSync('cert.pem'),
                    passphrase: process.env.SSL_CERT_PASSWORD };
 
-// Start server
-app.listen(process.env.PORT || 3000, function() {
-  console.log('server running on port ' + (process.env.PORT || 3000));
-});
 
-https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 4433, '127.0.0.1', function() {
-  console.log("https server running on port " + (process.env.HTTPS_PORT || 4433));
+// Set mongoose connection - server is conditional on that connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1/signpost', function(error) {
+  if(error) {
+    console.log('Error connecting to Mongo DB. Error is: ', error);
+    return new Error('Connection to Mongo DB failed. Stopping server from starting.');
+  }
+  console.log('Starting http & https servers...');
+
+  // DB connection success => start server
+  app.listen(process.env.PORT || 3000, function() {
+    console.log('server running on port ' + (process.env.PORT || 3000));
+  });
+
+  https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 8443, '127.0.0.1', function() {
+    console.log("https server running on port " + (process.env.HTTPS_PORT || 8443));
+  });
 });
 
