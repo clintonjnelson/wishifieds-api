@@ -88,12 +88,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1/signpost', func
   console.log('Starting http & https servers...');
 
   // DB connection success => start server
-  app.listen(process.env.HTTP_PORT || 3000, function() {
-    console.log('server running on port ' + (process.env.HTTP_PORT || 3000));
+  app.listen(process.env.PORT || process.env.HTTP_PORT || 3000, function() {
+    console.log('server running on port ' + (process.env.PORT || process.env.HTTP_PORT || 3000));
   });
 
-  https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 8443, '127.0.0.1', function() {
-    console.log("https server running on port " + (process.env.HTTPS_PORT || 8443));
-  });
+  // https.createServer(sslOptions, app).listen(process.env.PORT || process.env.HTTPS_PORT || 8443, '127.0.0.1', function() {
+  //   console.log("https server running on port " + (process.env.PORT || process.env.HTTPS_PORT ||  8443));
+  // });
 });
 
