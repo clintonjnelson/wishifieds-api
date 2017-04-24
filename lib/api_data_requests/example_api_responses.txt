@@ -3,6 +3,94 @@
 
 
 /*
+------------------------------ Sample of DEVIANTART Data ---------------------------
+{ provider: 'deviantart',
+  id: 'DB37457C-FCBC-A631-5277-B1092643F84A',
+  username: 'clintonjnelson',
+  avatar: undefined,
+  _raw: '{"userid":"DB37457C-FCBC-A631-5277-B1092643F84A","username":"clintonjnelson","usericon":"http:\\/\\/a.deviantart.net\\/avatars\\/default.gif","type…
+  _json:
+   { userid: 'DB37457C-FCBC-A631-5277-B1092643F84A',
+     username: 'clintonjnelson',
+     usericon: 'http://a.deviantart.net/avatars/default.gif',
+     type: 'regular' } }
+*/
+
+
+
+/*
+------------------------------ Sample of DISQUS Data ---------------------------
+{ provider: 'disqus',
+  id: '170918432',
+  displayName: 'clintonjnelson',
+  username: 'clintonjnelson',
+  emails: [],
+  _raw: '{"code":0,"response":{"isFollowing":false,"disable3rdPartyTrackers":false,"isPowerContributor":false,"isFollowedBy":false,"isPrimary":true,"id":"17…
+  _json:
+   { code: 0,
+     response:
+      { isFollowing: false,
+        disable3rdPartyTrackers: false,
+        isPowerContributor: false,
+        isFollowedBy: false,
+        isPrimary: true,
+        id: '170918432',
+        numFollowers: 1,
+        rep: 1.235563,
+        numFollowing: 0,
+        numPosts: 0,
+        location: '',
+        isPrivate: false,
+        joinedAt: '2015-08-22T06:14:30',
+        username: 'clintonjnelson',
+        numLikesReceived: 0,
+        reputationLabel: 'Average',
+        about: '',
+        name: 'clintonjnelson',
+        url: '',
+        isBlocked: false,
+        numForumsFollowing: 0,
+        profileUrl: 'https://disqus.com/by/clintonjnelson/',
+        reputation: 1.235563,
+        avatar: {
+          small: [Object],
+          isCustom: true,
+          permalink: 'https://disqus.com/api/users/avatars/clintonjnelson.jpg',
+          cache: 'https://c.disquscdn.com/uploads/users/17091/8432/avatar92.jpg?1440224071',
+          large: [Object] },
+        signedUrl: '',
+        isAnonymous: false } } }
+*/
+
+
+
+/*
+------------------------------ Sample of ETSY Data ---------------------------
+{ provider: 'etsy',
+  id: 107323234,
+  name: 'clintonjnelson',
+  email: 'clintonjnelson@live.com',
+  _raw: '{"count":1,"results":[{"user_id":107323234,"login_name":"clintonjnelson","primary_email":"clintonjnelson@live.com","creation_tsz":1492526466,"user_…
+  _json:
+   { count: 1,
+     results:
+      [ { user_id: 107323234,
+          login_name: 'clintonjnelson',
+          primary_email: 'clintonjnelson@live.com',
+          creation_tsz: 1492526466,
+          user_pub_key: [Object],
+          referred_by_user_id: null,
+          feedback_info: [Object],
+          awaiting_feedback_count: 0,
+          use_new_inventory_endpoints: true } ],
+     params: { user_id: '__SELF__' },
+     type: 'User',
+     pagination: {} } }
+*/
+
+
+
+/*
 ------------------------------ Sample of FOURSQUARE Data ---------------------------
 { id: '412326279',
   name: { familyName: 'Nelson', givenName: 'Clint' },
@@ -365,12 +453,6 @@ API DIRECT DATA REQUEST CALL
 
 
 
-
-
-
-
-
-
 /*
 ------------------------- Sample of Stackexchange Data -------------------------
 { badge_counts: { bronze: 10, silver: 3, gold: 0 },
@@ -592,6 +674,111 @@ API DIRECT DATA REQUEST CALL
   following: false,
   follow_request_sent: false,
   notifications: false }
+*/
+
+
+
+
+
+//----------------------- Sample of VIMEO Data in Access Token Request --------------------
+/*
+{
+  provider: 'Vimeo',
+  id: '37216075',
+  username: 'Clinton Nelson',
+  displayName: 'Clinton Nelson',
+  _json: {
+    { uri: '/users/37216075',
+    name: 'Clinton Nelson',
+    link: 'https://vimeo.com/user37216075',
+    location: null,
+    bio: null,
+    created_time: '2015-02-08T17:28:09+00:00',
+    account: 'basic',
+    pictures: [
+      { type: 'portrait',
+        width: 30,
+        height: 30,
+        link: 'https://secure.gravatar.com/avatar/4571f75b2226b1f6b8cd5fa8e4b44ecf?d=https%3A%2F%2Fi.vimeocdn.com%2Fportrait%2Fdefaults-blue_30x30.png&s=30' },
+      { type: 'portrait',
+        width: 75,
+        height: 75,
+        link: 'https://secure.gravatar.com/avatar/4571f75b2226b1f6b8cd5fa8e4b44ecf?d=https%3A%2F%2Fi.vimeocdn.com%2Fportrait%2Fdefaults-blue_75x75.png&s=75' },
+      { type: 'portrait',
+        width: 100,
+        height: 100,
+        link: 'https://secure.gravatar.com/avatar/4571f75b2226b1f6b8cd5fa8e4b44ecf?d=https%3A%2F%2Fi.vimeocdn.com%2Fportrait%2Fdefaults-blue_100x100.png&s=100' },
+      { type: 'portrait',
+        width: 300,
+        height: 300,
+        link: 'https://secure.gravatar.com/avatar/4571f75b2226b1f6b8cd5fa8e4b44ecf?d=https%3A%2F%2Fi.vimeocdn.com%2Fportrait%2Fdefaults-blue_300x300.png&s=300' }
+    ],
+    websites: [],
+    metadata: {
+      connections: {
+        activities: '/users/37216075/activities',
+        albums: '/users/37216075/albums',
+        appearances: {
+          uri: '/users/37216075/appearances',
+          options: [Object],
+          total: 0
+        },
+        categories: {
+          uri: '/users/37216075/categories',
+          options: [Object],
+          total: 0
+        },
+      channels: '/users/37216075/channels',
+      feed: '/users/37216075/feed',
+      followers: '/users/37216075/followers',
+      following: '/users/37216075/following',
+      groups: '/users/37216075/groups',
+      likes: '/users/37216075/likes',
+      moderated_channels: {
+        uri: '/users/37216075/channels?filter=moderated',
+        options: [Object],
+        total: 0
+      },
+      portfolios: '/users/37216075/portfolios',
+      videos: '/users/37216075/videos',
+      watchlater: '/users/37216075/watchlater',
+      shared: '/users/37216075/shared/videos',
+      pictures: '/users/37216075/pictures',
+      violations: null,
+      watched_videos: {
+        uri: '/me/watched/videos', options: [Object], total: 7
+      }
+    }
+  },
+  preferences: { videos: [Object] },
+  content_filter: [ 'language', 'drugs', 'violence', 'nudity', 'safe', 'unrated' ],
+  resource_key: '358da0fa8e2479a6ce55faa155e81005ffc319ee',
+  stats: {}
+}
+*/
+
+
+
+//----------------------- Sample of VK Data in Access Token Request --------------------
+/*
+{ id: 425306819,
+  username: 'id425306819',
+  displayName: 'Clint Nelson',
+  name: { familyName: 'Nelson', givenName: 'Clint' },
+  gender: 'male',
+  profileUrl: 'http://vk.com/id425306819',
+  photos: [ { value: 'https://vk.com/images/camera_50.png', type: 'photo' } ],
+  provider: 'vkontakte',
+  _raw: '{"response":[{"id":425306819,"first_name":"Clint","last_name":"Nelson","sex":2,"screen_name":"id425306819","photo":"https:\\/\\/vk.com\\/images\\/camera_50.png"}]}',
+  _json: {
+    id: 425306819,
+    first_name: 'Clint',
+    last_name: 'Nelson',
+    sex: 2,
+    screen_name: 'id425306819',
+    photo: 'https://vk.com/images/camera_50.png'
+  }
+}
 */
 
 

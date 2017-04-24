@@ -16,6 +16,18 @@ var UserSchema = mongoose.Schema({
         expiration: { type: String, default: null}
       }
     },
+    deviantart: {
+      deviantartId:             { type: String,   default: null },
+      deviantartAccessToken:    { type: String,   default: null },
+    },
+    disqus: {
+      disqusId:             { type: String,   default: null },
+      disqusAccessToken:    { type: String,   default: null },
+    },
+    etsy: {
+      etsyId:             { type: String,   default: null },
+      etsyAccessToken:    { type: String,   default: null },
+    },
     facebook: {
       facebookId:           { type: String,   default: null },
       facebookAccessToken:  { type: String,   default: null },
@@ -67,6 +79,14 @@ var UserSchema = mongoose.Schema({
     twitter: {
       twitterId:            { type: String,   default: null },
       twitterAccessToken:   { type: String,   default: null },
+    },
+    vimeo: {
+      vimeoId:             { type: String,   default: null },
+      vimeoAccessToken:    { type: String,   default: null },
+    },
+    vk: {
+      vkId:             { type: String,   default: null },
+      vkAccessToken:    { type: String,   default: null },
     },
     wordpress: {
       wordpressId:          { type: String,   default: null },

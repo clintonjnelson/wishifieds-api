@@ -10,6 +10,7 @@
 *.DS_Store
 *bundle.js
 *.pem
+*.example_api_responses.txt
 
 ## Specific Files
 .env

@@ -13,16 +13,24 @@ module.exports = function(router, passport) {
   router.use(removePassptSessions);  // bypass oauth1 sessions if exist
 
   // Require routes by provider
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.deviantart);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.disqus);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.etsy);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.facebook);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.foursquare);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.github);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.google);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.imgur);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.instagram);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.linkedin);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.pinterest);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.reddit);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.spotify);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.stackexchange);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.tumblr);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.twitter);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.vimeo);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.vkontakte);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.wordpress);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.youtube);
 };
@@ -31,10 +39,34 @@ module.exports = function(router, passport) {
 
 function getOauthConfigsLibrary() {
   return {
+    deviantart: {
+      oauthVersion: '2',
+      passportType: 'deviantart',
+      scope: 'basic',
+      session: false,
+    },
+    disqus: {
+      oauthVersion: '2',
+      passportType: 'disqus',
+      scope: undefined,
+      session: false,
+    },
+    etsy: {
+      oauthVersion: '1',
+      passportType: 'etsy',
+      scope: 'profile_r',
+      session: false,
+    },
     facebook: {
       oauthVersion: '2',
       passportType: 'facebook',
       scope: ['public_profile', 'email'],
+      session: false,
+    },
+    foursquare: {
+      oauthVersion: '2',
+      passportType: 'foursquare',
+      scope: undefined,
       session: false,
     },
     github: {
@@ -47,6 +79,12 @@ function getOauthConfigsLibrary() {
       oauthVersion: '2',
       passportType: 'google',
       scope: 'https://www.googleapis.com/auth/plus.login',
+      session: false,
+    },
+    imgur: {
+      oauthVersion: '2',
+      passportType: 'imgur',
+      scope: null,
       session: false,
     },
     instagram: {
@@ -73,6 +111,12 @@ function getOauthConfigsLibrary() {
       scope: 'identity',
       state: 'PLACEHOLDERFORNOW',
     },
+    spotify: {
+      oauthVersion: '2',
+      passportType: 'spotify',
+      scope: null,
+      session: false,
+    },
     stackexchange: {
       oauthVersion: '2',
       passportType: 'stackexchange',
@@ -88,6 +132,18 @@ function getOauthConfigsLibrary() {
       oauthVersion: '1',
       passportType: 'twitter',
       scope: null,
+      session: false,
+    },
+    vimeo: {
+      oauthVersion: '2',
+      passportType: 'vimeo',
+      scope: 'public',
+      session: false,
+    },
+    vkontakte: {
+      oauthVersion: '2',
+      passportType: 'vkontakte',
+      scope: undefined,
       session: false,
     },
     wordpress: {
