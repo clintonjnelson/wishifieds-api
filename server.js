@@ -73,10 +73,13 @@ app.use('*/', function(req, res) {
   res.sendFile(__dirname + '/' + dir + '/index.html');
 });
 
-// SSL Cert
-var sslOptions = { key:  fs.readFileSync('key.pem'),
-                   cert: fs.readFileSync('cert.pem'),
-                   passphrase: process.env.SSL_CERT_PASSWORD };
+// SSL Cert for Dev env
+var sslOptions;
+if(process.env.NODE_ENV === 'dev') {
+  sslOptions = { key:  fs.readFileSync('key.pem'),
+                 cert: fs.readFileSync('cert.pem'),
+                 passphrase: process.env.SSL_CERT_PASSWORD };
+}
 
 
 // Set mongoose connection - server is conditional on that connection
@@ -92,8 +95,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1/signpost', func
     console.log('server running on port ' + (process.env.PORT || process.env.HTTP_PORT || 3000));
   });
 
-  // https.createServer(sslOptions, app).listen(process.env.PORT || process.env.HTTPS_PORT || 8443, '127.0.0.1', function() {
-  //   console.log("https server running on port " + (process.env.PORT || process.env.HTTPS_PORT ||  8443));
-  // });
+  if(process.env.NODE_ENV === 'dev') {
+    https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 8443, '127.0.0.1', function() {
+      console.log("https server running on port " + (process.env.HTTPS_PORT ||  8443));
+    });
+  }
 });
 
