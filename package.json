@@ -1,7 +1,7 @@
 {
   "name": "signpost-mean",
   "version": "0.1.0",
-  "description": "Signpost app built in the MEAN stack",
+  "description": "Signpost app.",
   "main": "server.js",
   "scripts": {
     "test": "./node_modules/grunt-cli/bin/grunt test",
