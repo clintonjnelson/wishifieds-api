@@ -13,7 +13,6 @@ twitterSignSchema.add({
   friendsCount:    { type: String                         },
   icon:            { type: String, default: 'twitter'     },
   profileId:       { type: String, required: true         },
-  profileBgColor:  { type: String                         },
   signType:        { type: String, default: 'twitter'     },
 });
 
