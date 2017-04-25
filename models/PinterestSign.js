@@ -10,6 +10,7 @@ var pinterestSignSchema = new SignSchema();
 pinterestSignSchema.add({
   bgColor:         { type: String, default: '#cb2027'          },
   icon:            { type: String, default: 'pinterest'        },
+  followersCount:  { type: String,                             },
   profileId:       { type: String, required: true              },
   signType:        { type: String, default: 'pinterest'        },
 });
