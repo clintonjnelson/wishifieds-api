@@ -209,7 +209,7 @@ module.exports = function(router) {
           res.json({ success: true,
                      user: {username:  user.username,
                             email:     user.email,
-                            userid:    user._id,
+                            userId:    user._id,
                             status:    user.status,
                             role:      user.role,
                             confirmed: user.confirmed}

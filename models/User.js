@@ -1,7 +1,7 @@
 'use strict';
 
 var bcrypt   = require('bcrypt-nodejs');
-var eat      = require('eat'          );
+var Eat      = require('eat'          );
 var mongoose = require('mongoose'     );
 var crypto   = require('crypto'       );
 var Utils    = require('../lib/signpost_utils.js');
@@ -234,18 +234,19 @@ UserSchema.methods.generateToken = function generateToken(secret, callback) {
       return callback(err, null);
     }
     console.log("AFTER SAVING, EAT IS: ", user.eat, " WHICH SHOULD BE SAME AS THE CRYPTO EAT ABOVE");
-    eat.encode({eat: user.eat}, secret, function encodeEat(err, eatoken) {
+    Eat.encode({eat: user.eat}, secret, function encodeEat(err, eatoken) {
       if (err) {
         console.log('Error encoding eat. Error: ', err);
         return callback(err, null);
       }
       console.log("ABOUT TO ENCODE THIS TOKEN: ", eatoken);
-      var encodedToken = encodeURIComponent(eatoken)
+      var encodedToken = encodeURIComponent(eatoken);
       console.log("NEWLY ENCODED TOKEN IS: ", encodedToken);
       callback(null, encodedToken);
     });
   });
 };
+
 
 UserSchema.methods.invalidateToken = function invalidateToken(callback) {
   this.eat = null;
