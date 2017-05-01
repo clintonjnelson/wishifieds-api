@@ -97,7 +97,7 @@ module.exports = function(router, passport) {
           from:    'Syynpost Password Reset <syynpost@gmail.com>',
           to:      passwordResetEmail,   // Email provided by user
           subject: 'Syynpost Password Change Request',
-          html: EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email }),
+          html: EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email, host: req.headers.origin }),
           // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
         };
 
@@ -209,9 +209,10 @@ module.exports = function(router, passport) {
           from:    'Syynpost Confirmation <syynpost@gmail.com>',
           to:      user.email,      // User-provided basic-auth email
           subject: 'Syynpost Confirmation',
-          html:    EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email}),
+          html:    EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email, host: req.headers.origin}),
           // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
         };
+
         MailService.sendEmail(mailOptions, function(errr, result){
           if(errr || !result) {
             console.log('Error sending email. Error is: ', errr, '. Result is: ', result);
@@ -226,7 +227,7 @@ module.exports = function(router, passport) {
 
   router.get('/auth/emailconfirmation', function(req, res) {
     console.log("MADE IT TO EMAIL CONFIRMATION ROUTE. QueryParams are", req.query);
-
+    console.log("CONFRIMATION EMAIL REQUEST IS: ", req);
     var confirmationToken = req.query['confirmationtoken'];
     var email             = req.query['email'];
 

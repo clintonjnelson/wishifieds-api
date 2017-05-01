@@ -105,7 +105,7 @@ module.exports = function(router) {
               from:    'Syynpost Confirmation <syynpost@gmail.com>',
               to:      user.email,      // User-provided basic-auth email
               subject: 'Syynpost Confirmation',
-              html: EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email}),
+              html: EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email, host: req.headers.origin}),
               // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
             };
             MailService.sendEmail(mailOptions, function(errrr, result){
