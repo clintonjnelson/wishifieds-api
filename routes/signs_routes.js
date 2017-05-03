@@ -192,7 +192,7 @@ module.exports = function(app) {
       // CURRENTLY THIS IS ALWAYS THE CASE FOR ANY UPDATE ATTAMPTED - FIX!!!!!
       if(data.nModified === 0) {
         console.log('No updates made.');
-        return res.status(304).json({error: false, msg: 'no updates made'});
+        return res.status(200).json({error: false, msg: 'no updates made'});
       }
 
       console.log('UPDATE SUCCESSFUL! DATA IS: ', data);
