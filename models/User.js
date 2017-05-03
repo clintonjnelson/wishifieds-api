@@ -196,10 +196,6 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
-
-
-
-
 //------------------------------- USER METHODS ----------------------------------
 UserSchema.methods.generateHash = function generateHash(password, callback) {
   bcrypt.genSalt(8, function(err, salt) {
@@ -224,25 +220,32 @@ UserSchema.methods.checkPassword = function checkPassword(password, callback) {
 };
 
 UserSchema.methods.generateToken = function generateToken(secret, callback) {
-  this.eat = crypto.randomBytes(24).toString('hex').toString();
-  console.log("CRYPTO GENERATED EAT IS: ", this.eat);
-
-  // FOR SOME REASON, SAVE DOESNT ALWAYS WORK WITH OAUTH SIGN SIGN-IN
-  this.save(function(err, user) {
-    if (err) {
-      console.log('Error creating new token. Error: ', err);
-      return callback(err, null);
+  this.constructor.findById(this._id, function(error, user) {
+    if (error) {
+      console.log('Error finding user for token update. Error: ', error);
+      return callback(error, null);
     }
-    console.log("AFTER SAVING, EAT IS: ", user.eat, " WHICH SHOULD BE SAME AS THE CRYPTO EAT ABOVE");
-    Eat.encode({eat: user.eat}, secret, function encodeEat(err, eatoken) {
+
+    user.eat = crypto.randomBytes(24).toString('hex').toString();
+    user.markModified('eat');  // ensure catches these changes
+    user.save(function(err, savedUser) {
       if (err) {
-        console.log('Error encoding eat. Error: ', err);
+        console.log('Error saving base token to user. Error: ', err);
         return callback(err, null);
       }
-      console.log("ABOUT TO ENCODE THIS TOKEN: ", eatoken);
-      var encodedToken = encodeURIComponent(eatoken);
-      console.log("NEWLY ENCODED TOKEN IS: ", encodedToken);
-      callback(null, encodedToken);
+
+      console.log("CURIOUS WHAT THE VALUE OF **THIS** IS AFTER: ", this);
+      console.log("AFTER SAVING, EAT IS: ", user.eat, " WHICH SHOULD BE SAME AS THE CRYPTO EAT ABOVE");
+      Eat.encode({eat: savedUser.eat}, secret, function(errr, eatToken) {
+        if(errr) {
+          console.log('Error encoding eat. Error: ', errr);
+          return callback(errr, null);
+        }
+        console.log("ABOUT TO URI_ENCODE THIS TOKEN: ", eatToken);
+        var encodedToken = encodeURIComponent(eatToken);
+        console.log("NEWLY URI_ENCODED TOKEN IS: ", encodedToken);
+        callback(null, encodedToken);
+      });
     });
   });
 };
