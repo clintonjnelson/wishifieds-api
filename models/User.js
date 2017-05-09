@@ -16,6 +16,10 @@ var UserSchema = mongoose.Schema({
         expiration: { type: String, default: null}
       }
     },
+    amazon: {
+      amazonId:             { type: String,   default: null },
+      amazonAccessToken:    { type: String,   default: null },
+    },
     deviantart: {
       deviantartId:             { type: String,   default: null },
       deviantartAccessToken:    { type: String,   default: null },
@@ -55,6 +59,10 @@ var UserSchema = mongoose.Schema({
     linkedin: {
       linkedinId:           { type: String,   default: null },
       linkedinAccessToken:  { type: String,   default: null },
+    },
+    patreon: {
+      patreonId:           { type: String,   default: null },
+      patreonAccessToken:  { type: String,   default: null },
     },
     pinterest: {
       pinterestId:           { type: String,   default: null },

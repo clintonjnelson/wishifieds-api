@@ -13,6 +13,7 @@ module.exports = function(router, passport) {
   router.use(removePassptSessions);  // bypass oauth1 sessions if exist
 
   // Require routes by provider
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.amazon);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.deviantart);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.disqus);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.etsy);
@@ -23,6 +24,7 @@ module.exports = function(router, passport) {
   loadOauthRoutes(router, passport, OAUTH_CONFIG.imgur);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.instagram);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.linkedin);
+  loadOauthRoutes(router, passport, OAUTH_CONFIG.patreon);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.pinterest);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.reddit);
   loadOauthRoutes(router, passport, OAUTH_CONFIG.spotify);
@@ -39,6 +41,12 @@ module.exports = function(router, passport) {
 
 function getOauthConfigsLibrary() {
   return {
+    amazon: {
+      oauthVersion: '2',
+      passportType: 'amazon',
+      scope: 'profile',
+      session: false,
+    },
     deviantart: {
       oauthVersion: '2',
       passportType: 'deviantart',
@@ -97,6 +105,12 @@ function getOauthConfigsLibrary() {
       oauthVersion: '2',
       passportType: 'linkedin',
       scope: 'r_basicprofile',
+      session: false,
+    },
+    patreon: {
+      oauthVersion: '2',
+      passportType: 'patreon',
+      scope: 'users',
       session: false,
     },
     pinterest: {

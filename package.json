@@ -66,6 +66,7 @@
     "passport-imgur": "0.0.3",
     "passport-instagram": "^0.1.2",
     "passport-linkedin-oauth2": "^1.2.1",
+    "passport-patreon": "^1.0.1",
     "passport-pinterest-oauth": "^0.3.2",
     "passport-reddit": "^0.2.4",
     "passport-spotify": "^0.3.1",
