@@ -95,7 +95,7 @@ module.exports = function(router, passport) {
         // configure mail for sending
         var mailOptions = {
           from:    'Syynpost Password Reset <syynpost@gmail.com>',
-          to:      passwordResetEmail,   // Email provided by user
+          to:      user.email,   // Email provided by user
           subject: 'Syynpost Password Change Request',
           html: EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email, host: req.headers.origin }),
           // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
@@ -190,6 +190,10 @@ module.exports = function(router, passport) {
       if(error || !user) {
         console.log("Error finding user by ID: ", error);
         return res.status(404).json({error: true, msg: 'invalid-user'});
+      }
+      if(!user.email) {
+        console.log('Error: User has no email to send confirmation to.');
+        return res.status(404).json(error: true, msg: 'missing-email');
       }
 
       console.log("ABOUT TO GO INTO SEND EMAIL SECTION...");

@@ -154,6 +154,7 @@ module.exports = function(router) {
         case(!EMAIL_REGEX.test(userData.email)):  return respond400ErrorMsg(res, 'email-format');
         case(!userData.username):                 return respond400ErrorMsg(res, 'username missing');
         case(!userData.email):                    return respond400ErrorMsg(res, 'email missing');
+        case(!Utils.isUsernameAllowed(userData.username)): return respond400ErrorMsg(res, 'username-invalid');
       }
 
       User.findOne({username: userData.username}, function(error, user) {
