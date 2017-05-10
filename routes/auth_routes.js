@@ -193,7 +193,7 @@ module.exports = function(router, passport) {
       }
       if(!user.email) {
         console.log('Error: User has no email to send confirmation to.');
-        return res.status(404).json(error: true, msg: 'missing-email');
+        return res.status(404).json({error: true, msg: 'missing-email'});
       }
 
       console.log("ABOUT TO GO INTO SEND EMAIL SECTION...");
