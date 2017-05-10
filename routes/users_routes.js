@@ -153,10 +153,10 @@ module.exports = function(router) {
         case(!userData.email):                    return respond400ErrorMsg(res, 'email missing');
         case(!EMAIL_REGEX.test(userData.email)):  return respond400ErrorMsg(res, 'email-format');
         case(!userData.username):                 return respond400ErrorMsg(res, 'username missing');
-        case(!userData.email):                    return respond400ErrorMsg(res, 'email missing');
         case(!Utils.isUsernameAllowed(userData.username)): return respond400ErrorMsg(res, 'username-invalid');
       }
 
+      // See if user already taken
       User.findOne({username: userData.username}, function(error, user) {
         if(error) {
           console.log("Error checking username for availability: ", error);
@@ -167,6 +167,8 @@ module.exports = function(router) {
           console.log("Username has already been used: ", userData.username);
           return respond400ErrorMsg(res, 'username-taken');
         }
+
+        // See if email already taken
         User.findOne({email: userData.email}, function(err, usr) {
           if(err) {
             console.log("Error checking email for availability: ", error);
@@ -190,6 +192,7 @@ module.exports = function(router) {
 
     function updateUser(userId, userData) {
       console.log("ID TO UPDATE IS: ", req.user._id);
+      console.log("USER PRIOR TO UPDATE IS: ", userData);
       User.findByIdAndUpdate(
         userId,                            // id to find
         {$set: userData},                  // values to update
@@ -206,15 +209,17 @@ module.exports = function(router) {
             case !!(err):
               return res.status(500).json({ error: true });
           }
-          console.log("Updated user is: ", user);
-          res.json({ success: true,
-                     user: {username:  user.username,
-                            email:     user.email,
-                            userId:    user._id,
-                            status:    user.status,
-                            role:      user.role,
-                            confirmed: user.confirmed}
+          user.save(function(errr, usr) {
+            console.log("Updated user is: ", usr);
+            res.json({ success: true,
+                       user: {username:  usr.username,
+                              email:     usr.email,
+                              userId:    usr._id,
+                              status:    usr.status,
+                              role:      usr.role,
+                              confirmed: usr.confirmed}
                    });
+          });
         }
       );
     }
