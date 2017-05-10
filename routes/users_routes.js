@@ -192,12 +192,20 @@ module.exports = function(router) {
 
     function updateUser(userId, userData) {
       console.log("ID TO UPDATE IS: ", req.user._id);
-      console.log("USER PRIOR TO UPDATE IS: ", userData);
-      User.findByIdAndUpdate(
-        userId,                            // id to find
-        {$set: userData},                  // values to update
-        {runValidators: true, new: true},  // mongoose options
-        function(err, user) {              // callback
+      console.log("USER DATA PRIOR TO UPDATE IS: ", userData);
+      User.findById(userId, function(error, user) {
+        if (error) {
+          console.log('Error finding user. Error: ', error);
+          return res.status(500).json({ error: true });
+        }
+
+        Object.keys(userData).forEach(function(userSetting) {
+          user[userSetting] = userData[userSetting];
+          user.markModified(userSetting);
+        });
+
+        console.loc("USER PRIOR TO SAVE IS: ", user);
+        user.save(function(err, usr) {
           if (err) { console.log('Error updating user. Error: ', err); }
           switch(true) {
             // Username uniqueness error
@@ -209,19 +217,47 @@ module.exports = function(router) {
             case !!(err):
               return res.status(500).json({ error: true });
           }
-          user.save(function(errr, usr) {
-            console.log("Updated user is: ", usr);
-            res.json({ success: true,
-                       user: {username:  usr.username,
-                              email:     usr.email,
-                              userId:    usr._id,
-                              status:    usr.status,
-                              role:      usr.role,
-                              confirmed: usr.confirmed}
-                   });
-          });
-        }
-      );
+
+          console.log("User returned from save is: ", usr);
+          return res.json({ success: true,
+                     user: {username:  usr.username,
+                            email:     usr.email,
+                            userId:    usr._id,
+                            status:    usr.status,
+                            role:      usr.role,
+                            confirmed: usr.confirmed}
+                 });
+        });
+      })
+      // User.findByIdAndUpdate(
+      //   userId,                            // id to find
+      //   {$set: userData},                  // values to update
+      //   {runValidators: true, new: true},  // mongoose options
+      //   function(err, user) {              // callback
+      //     if (err) { console.log('Error updating user. Error: ', err); }
+      //     switch(true) {
+      //       // Username uniqueness error
+      //       case !!(err && err.code === 11000 && err.message.includes('username')):  // unique validation
+      //         return respond400ErrorMsg(res, 'username-taken');
+      //       // Email uniqueness error
+      //       case !!(err && err.code === 11000 && err.message.includes('email')):  // unique validation
+      //         return respond400ErrorMsg(res, 'email-taken');
+      //       case !!(err):
+      //         return res.status(500).json({ error: true });
+      //     }
+      //     user.save(function(errr, usr) {      /// REMOVE THIS REDUNDANT SAVE IF CAN!!!
+      //       console.log("Updated user is: ", usr);
+      //       res.json({ success: true,
+      //                  user: {username:  usr.username,
+      //                         email:     usr.email,
+      //                         userId:    usr._id,
+      //                         status:    usr.status,
+      //                         role:      usr.role,
+      //                         confirmed: usr.confirmed}
+      //              });
+      //     });
+      //   }
+      // );
     }
   });
 
