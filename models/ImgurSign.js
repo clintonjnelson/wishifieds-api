@@ -8,7 +8,7 @@ var imgurSignSchema = new SignSchema();
 
 // BaseSchema: customBgColor, description, knownAs, linkUrl, published, userId
 imgurSignSchema.add({
-  bgColor:         { type: String, default: '#dd4b39'          },
+  bgColor:         { type: String, default: '#85bf25'          },
   circledByCount:  { type: String                              },
   icon:            { type: String, default: 'imgur'           },
   profileId:       { type: String, required: true              },
