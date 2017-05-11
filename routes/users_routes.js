@@ -204,7 +204,7 @@ module.exports = function(router) {
           user.markModified(userSetting);
         });
 
-        console.loc("USER PRIOR TO SAVE IS: ", user);
+        console.log("USER PRIOR TO SAVE IS: ", user);
         user.save(function(err, usr) {
           if (err) { console.log('Error updating user. Error: ', err); }
           switch(true) {
