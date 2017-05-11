@@ -87,7 +87,7 @@ module.exports = function(router) {
           switch(true) {
             case !!(err && contains(err.errmsg, 'E11000')):
               return res.status(400).json({ error: 'username'  });
-            case !!(err && contains(err.errmsg, '.email')):
+            case !!(err && contains(err.errmsg, 'email')):
               return res.status(400).json({ error: 'email'     });
             case !!(err):
               return res.status(400).json({ error: true        });
@@ -206,16 +206,18 @@ module.exports = function(router) {
 
         console.log("USER PRIOR TO SAVE IS: ", user);
         user.save(function(err, usr) {
-          if (err) { console.log('Error updating user. Error: ', err); }
-          switch(true) {
-            // Username uniqueness error
-            case !!(err && err.code === 11000 && err.message.includes('username')):  // unique validation
-              return respond400ErrorMsg(res, 'username-taken');
-            // Email uniqueness error
-            case !!(err && err.code === 11000 && err.message.includes('email')):  // unique validation
-              return respond400ErrorMsg(res, 'email-taken');
-            case !!(err):
-              return res.status(500).json({ error: true });
+          if (err) {
+            console.log('Error updating user. Error: ', err);
+            switch(true) {
+              // Username uniqueness error
+              case !!(err.code === 11000 && err.message.includes('username')):  // unique validation
+                return respond400ErrorMsg(res, 'username-taken');
+              // Email uniqueness error
+              case !!(err.message.includes('email') || (err.errors && err.errors.email) ):  // unique validation
+                return respond400ErrorMsg(res, 'email-taken');
+              default:
+                return res.status(500).json({ error: true });
+            }
           }
 
           console.log("User returned from save is: ", usr);
@@ -228,7 +230,7 @@ module.exports = function(router) {
                             confirmed: usr.confirmed}
                  });
         });
-      })
+      });
       // User.findByIdAndUpdate(
       //   userId,                            // id to find
       //   {$set: userData},                  // values to update

@@ -5,6 +5,8 @@ var Eat      = require('eat'          );
 var mongoose = require('mongoose'     );
 var crypto   = require('crypto'       );
 var Utils    = require('../lib/signpost_utils.js');
+var ValidationError = mongoose.Error.ValidationError;
+var ValidatorError  = mongoose.Error.ValidatorError;
 
 // db schema for User
 var UserSchema = mongoose.Schema({
@@ -182,6 +184,7 @@ UserSchema.pre('validate', function(next) {
   }
   // If has value, ensure NO DUPLICATE
   user.constructor.findOne({email: user.email}, function(err, match) {
+    console.log("MATCH FOUND IS: ", match);
     if(err) { throw 'database error' };
     if(!match || !match.email) {  // no matching user found => NEXT!
       console.log("VALIDATING EMAIL - NO USER FOUND WITH SAME EMAIL - OK!");
@@ -192,11 +195,11 @@ UserSchema.pre('validate', function(next) {
       return next();  // found itself
     }
 
-    console.log("VALIDATING EMAIL - USER FOUND ITSELF - OK!");
-    user.email = null;
-    next();
+    console.log("VALIDATING EMAIL - EMAIL NOT VALID - Do not update.");
+    var error = new ValidationError(user);
+    error.errors.email = new ValidatorError('email', 'email already taken', 'notvalid', user.email);
+    next(error);
   });
-
 });
 
 UserSchema.pre('save', function(next) {
