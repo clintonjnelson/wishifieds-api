@@ -231,35 +231,6 @@ module.exports = function(router) {
                  });
         });
       });
-      // User.findByIdAndUpdate(
-      //   userId,                            // id to find
-      //   {$set: userData},                  // values to update
-      //   {runValidators: true, new: true},  // mongoose options
-      //   function(err, user) {              // callback
-      //     if (err) { console.log('Error updating user. Error: ', err); }
-      //     switch(true) {
-      //       // Username uniqueness error
-      //       case !!(err && err.code === 11000 && err.message.includes('username')):  // unique validation
-      //         return respond400ErrorMsg(res, 'username-taken');
-      //       // Email uniqueness error
-      //       case !!(err && err.code === 11000 && err.message.includes('email')):  // unique validation
-      //         return respond400ErrorMsg(res, 'email-taken');
-      //       case !!(err):
-      //         return res.status(500).json({ error: true });
-      //     }
-      //     user.save(function(errr, usr) {      /// REMOVE THIS REDUNDANT SAVE IF CAN!!!
-      //       console.log("Updated user is: ", usr);
-      //       res.json({ success: true,
-      //                  user: {username:  usr.username,
-      //                         email:     usr.email,
-      //                         userId:    usr._id,
-      //                         status:    usr.status,
-      //                         role:      usr.role,
-      //                         confirmed: usr.confirmed}
-      //              });
-      //     });
-      //   }
-      // );
     }
   });
 
