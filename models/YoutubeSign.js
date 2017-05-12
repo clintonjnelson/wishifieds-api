@@ -10,7 +10,7 @@ var youtubeSignSchema = new SignSchema();
 youtubeSignSchema.add({
   bgColor:     { type: String, default: '#bb0000' },
   icon:        { type: String, default: 'youtube' },
-  signType:    { type: String, default: 'google'  },
+  signType:    { type: String, default: 'youtube'  },
   profileId:   { type: String, required: true     },
 });
 
