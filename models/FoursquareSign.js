@@ -8,7 +8,7 @@ var foursquareSignSchema = new SignSchema();
 
 // BaseSchema: customBgColor, description, knownAs, linkUrl, published, userId
 foursquareSignSchema.add({
-  bgColor:         { type: String, default: '#0072b1'          },
+  bgColor:         { type: String, default: '#f94877'          },
   icon:            { type: String, default: 'foursquare'       },
   profileId:       { type: String, required: true              },
   signType:        { type: String, default: 'foursquare'       },
