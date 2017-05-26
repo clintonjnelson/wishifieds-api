@@ -18,21 +18,25 @@ module.exports = function(router) {
 
     if( notNullish([guid, username]) ) {
       User.findOne({username: username}, function(err, user){
-        if(err) { return console.log('Error finding user id by username in interactions/userpagevisit. Error: ', err); }
+        if(err) {
+          console.log('Error finding user id by username in interactions/log/userpagevisit. Error: ', err);
+          return res.send();
+        }
 
         console.log("USER FOUND IN INTERACTIONS ROUTE IS: ", user);
         new Interaction({
           guid:             guid,
-          targetType:       'userpageview',
+          targetCategory:   'userpageview',
           targetIdentifier: user._id,  // should always be the UserID or SignID
           interactorUserId: interactorUserId,
         }).save();
         console.log("DONE SAVING USER INTERACTION!!!");
       });
-      res.send(); // immediately respond!
+      return res.send(); // immediately respond!
     }
     else {
       console.log('Missing required user page interaction value(s)');
+      return res.send();
     }
   });
 
@@ -41,21 +45,24 @@ module.exports = function(router) {
     console.log("MADE IT TO SIGNCLICK");
     var guid             = req.query.guid;
     var signId           = req.query.signid;
+    var signIcon         = req.query.signicon;
     var interactorUserId = (notNullish([req.query.userid]) ? req.query.userid : null);
 
-    if( notNullish([guid, signId]) ) {
+    if( notNullish([guid, signId, signIcon]) ) {
       new Interaction({
         guid:             guid,
-        targetType:       'signlinkoff',
+        targetCategory:  'signlinkoff',
         targetIdentifier: signId,  // This should be a mongoose type, but which REF?!!!
+        targetType:       signIcon,
         interactorUserId: interactorUserId,
       }).save();  // immediately save!
 
       console.log("DONE SAVING SIGN INTERACTION!!!");
-      res.send();  // respond immediately!
+      return res.send();  // respond immediately!
     }
     else {
       console.log('Missing required sign linkoff interaction value(s)');
+      return res.send();  // respond immediately!
     }
   });
 

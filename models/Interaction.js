@@ -8,8 +8,9 @@ var mongoose = require('mongoose');
 
 var InteractionSchema = mongoose.Schema({
     guid:             { type: String, required: true },
-    targetType:       { type: String, required: true }, // user, sign, etc
-    targetIdentifier: { type: String, required: true }, // <userId>, <signId>, etc
+    targetCategory:   { type: String, required: true },  // user, sign, etc
+    targetIdentifier: { type: String, required: true },  // <userId>, <signId>, etc
+    targetType:       { type: String, default:  null },  // 'facebook', 'twitter', etc where applicable
     interactorUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   },
   { timestamps: true });
