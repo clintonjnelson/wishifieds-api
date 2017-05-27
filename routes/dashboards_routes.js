@@ -13,8 +13,11 @@ module.exports = function(router) {
     console.log("MADE IT TO INTERACTIONS GET USER PAGE VIEWS DATA...");
     var userId = req.user._id;
     console.log("USERID IN INTERACTION REQUEST IS: ", userId);
+    var searchQuery = ( req.user.role === 'admin' ?
+                      { targetCategory: 'userpageview' } :
+                      { targetCategory: 'userpageview', targetIdentifier: userId } );
 
-    Interaction.find({targetCategory: 'userpageview', targetIdentifier: userId}, function(err, interactions) {
+    Interaction.find(searchQuery, function(err, interactions) {
       if(err) {
         console.log('Error getting user page interactions: ', err);
         res.status(500).json({error: true, msg: 'server error finding interactions'});
@@ -29,28 +32,40 @@ module.exports = function(router) {
     var userId = req.user._id;
     console.log("USERID IN INTERACTION REQUEST IS: ", userId);
 
-    // Get all of user's active signs
-    Sign.find({userId: userId, status: 'A'}, function(err, signs) {
-      if(err) {
-        console.log("Error getting signs: ", err);
-        return res.status(500).json({error: true, msg: 'Database error.'});
-      }
-      console.log("SIGNS FOUND: ", signs);
+    // Admin => get ALL signs
+    if(req.user.role === 'admin') {
+      var searchQuery = { targetCategory: 'signlinkoff' };
+      findSignInteractionsFromQuery(searchQuery);
+    }
+    else {
+      // Non-Admin => get signs by user's ID
+      Sign.find({userId: userId, status: 'A'}, function(err, signs) {
+        if(err) {
+          console.log("Error getting signs: ", err);
+          return res.status(500).json({error: true, msg: 'Database error.'});
+        }
+        console.log("SIGNS FOUND: ", signs);
 
-      // Get the sign IDs
-      var signIds = signs.map(function(sign) {
-        return sign._id;
+        // Get the sign IDs
+        var signIds = signs.map(function(sign) {
+          return sign._id;
+        });
+
+        var searchQuery = {targetCategory: 'signlinkoff', targetIdentifier: { $in: [signIds] } }
+        findSignInteractionsFromQuery(searchQuery);
       });
+    }
 
+    function findSignInteractionsFromQuery(query) {
       // query interactions by sign ids
-      Interaction.find({targetCategory: 'signlinkoff', targetIdentifier: { $in: [signIds] } }, function(err, interactions) {
+      Interaction.find(query, function(err, interactions) {
         if(err) {
           console.log('Error getting sign linkoff interactions: ', err);
           res.status(500).json({error: true, msg: 'server error finding interactions'});
         }
         console.log("SIGN INTERACTIONS FOUND ARE: ", interactions);
-        res.json(interactions);
+        res.json(interactions);  // note: res is still in scope
       });
-    });
+    }
   });
 }
