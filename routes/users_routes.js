@@ -45,6 +45,20 @@ module.exports = function(router) {
     });
   });
 
+  // Get username by user id
+  router.get('/users/:id/username', function(req, res) {
+    var userId = req.params.id;
+    User.findById(userId, function(err, user) {
+      if(err) {
+        console.log('error finding user');
+        return res.status(500).json({error: true, msg: 'database error'});
+      }
+
+      console.log("USERNAME FOUND FROM USER: ", user);
+      res.json({username: user.username});
+    });
+  });
+
   // Get users (requires login & Admin authorization role)
   router.get('/users', eatOnReq, eatAuth, adminAuth, function(req, res) {
     User.find({}, function(err, users) {

@@ -15,7 +15,7 @@ module.exports = function(router) {
     var guid             = req.query.guid;
     var username         = req.query.pageusername;
     var interactorUserId = (notNullish([req.query.userid]) ? req.query.userid : null);
-
+    console.log("USERNAME IN REQUEST IS: ", username);
     if( notNullish([guid, username]) ) {
       User.findOne({username: username}, function(err, user){
         if(err) {
