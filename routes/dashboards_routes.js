@@ -44,14 +44,14 @@ module.exports = function(router) {
           console.log("Error getting signs: ", err);
           return res.status(500).json({error: true, msg: 'Database error.'});
         }
-        console.log("SIGNS FOUND: ", signs);
 
         // Get the sign IDs
         var signIds = signs.map(function(sign) {
           return sign._id;
         });
 
-        var searchQuery = {targetCategory: 'signlinkoff', targetIdentifier: { $in: [signIds] } }
+        console.log("SIGN IDs FOUND: ", signIds);
+        var searchQuery = {targetCategory: 'signlinkoff', targetIdentifier: { $in: signIds } }
         findSignInteractionsFromQuery(searchQuery);
       });
     }
