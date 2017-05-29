@@ -13,24 +13,28 @@ module.exports = function(router) {
     // Now do the work with data received
     console.log("MADE IT TO USER PAGE CLICK");
     var guid             = req.query.guid;
-    var username         = req.query.pageusername;
+    var pagename         = req.query.pageusername;
     var interactorUserId = (notNullish([req.query.userid]) ? req.query.userid : null);
-    console.log("USERNAME IN REQUEST IS: ", username);
-    if( notNullish([guid, username]) ) {
-      User.findOne({username: username}, function(err, user){
+    console.log("USERNAME IN REQUEST IS: ", pagename);
+    if( notNullish([guid, pagename]) ) {
+      // try to get user by pagename (if pagename is a username)
+      User.findOne({username: pagename}, function(err, user){
         if(err) {
           console.log('Error finding user id by username in interactions/log/userpagevisit. Error: ', err);
           return res.send();
         }
 
         console.log("USER FOUND IN INTERACTIONS ROUTE IS: ", user);
+        // set the identifier => userID or pagename
+        var identifier = (user && user._id ? user._id : pagename);
+
         new Interaction({
-          guid:             guid,
-          targetCategory:   'userpageview',
-          targetIdentifier: user._id,  // should always be the UserID or SignID
-          interactorUserId: interactorUserId,
-        }).save();
-        console.log("DONE SAVING USER INTERACTION!!!");
+            guid:             guid,
+            targetCategory:   'userpageview',
+            targetIdentifier: identifier,  // should always be the UserID or SignID
+            interactorUserId: interactorUserId,
+          }).save();
+          console.log("DONE SAVING USER INTERACTION!!!");
       });
       return res.send(); // immediately respond!
     }
