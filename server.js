@@ -1,12 +1,13 @@
 'use strict';
 
-var express  = require('express'        );
-var fs       = require('fs'             );
-var https    = require('https'          );
-var mongoose = require('mongoose'       );
-var passport = require('passport'       );
-var session  = require('express-session');  // Oauth1 provider workaround
-var app      = express();
+var express     = require('express'        );
+var compression = require('compression'    );
+var fs          = require('fs'             );
+var https       = require('https'          );
+var mongoose    = require('mongoose'       );
+var passport    = require('passport'       );
+var session     = require('express-session');  // Oauth1 provider workaround
+var app         = express();
 
 // Routers
 var authRouter         = new express.Router();
@@ -81,6 +82,10 @@ app.use(express.static(__dirname + '/' + dir));
 app.use('*/', function(req, res) {
   res.sendFile(__dirname + '/' + dir + '/index.html');
 });
+
+// gzip the files for prod
+app.use(compression());
+// if(process.env.NODE_ENV === 'production') { app.use(compression());}
 
 // SSL Cert for Dev env
 var sslOptions;
