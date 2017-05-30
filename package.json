@@ -7,7 +7,7 @@
     "test": "./node_modules/grunt-cli/bin/grunt test",
     "start": "node server.js",
     "watch": "./node_modules/gulp/bin/gulp watch-dev",
-    "postinstall": "( cd client && npm install && ng build )"
+    "postinstall": "( cd client && npm install && ng build --prod )"
   },
   "repository": {
     "type": "git",
