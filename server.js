@@ -21,11 +21,13 @@ var usersRouter        = new express.Router();
 // TEMP ENVIRONMENT VARIABLE
 process.env.AUTH_SECRET = process.env.AUTH_SECRET || 'setThisVarInENV';
 
+// gzip the files for speed
+app.use(compression());
+
 // Initialize passport middleware & configure with passport_strategy.js
 app.use(session({secret: 'oauth1sucks', id: 'oauth', maxAge: null}));
 app.use(passport.initialize());
 app.use(passport.session());            // only for oauth1 to work
-
 
 // Load passport with strategies
 require('./lib/passport_strategies/basic.js'        )(passport);
@@ -83,8 +85,6 @@ app.use('*/', function(req, res) {
   res.sendFile(__dirname + '/' + dir + '/index.html');
 });
 
-// gzip the files for prod
-app.use(compression());
 // if(process.env.NODE_ENV === 'production') { app.use(compression());}
 
 // SSL Cert for Dev env
