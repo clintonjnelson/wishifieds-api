@@ -7,6 +7,7 @@ var https       = require('https'          );
 var mongoose    = require('mongoose'       );
 var passport    = require('passport'       );
 var session     = require('express-session');  // Oauth1 provider workaround
+var ensureHttps = require('./lib/routes_middleware/ensure_https.js');
 var app         = express();
 
 // Routers
@@ -17,6 +18,9 @@ var dashboardsRouter   = new express.Router();
 var searchRouter       = new express.Router();
 var signsRouter        = new express.Router();
 var usersRouter        = new express.Router();
+
+// Redirect any http to https
+app.use(ensureHttps);
 
 // TEMP ENVIRONMENT VARIABLE
 process.env.AUTH_SECRET = process.env.AUTH_SECRET || 'setThisVarInENV';
