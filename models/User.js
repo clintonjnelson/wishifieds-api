@@ -162,7 +162,7 @@ UserSchema.pre('validate', function(next) {
     while(digits.length < 12) {
       digits += '0';
     }
-    return 'signpost' + digits;
+    return 'syynpost' + digits;
   }
 
   // format: only alphanimeric/dash/underscore, trim, lowercase, max20chars
