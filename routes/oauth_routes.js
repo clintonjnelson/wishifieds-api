@@ -163,7 +163,7 @@ function getOauthConfigsLibrary() {
     wordpress: {
       oauthVersion: '2',
       passportType: 'wordpress',
-      scope: 'global',
+      scope: 'auth',
       session: false,
     },
     youtube: {
