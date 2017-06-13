@@ -116,7 +116,7 @@ module.exports = function(router) {
             console.log("USER SAVED, NOW TO SEND EMAIL...");
             // Send confirmation email
             var mailOptions = {
-              from:    'Syynpost Confirmation <syynpost@gmail.com>',
+              from:    'Syynpost Confirmation <confirm@syynpost.com>',
               to:      user.email,      // User-provided basic-auth email
               subject: 'Syynpost Confirmation',
               html: EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email, host: req.headers.origin}),
