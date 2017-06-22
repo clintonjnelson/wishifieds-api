@@ -94,7 +94,7 @@ module.exports = function(router, passport) {
 
         // configure mail for sending
         var mailOptions = {
-          from:    'Syynpost Password Reset <reset@syynpost.com>',
+          from:    'Syynpost Password Reset <info@syynpost.com>',
           to:      user.email,   // Email provided by user
           subject: 'Syynpost Password Change Request',
           html: EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email, host: req.headers.origin }),
@@ -210,7 +210,7 @@ module.exports = function(router, passport) {
         console.log("USER SAVED, NOW TO SEND EMAIL...");
         // Send confirmation email
         var mailOptions = {
-          from:    'Syynpost Confirmation <confirm@syynpost.com>',
+          from:    'Syynpost Confirmation <info@syynpost.com>',
           to:      user.email,      // User-provided basic-auth email
           subject: 'Syynpost Confirmation',
           html:    EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email, host: req.headers.origin}),
