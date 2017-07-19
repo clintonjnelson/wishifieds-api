@@ -10,6 +10,7 @@ var session     = require('express-session');  // Oauth1 provider workaround
 var ensureHttps = require('./lib/routes_middleware/ensure_https.js');
 var app         = express();
 
+
 // Routers
 var authRouter         = new express.Router();
 var oauthRouter        = new express.Router();
@@ -22,9 +23,6 @@ var usersRouter        = new express.Router();
 
 // Redirect any http to https
 app.use(ensureHttps);
-
-// TEMP ENVIRONMENT VARIABLE
-process.env.AUTH_SECRET = process.env.AUTH_SECRET || 'setThisVarInENV';
 
 // gzip the files for speed
 app.use(compression());
