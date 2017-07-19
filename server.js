@@ -17,6 +17,7 @@ var interactionsRouter = new express.Router();
 var dashboardsRouter   = new express.Router();
 var searchRouter       = new express.Router();
 var signsRouter        = new express.Router();
+var tasksRouter        = new express.Router();
 var usersRouter        = new express.Router();
 
 // Redirect any http to https
@@ -66,6 +67,7 @@ require('./routes/dashboards_routes.js')(dashboardsRouter);
 require('./routes/search_routes.js')(searchRouter);
 require('./routes/signs_routes.js' )(signsRouter );
 require('./routes/users_routes.js' )(usersRouter );
+require('./routes/tasks_routes.js')(tasksRouter  );
 
 
 // Route middleware
@@ -76,6 +78,7 @@ app.use('/api', signsRouter );
 app.use('/api', usersRouter );
 app.use('/api', interactionsRouter);
 app.use('/api', dashboardsRouter);
+app.use('/api', tasksRouter );
 
 // Static Resources
 var dir = process.env.WEBPACK_DIRECTORY || './client/dist';
