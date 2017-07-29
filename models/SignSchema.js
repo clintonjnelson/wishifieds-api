@@ -15,7 +15,7 @@ function SignSchema() {
     linkUrl:        { type: String                                     }, // link to site
     order:          { type: Number, default: null                      }, // for ordering signs
     picUrl:         { type: String                                     }, // link to image (opt)
-    status:         { type: String, default: "A"                       }, // remove from public
+    status:         { type: String, default: "A"                       }, // Valid Statuses: 'A' (active), 'D' (deleted)
     userId:         { type: mongoose.Schema.Types.ObjectId, ref: 'User' , required: true},  // needed for ALL Signs
     createdAt:      { type: Date,   default: Date.now()                },
     updatedAt:      { type: Date,   default: Date.now()                },
