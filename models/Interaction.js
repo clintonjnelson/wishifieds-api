@@ -12,8 +12,14 @@ var InteractionSchema = mongoose.Schema({
     targetIdentifier: { type: String, required: true },  // <userId>, <signId>, etc
     targetType:       { type: String, default:  null },  // 'facebook', 'twitter', etc where applicable
     interactorUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
+    eventDate:        { type: Date,   required: true },
   },
-  { timestamps: true });
+  { timestamps: true }
+);
+
+// Instead of writing a validator (inefficient), just ensure uniqueness on 2-fields
+// This will ensure there is only one guid per date logged
+InteractionSchema.index({guid: 1, eventDate: 1}, {unique: true});
 
 // export schema
 module.exports = mongoose.model('Interaction', InteractionSchema);
