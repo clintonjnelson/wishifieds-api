@@ -17,7 +17,7 @@ module.exports = function(router) {
                       { targetCategory: 'userpageview' } :
                       { targetCategory: 'userpageview', targetIdentifier: userId } );
 
-    Interaction.find(searchQuery, null, {sort: 'createdAt'}, function(err, interactions) {
+    Interaction.find(searchQuery, null, {sort: 'eventDate'}, function(err, interactions) {
       if(err) {
         console.log('Error getting user page interactions: ', err);
         res.status(500).json({error: true, msg: 'server error finding interactions'});
@@ -58,7 +58,7 @@ module.exports = function(router) {
 
     function findSignInteractionsFromQuery(query) {
       // query interactions by sign ids
-      Interaction.find(query, null, {sort: 'createdAt'}, function(err, interactions) {
+      Interaction.find(query, null, {sort: 'eventDate'}, function(err, interactions) {
         if(err) {
           console.log('Error getting sign linkoff interactions: ', err);
           res.status(500).json({error: true, msg: 'server error finding interactions'});
