@@ -10,6 +10,9 @@ var userCleanup   = require('../lib/tasks/userCleanup.js');
 module.exports = function(router) {
   router.use(bodyparser.json());
 
+  // This creates the sitemap and this must be done each time the site is launched
+  // because the file is deleted each time (container teardown/rebuild). Google
+  // NEEDS to be able to find this sitemap to update its records.
   router.put('/tasks/sitemap', eatOnReq, eatAuth, adminAuth, function(req, res) {
 
     if(req.body.trigger === true) {
@@ -25,6 +28,8 @@ module.exports = function(router) {
     }
   });
 
+  // This cleans up accounts that were created but never used so that Google doesn't
+  // look at our sites & see "duplicate content" of no content at all.
   router.put('/tasks/cleanupusers', eatOnReq, eatAuth, adminAuth, function(req, res) {
     console.log("MADE IT TO THE ROUTE...");
 
