@@ -17,101 +17,13 @@ var UserSchema = mongoose.Schema({
         tokenHash:  { type: String, default: null},
         expiration: { type: String, default: null}
       }
-    },
-    amazon: {
-      amazonId:             { type: String,   default: null },
-      amazonAccessToken:    { type: String,   default: null },
-    },
-    deviantart: {
-      deviantartId:             { type: String,   default: null },
-      deviantartAccessToken:    { type: String,   default: null },
-    },
-    disqus: {
-      disqusId:             { type: String,   default: null },
-      disqusAccessToken:    { type: String,   default: null },
-    },
-    etsy: {
-      etsyId:             { type: String,   default: null },
-      etsyAccessToken:    { type: String,   default: null },
-    },
-    facebook: {
-      facebookId:           { type: String,   default: null },
-      facebookAccessToken:  { type: String,   default: null },
-    },
-    foursquare: {
-      foursquareId:           { type: String,   default: null },
-      foursquareAccessToken:  { type: String,   default: null },
-    },
-    github: {
-      githubId:             { type: String,   default: null },
-      githubAccessToken:    { type: String,   default: null },
-    },
-    google: {
-      googleId:             { type: String,   default: null },
-      googleAccessToken:    { type: String,   default: null },
-    },
-    imgur: {
-      imgurId:             { type: String,   default: null },
-      imgurAccessToken:    { type: String,   default: null },
-    },
-    instagram: {
-      instagramId:          { type: String,   default: null },
-      instagramAccessToken: { type: String,   default: null },
-    },
-    linkedin: {
-      linkedinId:           { type: String,   default: null },
-      linkedinAccessToken:  { type: String,   default: null },
-    },
-    patreon: {
-      patreonId:           { type: String,   default: null },
-      patreonAccessToken:  { type: String,   default: null },
-    },
-    pinterest: {
-      pinterestId:           { type: String,   default: null },
-      pinterestAccessToken:  { type: String,   default: null },
-    },
-    reddit: {
-      redditId:             { type: String,   default: null },
-      redditAccessToken:    { type: String,   default: null },
-    },
-    spotify: {
-      spotifyId:             { type: String,   default: null },
-      spotifyAccessToken:    { type: String,   default: null },
-    },
-    stackexchange: {
-      stackexchangeId:          { type: String,   default: null },
-      stackexchangeAccessToken: { type: String,   default: null },
-    },
-    tumblr: {
-      tumblrId:             { type: String,   default: null },
-      tumblrAccessToken:    { type: String,   default: null },
-    },
-    twitter: {
-      twitterId:            { type: String,   default: null },
-      twitterAccessToken:   { type: String,   default: null },
-    },
-    vimeo: {
-      vimeoId:             { type: String,   default: null },
-      vimeoAccessToken:    { type: String,   default: null },
-    },
-    vk: {
-      vkId:             { type: String,   default: null },
-      vkAccessToken:    { type: String,   default: null },
-    },
-    wordpress: {
-      wordpressId:          { type: String,   default: null },
-      wordpressAccessToken: { type: String,   default: null },
-    },
-    youtube: {
-      youtubeId:          { type: String,   default: null },
-      youtubeAccessToken: { type: String,   default: null },
-    },
-                                                                     },
+    }
+  },
   confirmed:       { type: String,  default: null                    },  // Gets date when confirmed
   eat:             { type: String,  default: null                    },
   email:           { type: String,  default: null, lowercase: true   },  // sparse: true,
   permissions:     { type: Array,   default: ['user']                },
-  prt:             { type: String,  default: null                    },  // HOOK THIS UP TO EMAIL
+  prt:             { type: String,  default: null                    },  // HOOK THIS UP TO EMAIL, reset token
   role:            { type: String,  default: null                    },
   status:          { type: String,  default: 'A'                     },  // A=Active, D=Deleted, P=Pending, S=Suspended
   termsconditions: { type: Date,    default: null                    },
