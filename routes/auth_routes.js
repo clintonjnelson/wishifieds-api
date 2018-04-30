@@ -6,8 +6,9 @@ var eatAuth     = require('../lib/routes_middleware/eat_auth.js')(process.env.AU
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 var MailService = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder');
-var Utils       = require('../lib/signpost_utils.js');
-var User        = require('../models/User.js');
+var Utils       = require('../lib/utils.js');
+// TODO: UPDATE THIS MODEL TO USE SEQUELIZE
+var User        = {};
 
 module.exports = function(router, passport) {
   router.use(bodyparser.json());
