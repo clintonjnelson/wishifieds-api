@@ -10,11 +10,58 @@ var MailService  = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var Utils        = require('../lib/utils.js');
 var User         = require('../db/models/index.js').users;
+var Sequelize    = require('sequelize');
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
 module.exports = function(router) {
   router.use(bodyparser.json());
+
+
+  // Get user by ID (id)
+  router.get('/users/:usernameOrId', eatOnReq, eatAuth, ownerAuth('usernameOrId'), function(req, res) {
+    var usernameOrId = req.params.usernameOrId;
+
+    // TODO: If OwnerAuth stays, this must be owner, and already have Owner user at res.user
+    console.log("ABOUT TO QUERY USER BY usernameOrId");
+    User
+      .findOne({where: makeUsernameOrIdQuery(usernameOrId) })
+      .then(function(user) {
+        if(!user) {
+          console.log('Tried to get user. User could not be found by: ', usernameOrId, '. User is: ', user);
+          return res.status(204).json({error: false, msg: 'no user found', user: {} });
+        }
+
+        console.log("USER FOUND: ", user);
+        return res.json({
+          username:  user.username,
+          email:     user.email,
+          userId:    user.id,
+          status:    user.status,
+          role:      user.role,
+          confirmed: user.confirmed
+        })
+      })
+      .catch(function(err) {
+        console.log('Database error getting user by username or id:');
+        return res.status(500).json({error: true, msg: 'database error'});
+      });
+  });
+
+  // Get username by user id
+  router.get('/users/:id/username', function(req, res) {
+    var userId = req.params.id;
+    User
+      .findById(userId)
+      .then(function(user) {
+        console.log("USERNAME FOUND FROM USER: ", user);
+        res.json({username: user.username});
+      })
+      .catch(function(err) {
+        console.log('error finding user');
+        return res.status(500).json({error: true, msg: 'database error'});
+      });
+  });
 
   // Create new user
   router.post('/users', function(req, res) {
@@ -90,8 +137,8 @@ module.exports = function(router) {
   router.patch('/users/:id', eatOnReq, eatAuth, ownerAuth('id'), function(req, res) {
     console.log("BODY ON UPDATE REQUEST IS: ", req.body);
     // TODO: this should NOT be userSettings on the body, it should be updated USER object
-    var reqUser = req.body.user;
-
+    var reqUser = req.body.userUpdates;
+    console.log("reqUser is: ", reqUser);
     // Restrict fields allowed to be updated
     var allowedUpdates = {
       username: reqUser.username,
@@ -99,7 +146,7 @@ module.exports = function(router) {
     }
 
     var userId = reqUser.userId;
-    console.log("ABOUT TO UPDATE USER... Current user is: ", allowedUpdates);
+    console.log("ABOUT TO UPDATE USER... Updates are: ", allowedUpdates);
     verifyAvailabilityAndUpdateUser(userId, allowedUpdates);
 
 
@@ -118,7 +165,7 @@ module.exports = function(router) {
       // TODO: THIS SHOULD FIND ALL USERS & VERIFY ONLY ONE --AND-- THAT IT'S SAME
       User
         .findAll({where: {username: userUpdates.username}})
-        .then(function(error, users) {
+        .then(function(users) {
           // if only one, may be self
           if(users && users.length > 0) {
             if(users.length > 1) {
@@ -131,15 +178,11 @@ module.exports = function(router) {
               return respond400ErrorMsg(res, 'username-taken');
             }
           }
-          if(error) {
-            console.log("Error checking username for availability: ", error);
-            return res.status(500).json({error: true});
-          }
 
           // See if email already taken
           User
             .findAll({where: {email: userUpdates.email}})
-            .then(function(err, usrs) {
+            .then(function(usrs) {
               // if only one, may be self
               if(usrs && usrs.length > 0) {
                 if(usrs.length > 1) {
@@ -152,14 +195,18 @@ module.exports = function(router) {
                   return respond400ErrorMsg(res, 'email-taken');
                 }
               }
-              if(err) {
-                console.log("Error checking email for availability: ", error);
-                return res.status(500).json({error: true});
-              }
 
               // All clear, continue...
               updateUser(userId, userUpdates);
+            })
+            .catch(function() {
+              console.log("Error checking email for availability: ", error);
+              return res.status(500).json({error: true});
             });
+        })
+        .catch(function(error) {
+          console.log("Error checking username for availability: ", error);
+          return res.status(500).json({error: true});
         });
     }
 
@@ -168,12 +215,7 @@ module.exports = function(router) {
       console.log("USER DATA PRIOR TO UPDATE IS: ", userData);
       User
         .findById(userId)
-        .then(function(error, user) {
-        if (error) {
-          console.log('Error finding user. Error: ', error);
-          return res.status(500).json({ error: true });
-        }
-
+        .then(function(user) {
         // userData is just the "allowedUpdates" object above
         Object.keys(userData).forEach(function(allowedUpdate) {
           user.setDataValue(allowedUpdate, userData[allowedUpdate]);
@@ -182,12 +224,7 @@ module.exports = function(router) {
         console.log("USER PRIOR TO SAVE IS: ", user);
         user
           .save()
-          .then(function(err, usr) {
-            if (err) {
-              console.log('Error updating user. Error: ', err);
-              return respond400ErrorMsg(res, 'error saving user');
-            }
-
+          .then(function(usr) {
             console.log("User returned from save is: ", usr);
             return res.json({ success: true,
                        user: {username:  usr.username,
@@ -197,11 +234,27 @@ module.exports = function(router) {
                               role:      usr.role,
                               confirmed: usr.confirmed}
             });
+          })
+          .catch(function(err) {
+            console.log('Error updating user. Error: ', err);
+            return respond400ErrorMsg(res, 'error saving user');
           });
+      })
+      .catch(function(error) {
+        console.log('Error finding user. Error: ', error);
+        return res.status(500).json({ error: true });
       });
     }
   });
 
+  function makeUsernameOrIdQuery(usernameOrId) {
+    let query = {};
+    try      { query['id'] = parseInt(usernameOrId, 10); }
+    catch(e) { query['username'] =  usernameOrId; }
+
+    console.log("Query for usernameOrId is: ", query);
+    return query;
+  }
 
   function respond400ErrorMsg(res, errorMsg) {
     console.log('Error in settings data. Sending 400 msg: ', errorMsg);

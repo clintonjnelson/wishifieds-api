@@ -47,7 +47,7 @@ module.exports = function(router, passport) {
         res.json({
           eat:      eat,
           username: user.username,
-          userId:   user._id,
+          userId:   user.id,
           email:    user.email,
           role:     user.role
         });
