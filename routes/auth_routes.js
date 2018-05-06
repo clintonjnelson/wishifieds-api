@@ -8,7 +8,7 @@ var MailService = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder');
 var Utils       = require('../lib/utils.js');
 // TODO: UPDATE THIS MODEL TO USE SEQUELIZE
-var User        = {};
+var User        = require('../db/models/index.js').users;
 
 module.exports = function(router, passport) {
   router.use(bodyparser.json());
@@ -39,7 +39,7 @@ module.exports = function(router, passport) {
         return res.status(404).json({ error: true, msg: 'user not found'});
       }
 
-      user.generateToken(process.env.AUTH_SECRET, function(err, eat) {  // passport strat adds req.user
+      User.prototype.generateToken(user, process.env.AUTH_SECRET, function(err, eat) {  // passport strat adds req.user
         if (err) {
           console.log('Error logging in user. Error: ', err);
           return res.status(404).json({ error: true, msg: 'error logging in' });
