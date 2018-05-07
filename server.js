@@ -10,8 +10,9 @@ var app         = express();
 var models      = require('./db/models/index.js');
 
 // Routers
-var authRouter         = new express.Router();
-var usersRouter        = new express.Router();
+var authRouter  = new express.Router();
+var usersRouter = new express.Router();
+var tasksRouter = new express.Router();
 
 // Redirect any http to https
 app.use(ensureHttps);
@@ -29,10 +30,12 @@ require('./lib/passport_strategies/basic.js'        )(passport);
 // Populate Routes
 require('./routes/auth_routes.js' )(authRouter,  passport);
 require('./routes/users_routes.js' )(usersRouter );
+require('./routes/tasks_routes.js')(tasksRouter  );
 
 // Add /api prefix to routes
 app.use('/api', authRouter  );
 app.use('/api', usersRouter );
+app.use('/api', tasksRouter );
 
 // Static Resources
 var dir = process.env.WEBPACK_DIRECTORY || './ui/dist';
