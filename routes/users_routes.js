@@ -9,7 +9,7 @@ var adminAuth    = require('../lib/routes_middleware/admin_auth.js');
 var MailService  = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var Utils        = require('../lib/utils.js');
-var User         = require('../db/models/index.js').users;
+var User         = require('../db/models/index.js').User;
 var Sequelize    = require('sequelize');
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
@@ -216,34 +216,34 @@ module.exports = function(router) {
       User
         .findById(userId)
         .then(function(user) {
-        // userData is just the "allowedUpdates" object above
-        Object.keys(userData).forEach(function(allowedUpdate) {
-          user.setDataValue(allowedUpdate, userData[allowedUpdate]);
-        });
-
-        console.log("USER PRIOR TO SAVE IS: ", user);
-        user
-          .save()
-          .then(function(usr) {
-            console.log("User returned from save is: ", usr);
-            return res.json({ success: true,
-                       user: {username:  usr.username,
-                              email:     usr.email,
-                              userId:    usr.id,
-                              status:    usr.status,
-                              role:      usr.role,
-                              confirmed: usr.confirmed}
-            });
-          })
-          .catch(function(err) {
-            console.log('Error updating user. Error: ', err);
-            return respond400ErrorMsg(res, 'error saving user');
+          // userData is just the "allowedUpdates" object above
+          Object.keys(userData).forEach(function(allowedUpdate) {
+            user.setDataValue(allowedUpdate, userData[allowedUpdate]);
           });
-      })
-      .catch(function(error) {
-        console.log('Error finding user. Error: ', error);
-        return res.status(500).json({ error: true });
-      });
+
+          console.log("USER PRIOR TO SAVE IS: ", user);
+          user
+            .save()
+            .then(function(usr) {
+              console.log("User returned from save is: ", usr);
+              return res.json({ success: true,
+                         user: {username:  usr.username,
+                                email:     usr.email,
+                                userId:    usr.id,
+                                status:    usr.status,
+                                role:      usr.role,
+                                confirmed: usr.confirmed}
+              });
+            })
+            .catch(function(err) {
+              console.log('Error updating user. Error: ', err);
+              return respond400ErrorMsg(res, 'error saving user');
+            });
+        })
+        .catch(function(error) {
+          console.log('Error finding user. Error: ', error);
+          return res.status(500).json({ error: true });
+        });
     }
   });
 
@@ -257,7 +257,7 @@ module.exports = function(router) {
   }
 
   function respond400ErrorMsg(res, errorMsg) {
-    console.log('Error in settings data. Sending 400 msg: ', errorMsg);
+    console.log('Error in data. Sending 400 msg: ', errorMsg);
     return res.status(400).json({error: true, msg: errorMsg});
   }
 

@@ -7,15 +7,23 @@ var https       = require('https'          );
 var passport    = require('passport'       );
 var ensureHttps = require('./lib/routes_middleware/ensure_https.js');
 var app         = express();
+var helmet      = require('helmet');
 var models      = require('./db/models/index.js');
 
 // Routers
 var authRouter  = new express.Router();
 var usersRouter = new express.Router();
 var tasksRouter = new express.Router();
+var imagesRouter = new express.Router();
+var listingsRouter = new express.Router();
+var conditionsRouter = new express.Router();
+var categoriesRouter = new express.Router();
 
 // Redirect any http to https
 app.use(ensureHttps);
+
+// Security middleware (https://expressjs.com/en/advanced/best-practice-security.html)
+app.use(helmet());
 
 // gzip the files for speed
 app.use(compression());
@@ -25,17 +33,25 @@ app.use(passport.initialize());
 app.use(passport.session());            // only for oauth1 to work
 
 // Load passport with strategies
-require('./lib/passport_strategies/basic.js'        )(passport);
+require('./lib/passport_strategies/basic.js')(passport);
 
 // Populate Routes
 require('./routes/auth_routes.js' )(authRouter,  passport);
-require('./routes/users_routes.js' )(usersRouter );
-require('./routes/tasks_routes.js')(tasksRouter  );
+require('./routes/users_routes.js')(usersRouter );
+require('./routes/tasks_routes.js')(tasksRouter );
+require('./routes/images_routes.js')(imagesRouter);
+require('./routes/listings_routes.js')(listingsRouter);
+require('./routes/categories_routes.js')(categoriesRouter );
+require('./routes/conditions_routes.js')(conditionsRouter );
 
 // Add /api prefix to routes
 app.use('/api', authRouter  );
 app.use('/api', usersRouter );
 app.use('/api', tasksRouter );
+app.use('/api', imagesRouter);
+app.use('/api', listingsRouter);
+app.use('/api', categoriesRouter);
+app.use('/api', conditionsRouter);
 
 // Static Resources
 var dir = process.env.WEBPACK_DIRECTORY || './ui/dist';

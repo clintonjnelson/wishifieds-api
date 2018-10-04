@@ -8,7 +8,7 @@ var MailService = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder');
 var Utils       = require('../lib/utils.js');
 // TODO: UPDATE THIS MODEL TO USE SEQUELIZE
-var User        = require('../db/models/index.js').users;
+var User        = require('../db/models/index.js').User;
 
 module.exports = function(router, passport) {
   router.use(bodyparser.json());
