@@ -12,7 +12,7 @@ var Utils           = require('../lib/utils.js');
 var Listings        = require('../db/models/index.js').Listing;
 var Images          = require('../db/models/index.js').Image;
 var zipObject       = require('lodash').zipObject;
-var Sequelize    = require('sequelize');
+var Sequelize       = require('sequelize');
 
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
 
@@ -28,6 +28,77 @@ var Sequelize    = require('sequelize');
 
 module.exports = function(router) {
   router.use(bodyparser.json());
+
+  router.get('/listings/search', function(req, res) {
+    console.log("REQUEST QUERY IS: ", req.query);
+    console.log("Made it to SEARCH. Query param: ", req.query['search']);
+
+    // Make the attributes variable for Advanced searches by a user.
+    // FIXME: THIS IS SUPER INEFFICIENT. WRITE CUSTOMER QUERY TO GATHER IMAGES IN SQL.
+    if(req.query['search'].length > 0) {
+      var searchStr = req.query['search'].trim();
+      Listings
+        .findAll({
+          where: {
+            status: 'ACTIVE',
+            $or: [
+              { title: { [Sequelize.Op.iLike]: '%'+searchStr } },
+              { keywords: { [Sequelize.Op.iLike]: '%'+searchStr } }
+            ]
+          },
+          include: [Images]
+        })
+        .then(function(results) {
+          console.log("RESULTS ARE: ", results);
+          var listingIds = results.map(function(listing) { return listing.id; });
+          Images
+            .findAll({ where: {listing_id: listingIds} })
+            .then(function(images) {
+              console.log("IMAGES FOUND ARE: ", images);
+              var sortedImgs = images
+                .sort(function(a, b){ return a.position - b.position; })
+
+              console.log("SORTED IMAGES ARE: ", sortedImgs);
+              var listings = results.map(function(listing) {
+                return {
+                  id:          listing.id,
+                  userId:      listing.user_id,
+                  categoryId:  listing.category_id,  // TODO: Decide if UI does the name conversion or the API
+                  conditionId: listing.condition_id,  // TODO: Decide if UI does the name conversion or the API
+                  title:       listing.title,
+                  description: listing.description,
+                  keywords:    listing.keywords,
+                  linkUrl:     listing.linkUrl,
+                  price:       listing.price,
+                  locationId:  listing.location_id, // TODO: SHOULD THIS BE LOCATION???
+                  images:      sortedImgs
+                                .filter(function(img){ return img.listing_id == listing.id})
+                                .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
+                  hero:        listing.hero_img,        // TODO: Send ONE of these
+                  imagesRef:   listing.images_ref,
+                  slug:        listing.slug,
+                  createdAt:   listing.createdAt,
+                  updatedAt:   listing.updatedAt
+                };
+              });
+              console.log("LISTINGS FOUND: ", listings);
+
+              res.json({error: false, success: true, listings: listings });
+            })
+            .catch(function(errr) {
+              console.log("Caught error in searching for listings. Error getting images: ", err);
+              res.json({error: true, success: false});
+            });;
+        })
+        .catch(function(err) {
+          console.log("Caught error in searching for listings. Error getting listings: ", err);
+          res.json({error: true, success: false});
+        });
+    }
+    else {
+      res.json({error: false, success: true, listings: []});  // No search, no results
+    }
+  });
 
   // Create New Listing
   // TODO: ADD BACK THE EATAUTH!!!!!!!!
@@ -48,6 +119,7 @@ module.exports = function(router) {
         linkUrl: listingData.linkUrl,
         keywords: listingData.keywords,
         location_id: listingData.location,
+        hero_img: listingData.images[0],  // First image is hero
         images_ref: "tbd",
         user_id: listingData.userId,  // TODO: UPDATE THIS TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
         slug: "tbd",
@@ -79,6 +151,7 @@ module.exports = function(router) {
                 locationId:  newListing.location_id, // TODO: SHOULD THIS BE LOCATION???
                 status:      newListing.status,
                 images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
+                hero:        newListing.hero_img,
                 imagesRef:   newListing.images_ref,
                 slug:        newListing.slug,
                 createdAt:   newListing.createdAt,
@@ -153,6 +226,7 @@ module.exports = function(router) {
             linkUrl:      Utils.sanitizeUrl(listingData.linkUrl),
             keywords:     Utils.sanitizeString(keywords),
             location_id:  listingData.locationId,
+            hero_img:     listingData.images[0],
             images_ref:   imagesRef,
             user_id:      userId,
             slug:         Utils.generateUrlSlug(title),
@@ -188,6 +262,7 @@ module.exports = function(router) {
                   price:       updatedListing.price,
                   locationId:  updatedListing.location_id, // TODO: SHOULD THIS BE LOCATION???
                   status:      updatedListing.status,
+                  hero:        updatedListing.hero_img,
                   images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
                   imagesRef:   updatedListing.images_ref,
                   slug:        updatedListing.slug,
