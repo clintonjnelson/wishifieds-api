@@ -1,8 +1,8 @@
 'use strict';
 
 var bodyparser   = require('body-parser'      );
-// var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
-// var eatAuth      = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
+var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
+var eatAuth      = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
 // var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
 // var adminAuth    = require('../lib/routes_middleware/admin_auth.js');
 // var MailService  = require('../lib/mailing/mail_service.js');
@@ -11,6 +11,7 @@ var bodyparser   = require('body-parser'      );
 var Utils           = require('../lib/utils.js');
 var Listings        = require('../db/models/index.js').Listing;
 var Images          = require('../db/models/index.js').Image;
+var User          = require('../db/models/index.js').User;
 var zipObject       = require('lodash').zipObject;
 var Sequelize       = require('sequelize');
 
@@ -47,6 +48,81 @@ module.exports = function(router) {
             ]
           },
           include: [Images]
+        })
+        .then(function(results) {
+          console.log("RESULTS ARE: ", results);
+          if(results && results.length > 0) {
+            var listingIds = results.map(function(listing) { return listing.id; });
+            Images
+              .findAll({ where: {listing_id: listingIds} })
+              .then(function(images) {
+                console.log("IMAGES FOUND ARE: ", images);
+                var sortedImgs = images
+                  .sort(function(a, b){ return a.position - b.position; })
+
+                console.log("SORTED IMAGES ARE: ", sortedImgs);
+                var listings = results.map(function(listing) {
+                  return {
+                    id:          listing.id,
+                    userId:      listing.user_id,
+                    categoryId:  listing.category_id,  // TODO: Decide if UI does the name conversion or the API
+                    conditionId: listing.condition_id,  // TODO: Decide if UI does the name conversion or the API
+                    title:       listing.title,
+                    description: listing.description,
+                    keywords:    listing.keywords,
+                    linkUrl:     listing.linkUrl,
+                    price:       listing.price,
+                    locationId:  listing.location_id, // TODO: SHOULD THIS BE LOCATION???
+                    images:      sortedImgs
+                                  .filter(function(img){ return img.listing_id == listing.id})
+                                  .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
+                    hero:        listing.hero_img,        // TODO: Send ONE of these
+                    imagesRef:   listing.images_ref,
+                    slug:        listing.slug,
+                    createdAt:   listing.createdAt,
+                    updatedAt:   listing.updatedAt
+                  };
+                });
+                console.log("LISTINGS FOUND: ", listings);
+
+                res.json({error: false, success: true, listings: listings });
+              })
+              .catch(function(errr) {
+                console.log("Caught error in searching for listings. Error getting images: ", err);
+                res.json({error: true, success: false});
+              });;
+          }
+          // No listings found
+          else {
+            res.json({error: true, success: false, listings: []});
+          }
+        })
+        .catch(function(err) {
+          console.log("Caught error in searching for listings. Error getting listings: ", err);
+          res.json({error: true, success: false});
+        });
+    }
+    else {
+      res.json({error: false, success: true, listings: []});  // No search, no results
+    }
+  });
+
+
+  // GET a User's Listings by their user object
+  router.get('/listings/:usernameOrId', function(req, res) {
+    parseOrGetUserId(req.params.usernameOrId, function(userId, error) {
+      if(!userId) {
+        console.log("Error finding user: ", error);
+        return res.status(404).json({error: true, success: false, msg: "Could not find user/listings."});
+      }
+      // Make the attributes variable for Advanced searches by a user.
+      // FIXME: THIS IS SUPER INEFFICIENT. WRITE CUSTOMER QUERY TO GATHER IMAGES IN SQL.
+      Listings
+        .findAll({
+          where: {
+            user_id: userId,
+            status: 'ACTIVE'
+          }
         })
         .then(function(results) {
           console.log("RESULTS ARE: ", results);
@@ -94,10 +170,7 @@ module.exports = function(router) {
           console.log("Caught error in searching for listings. Error getting listings: ", err);
           res.json({error: true, success: false});
         });
-    }
-    else {
-      res.json({error: false, success: true, listings: []});  // No search, no results
-    }
+    });
   });
 
   // Create New Listing
@@ -373,6 +446,32 @@ module.exports = function(router) {
           callback(success);
         });
     }
+  }
+
+  function parseOrGetUserId(usernameOrId, callback) {
+    if( isNaN(parseInt(usernameOrId, 10)) ) {
+      User
+        .findOne({where: {username: usernameOrId}})
+        .then(function(user) {
+          callback(user.id, null);
+        })
+        .catch(function(error) {
+          callback(null, error);
+        });
+    }
+    else {
+      callback(parseInt(usernameOrId, 10), null);
+    }
+
+    // console.log("ATTEMPTING TO PARSE: ", usernameOrId);
+    // try {
+    //   console.log("PARSES AS: ", parseInt(usernameOrId, 10));
+    //   return { id:  };
+    // }
+    // catch(e) {
+    //   console.log("Failed to convert param to ID, creating username query with username: ", usernameOrId);
+    //   return { username: usernameOrId };
+    // }
   }
 }
 
