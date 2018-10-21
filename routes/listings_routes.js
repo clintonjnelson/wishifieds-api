@@ -94,12 +94,12 @@ module.exports = function(router) {
           }
           // No listings found
           else {
-            res.json({error: true, success: false, listings: []});
+            res.json({error: false, success: true, listings: []});
           }
         })
         .catch(function(err) {
           console.log("Caught error in searching for listings. Error getting listings: ", err);
-          res.json({error: true, success: false});
+          res.status(500).json({error: true, success: false});
         });
     }
     else {
@@ -162,16 +162,87 @@ module.exports = function(router) {
               res.json({error: false, success: true, listings: listings });
             })
             .catch(function(errr) {
-              console.log("Caught error in searching for listings. Error getting images: ", err);
-              res.json({error: true, success: false});
+              console.log("Caught error in searching for listings. Error getting images: ", errr);
+              res.status(500).json({error: true, success: false});
             });;
         })
         .catch(function(err) {
           console.log("Caught error in searching for listings. Error getting listings: ", err);
-          res.json({error: true, success: false});
+          res.status(500).json({error: true, success: false});
         });
     });
   });
+
+  router.get('/listings/:listingId/messages', eatAuth, function() {
+    const user = req.user;
+    const listingId = req.params.listingId;
+
+    if(!user) {
+      console.log("Error getting user off of request.");
+      res.status(401).json({error: true, success: false});
+    }
+    if(!listingId) {
+      console.log("Route param of listing ID is required.");
+      res.status(400).json({error: true, success: false, msg: 'listing ID is required'});
+    }
+
+    // First get all user messages that have a foreign key of this listingId
+    // Map the messages by the correspondence
+    // Messages should be sorted by MOST RECENT (createdAt DESC)
+        // If the recipient is primary user, add to the user list matching sender's id
+        // if the sender if primary user, add to the user list matching recipient recipient's id
+    // Return the mapped object
+    // Example. Remember ALL for one listing...
+
+    // User order to match the order of messages received
+    // Dedup, while keeping first-order
+    // OR, set an ordering by user on the user object itself & using a counter
+    Message
+      .findAll({
+        where: { listing_id: listingId },
+        order: ['createdAt', 'DESC']
+      })
+      .then(function(allMessages) {
+        const ownerId = user.id;
+        let userOrder = 0;
+        let messagesByUser = {};
+        let listingMessages = [];
+        allMessages.forEach(message => {
+          // Build message info into correct user object
+          // Set the tracked user Id contacting ON the listing
+          let userId = (message.senderId !== ownerId ? senderId : recipientId);
+          let usrObj = messagesByUser[userId];
+
+          // No order yet, set one & increment counter
+          if(!usrObj.order) {
+            usrObj.order = userOrder;
+            userOrder++;
+          }
+          if(message.status === "UNREAD") {
+            usrObj.hasUnread = true;
+          }
+          // Add to or create messages array for user
+          if(usrObj.messages && usrObj.messages.length) {
+            usrObj.messages.push(message);
+          }
+          else {
+            usrObj['messages'] = [message];  // new array with one message in it
+          }
+        });
+        // Order the response object to match messages priority order
+        Object.keys(messagesByUser)
+          .sort(function(prior, current) { return prior.order - current.order; })
+          .forEach(function(userObj) {
+            listingMessages.push(userObj);
+          });
+
+        res.json({error: false, success: true, listingMessages: listingMessages});
+      })
+      .catch(function(error) {
+        console.log("Caught error in getting messages for listing: ", error);
+        res.status(500).json({error: true, success: false, msg: 'Error getting messages for listing.'});
+      });
+  })
 
   // Create New Listing
   // TODO: ADD BACK THE EATAUTH!!!!!!!!

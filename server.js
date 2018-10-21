@@ -16,6 +16,7 @@ var usersRouter = new express.Router();
 var tasksRouter = new express.Router();
 var imagesRouter = new express.Router();
 var listingsRouter = new express.Router();
+var messagesRouter = new express.Router();
 var conditionsRouter = new express.Router();
 var categoriesRouter = new express.Router();
 
@@ -41,6 +42,7 @@ require('./routes/users_routes.js')(usersRouter );
 require('./routes/tasks_routes.js')(tasksRouter );
 require('./routes/images_routes.js')(imagesRouter);
 require('./routes/listings_routes.js')(listingsRouter);
+require('./routes/messages_routes.js')(messagesRouter);
 require('./routes/categories_routes.js')(categoriesRouter );
 require('./routes/conditions_routes.js')(conditionsRouter );
 
@@ -50,6 +52,7 @@ app.use('/api', usersRouter );
 app.use('/api', tasksRouter );
 app.use('/api', imagesRouter);
 app.use('/api', listingsRouter);
+app.use('/api', messagesRouter);
 app.use('/api', categoriesRouter);
 app.use('/api', conditionsRouter);
 
