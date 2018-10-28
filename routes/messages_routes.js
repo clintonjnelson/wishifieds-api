@@ -34,15 +34,15 @@ module.exports = function(router) {
 
 
     const messageData = req.body.message;
-    const sender = req.user;
+    const user = req.user;
     console.log("Message data is: ", messageData);
-    console.log("User is: ", sender);
+    console.log("User is: ", user);
 
 
-    if(!sender) {
+    if(!user) {
       return res.status(401).json({error: true, msg: "Messages can only be sent by users."});
     }
-    if(!passesMessageValidations(messageData, sender)) {
+    if(!passesMessageValidations(messageData, user)) {
       return res.status(400).json({error: true, msg: "Message failed validations."});
     }
 
@@ -51,10 +51,10 @@ module.exports = function(router) {
     // Message should have content
     // construct the format for saving
     const preMessage = {
-      sender_id:     sender.id,
-      recipient_id:  messageData.recipientId,
-      listing_id:    messageData.listingId,
-      content:       messageData.content
+      senderId:     user.id,
+      recipientId:  messageData.recipientId,
+      listingId:    messageData.listingId,
+      content:      messageData.content
     };
 
     Message
@@ -73,13 +73,18 @@ module.exports = function(router) {
 
 
 function passesMessageValidations(messageData, sender) {
-  const checks = sender &&
-  messageData &&
-  sender.id &&
-  messageData.senderId &&
-  (sender.id.toString() !== messageData.senderId.toString()) &&
-  true;  // returns the last value
+  try{
+    const checks = sender &&
+    messageData &&
+    sender.id &&
+    messageData.senderId &&
+    (sender.id.toString() === messageData.senderId.toString()) &&  // Verify sender listed is same as auth
+    true;  // returns the last value
 
-  console.log("VALIDATION CHECKS IS: ", checks);
-  return !!checks;  // BangBang, just to be safe
+    console.log("VALIDATION CHECKS IS: ", checks);
+    return !!checks;  // BangBang, just to be safe
+  } catch(e) {
+    console.log("Error in validations was caught: ", e);
+    return false;
+  }
 }

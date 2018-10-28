@@ -66,7 +66,7 @@ module.exports = function(router) {
   // Create new user
   router.post('/users', function(req, res) {
     var newEmail = req.body.email || 'e@example.com';
-    var newName = req.body.username || "toto5"
+    var newName = req.body.username || "toto6"
     var preUser = {  // Explicitly populate to avoid exploit
       username: newName,
       email: newEmail
@@ -116,7 +116,7 @@ module.exports = function(router) {
                     username: usr.username,
                     role:     usr.role,
                     email:    usr.email,
-                    userid:   usr.id });
+                    userId:   usr.id });  // TODO: This seems like it should be userId, not userid (all LC). If doesn't work, flip back! Remove this comment if works.
                 });
               });
             })
@@ -127,7 +127,7 @@ module.exports = function(router) {
         });
       })
       .catch(error => {
-        console.log("ERROR SAVING USER!");
+        console.log("ERROR SAVING USER!");  // TODO: WHEN THERE ARE DUPLICATE USERS, THIS WILL BE HIT GENERICALLY. FIX THAT FOR BETTER FEEDBACK TO UI.
         return respond400ErrorMsg(res, 'create-user');
       });
   });

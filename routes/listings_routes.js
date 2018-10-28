@@ -1,19 +1,20 @@
 'use strict';
 
-var bodyparser   = require('body-parser'      );
-var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
-var eatAuth      = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
+var bodyparser = require('body-parser'      );
+var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
+var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
 // var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
 // var adminAuth    = require('../lib/routes_middleware/admin_auth.js');
 // var MailService  = require('../lib/mailing/mail_service.js');
 // TODO: WILL NEED SERVICE FOR SMS INTERFACT HERE (service logic in /lib)
 // var EmailBuilder = require('../lib/mailing/email_content_builder.js');
-var Utils           = require('../lib/utils.js');
-var Listings        = require('../db/models/index.js').Listing;
-var Images          = require('../db/models/index.js').Image;
-var User          = require('../db/models/index.js').User;
-var zipObject       = require('lodash').zipObject;
-var Sequelize       = require('sequelize');
+var Utils      = require('../lib/utils.js');
+var Listings   = require('../db/models/index.js').Listing;
+var Images     = require('../db/models/index.js').Image;
+var User       = require('../db/models/index.js').User;
+var Message    = require('../db/models/index.js').Message;
+var zipObject  = require('lodash').zipObject;
+var Sequelize  = require('sequelize');
 
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
 
@@ -54,7 +55,7 @@ module.exports = function(router) {
           if(results && results.length > 0) {
             var listingIds = results.map(function(listing) { return listing.id; });
             Images
-              .findAll({ where: {listing_id: listingIds} })
+              .findAll({ where: {listingId: listingIds} })
               .then(function(images) {
                 console.log("IMAGES FOUND ARE: ", images);
                 var sortedImgs = images
@@ -64,20 +65,20 @@ module.exports = function(router) {
                 var listings = results.map(function(listing) {
                   return {
                     id:          listing.id,
-                    userId:      listing.user_id,
-                    categoryId:  listing.category_id,  // TODO: Decide if UI does the name conversion or the API
-                    conditionId: listing.condition_id,  // TODO: Decide if UI does the name conversion or the API
+                    userId:      listing.userId,
+                    categoryId:  listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                    conditionId: listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                     title:       listing.title,
                     description: listing.description,
                     keywords:    listing.keywords,
                     linkUrl:     listing.linkUrl,
                     price:       listing.price,
-                    locationId:  listing.location_id, // TODO: SHOULD THIS BE LOCATION???
+                    locationId:  listing.locationId, // TODO: SHOULD THIS BE LOCATION???
                     images:      sortedImgs
-                                  .filter(function(img){ return img.listing_id == listing.id})
+                                  .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
-                    hero:        listing.hero_img,        // TODO: Send ONE of these
-                    imagesRef:   listing.images_ref,
+                    hero:        listing.heroImg,        // TODO: Send ONE of these
+                    imagesRef:   listing.imagesRef,
                     slug:        listing.slug,
                     createdAt:   listing.createdAt,
                     updatedAt:   listing.updatedAt
@@ -108,8 +109,64 @@ module.exports = function(router) {
   });
 
 
+  // GET by listing ID
+  router.get('/listings/:id', function(req, res) {
+    const listingId = req.params['id'];
+
+    if(!listingId) {
+      console.log("Route param of listing ID is required.");
+      res.status(400).json({error: true, success: false, msg: 'listing ID is required'});
+    }
+
+    Listings
+      .findOne({where: {id: listingId}})
+      .then(function(result) {
+        console.log("Listing found is: ", result);
+        if(!result || (result && result.length === 0)) {
+          console.log("No listing found for is: ", listingId);
+          return res.status(404).json({error: true, success: false, msg: 'No listing found.'});
+        }
+        Images
+          .findAll({ where: {listingId: listingId} })
+          .then(function(images) {
+            console.log("IMAGES FOUND ARE: ", images);
+            var sortedImgs = images.sort(function(a, b){ return a.position - b.position; });
+
+            console.log("SORTED IMAGES ARE: ", sortedImgs);
+            var listing = {
+                id:          result.id,
+                userId:      result.userId,
+                categoryId:  result.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                conditionId: result.conditionId,  // TODO: Decide if UI does the name conversion or the API
+                title:       result.title,
+                description: result.description,
+                keywords:    result.keywords,
+                linkUrl:     result.linkUrl,
+                price:       result.price,
+                locationId:  result.locationId, // TODO: SHOULD THIS BE LOCATION???
+                images:      sortedImgs.map(function(img){ return img.url }),  // get only img urls
+                hero:        result.heroImg,  // TODO: Send ONE of these
+                imagesRef:   result.imagesRef,
+                slug:        result.slug,
+                createdAt:   result.createdAt,
+                updatedAt:   result.updatedAt
+              };
+            res.json({error: false, success: true, listing: listing });
+          })
+          .catch(function(err) {
+            console.log("Caught error in searching for listings. Error getting images: ", err);
+            res.json({error: true, success: false, msg: 'Error getting listing images.'});
+          });
+      })
+      .catch(function(errr) {
+        console.log("Caught error in searching for listing.", errr);
+        res.json({error: true, success: false, msg: 'Error getting listing.'});
+      });
+  });
+
+
   // GET a User's Listings by their user object
-  router.get('/listings/:usernameOrId', function(req, res) {
+  router.get('/listings/user/:usernameOrId', function(req, res) {
     parseOrGetUserId(req.params.usernameOrId, function(userId, error) {
       if(!userId) {
         console.log("Error finding user: ", error);
@@ -120,7 +177,7 @@ module.exports = function(router) {
       Listings
         .findAll({
           where: {
-            user_id: userId,
+            userId: userId,
             status: 'ACTIVE'
           }
         })
@@ -128,7 +185,7 @@ module.exports = function(router) {
           console.log("RESULTS ARE: ", results);
           var listingIds = results.map(function(listing) { return listing.id; });
           Images
-            .findAll({ where: {listing_id: listingIds} })
+            .findAll({ where: {listingId: listingIds} })
             .then(function(images) {
               console.log("IMAGES FOUND ARE: ", images);
               var sortedImgs = images
@@ -138,20 +195,20 @@ module.exports = function(router) {
               var listings = results.map(function(listing) {
                 return {
                   id:          listing.id,
-                  userId:      listing.user_id,
-                  categoryId:  listing.category_id,  // TODO: Decide if UI does the name conversion or the API
-                  conditionId: listing.condition_id,  // TODO: Decide if UI does the name conversion or the API
+                  userId:      listing.userId,
+                  categoryId:  listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                  conditionId: listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                   title:       listing.title,
                   description: listing.description,
                   keywords:    listing.keywords,
                   linkUrl:     listing.linkUrl,
                   price:       listing.price,
-                  locationId:  listing.location_id, // TODO: SHOULD THIS BE LOCATION???
+                  locationId:  listing.locationId, // TODO: SHOULD THIS BE LOCATION???
                   images:      sortedImgs
-                                .filter(function(img){ return img.listing_id == listing.id})
+                                .filter(function(img){ return img.listingId == listing.id})
                                 .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
-                  hero:        listing.hero_img,        // TODO: Send ONE of these
-                  imagesRef:   listing.images_ref,
+                  hero:        listing.heroImg,        // TODO: Send ONE of these
+                  imagesRef:   listing.imagesRef,
                   slug:        listing.slug,
                   createdAt:   listing.createdAt,
                   updatedAt:   listing.updatedAt
@@ -173,9 +230,15 @@ module.exports = function(router) {
     });
   });
 
-  router.get('/listings/:listingId/messages', eatAuth, function() {
+
+  // Get Messages for Listing
+  router.get('/listings/:listingId/messages', eatOnReq, eatAuth, function(req, res) {
+    // !!!!!!! WE NEED TO BRANCH THIS LOGIC TO HANDLE THE CORRESPONDANTS-ONLY case
+    console.log("MADE IT TO MESSAGES ROUTE. REQ QUERY IS: ", req.query);
     const user = req.user;
     const listingId = req.params.listingId;
+    const correspondantId = req.query.correspondant;
+    const correspondantsOnly = req.query['correspondants_only'];
 
     if(!user) {
       console.log("Error getting user off of request.");
@@ -185,64 +248,128 @@ module.exports = function(router) {
       console.log("Route param of listing ID is required.");
       res.status(400).json({error: true, success: false, msg: 'listing ID is required'});
     }
+    if(!correspondantId && !correspondantsOnly) {
+      console.log("Query param of correspondantId is required.");
+      res.status(400).json({error: true, success: false, msg: 'correspondant ID or correspondantsOnly flag is required'});
+    }
 
-    // First get all user messages that have a foreign key of this listingId
-    // Map the messages by the correspondence
-    // Messages should be sorted by MOST RECENT (createdAt DESC)
-        // If the recipient is primary user, add to the user list matching sender's id
-        // if the sender if primary user, add to the user list matching recipient recipient's id
-    // Return the mapped object
-    // Example. Remember ALL for one listing...
+    // TODO: break this logic into two separate functions or even start a Service Layer
 
-    // User order to match the order of messages received
-    // Dedup, while keeping first-order
-    // OR, set an ordering by user on the user object itself & using a counter
-    Message
-      .findAll({
-        where: { listing_id: listingId },
-        order: ['createdAt', 'DESC']
-      })
-      .then(function(allMessages) {
-        const ownerId = user.id;
-        let userOrder = 0;
-        let messagesByUser = {};
-        let listingMessages = [];
-        allMessages.forEach(message => {
-          // Build message info into correct user object
-          // Set the tracked user Id contacting ON the listing
-          let userId = (message.senderId !== ownerId ? senderId : recipientId);
-          let usrObj = messagesByUser[userId];
+    // For case when NON-owner is requesting, get messages between themselves & listing owner
+    if(!!correspondantId) {
+      // First get all user messages that have a foreign key of this listingId
+      // Map the messages by the correspondence
+      // Messages should be sorted by MOST RECENT (createdAt DESC)
+          // If the recipient is primary user, add to the user list matching sender's id
+          // if the sender if primary user, add to the user list matching recipient recipient's id
+      // Return the mapped object
+      // Example. Remember ALL for one listing...
 
-          // No order yet, set one & increment counter
-          if(!usrObj.order) {
-            usrObj.order = userOrder;
-            userOrder++;
-          }
-          if(message.status === "UNREAD") {
-            usrObj.hasUnread = true;
-          }
-          // Add to or create messages array for user
-          if(usrObj.messages && usrObj.messages.length) {
-            usrObj.messages.push(message);
-          }
-          else {
-            usrObj['messages'] = [message];  // new array with one message in it
-          }
+      // User order to match the order of messages received
+      // Dedup, while keeping first-order
+      // OR, set an ordering by user on the user object itself & using a counter
+
+
+      // TODO: Make sure that the
+      Message
+        .findAll({
+          where: {
+            listingId: listingId,
+            $or: [
+              { senderId: correspondantId },
+              { recipientId: correspondantId }
+            ]
+          },
+          order: Sequelize.literal('"created_at" DESC'),  // [['createdAt', 'DESC']]
+          raw: true  // JUST give the values back
+        })
+        // This is going to list messages info by user name, so can order
+        // FIXME??? I'm not even sure this is what we want to do. May group all of a users messages together. :-P
+        //    Probably want more to arrange messages between two users by date, which the SQL should do anyway.
+        .then(function(allMessages) {
+          // console.log("MESSAGES FOUND: ", allMessages);
+          // const ownerId = user.id;
+          // let userOrder = 0;
+          // let messagesByUser = {};
+          // let listingMessages = [];
+          // allMessages.forEach(message => {
+          //   // Build message info into correct user object
+          //   // Set the tracked user Id contacting ON the listing
+          //   let userId = (message.senderId !== ownerId ? message.senderId : message.recipientId);
+
+          //   // If user is not yet in the object, add them
+          //   if(!messagesByUser[userId]) {
+          //     messagesByUser[userId] = {};
+          //   }
+
+          //   // Create quick reference to user's spot
+          //   let usrObj = messagesByUser[userId];
+
+          //   // No order number yet? Set one & increment counter.
+          //   if(!usrObj.order) {
+          //     usrObj.order = userOrder;
+          //     userOrder++;
+          //   }
+          //   if(message.status === "UNREAD") {
+          //     usrObj.hasUnread = true;
+          //   }
+          //   // Add to or create messages array for user
+          //   if(usrObj.messages && usrObj.messages.length) {
+          //     usrObj.messages.push(message);
+          //   }
+          //   else {
+          //     usrObj['messages'] = [message];  // new array with one message in it
+          //   }
+          // });
+
+          // console.log("MESSAGES BY USER WITH ORDER IS: ", messagesByUser);
+
+          // // Order the response object to match messages priority order
+          // Object.keys(messagesByUser)
+          //   .sort(function(prior, current) { return messagesByUser[prior].order - messagesByUser[current].order; })
+          //   .forEach(function(usrId) {
+          //     listingMessages.push(messagesByUser[usrId]);
+          //   });
+
+          // TODO: Probably do want something like the above to highlight unread msga, but not sure about other logic.
+          console.log("FINAL MESSAGES TO SEND ARE: ", allMessages);
+
+          res.json({error: false, success: true, listingMessages: allMessages});
+        })
+        .catch(function(error) {
+          console.log("Caught error in getting messages for listing: ", error);
+          res.status(500).json({error: true, success: false, msg: 'Error getting messages for listing.'});
         });
-        // Order the response object to match messages priority order
-        Object.keys(messagesByUser)
-          .sort(function(prior, current) { return prior.order - current.order; })
-          .forEach(function(userObj) {
-            listingMessages.push(userObj);
+    }
+    // For case when listing owner wants to get all messages, we return list of correspondants so can rerieve messages for each
+    else if(!!correspondantsOnly) {
+      Message
+        .findAll(
+          {
+            where: { listingId: listingId },
+            order: Sequelize.literal('"created_at" DESC'),
+            raw: true  // JUST give the values back
+          }
+        )
+        .then(function(allMessages) {
+          console.log("ALL MESSAGES FOUND ARE: ", allMessages);
+          var uniqueCorrespondants = new Set();
+          allMessages.forEach(function(msg) {
+            // Attempt to add every correspondant to the set
+            uniqueCorrespondants.add(msg.senderId);
+            // Probably don't need this, since sender will first always be NOT the owner, so would cover everyone
+            uniqueCorrespondants.add(msg.recipientId);
           });
+          console.log("Final correspondant's list for listing is: ", uniqueCorrespondants);
 
-        res.json({error: false, success: true, listingMessages: listingMessages});
-      })
-      .catch(function(error) {
-        console.log("Caught error in getting messages for listing: ", error);
-        res.status(500).json({error: true, success: false, msg: 'Error getting messages for listing.'});
-      });
-  })
+          res.json({error: false, success: true, correspondants: Array.from(uniqueCorrespondants)});
+        })
+        .catch(function(error) {
+          console.log("Caught error in getting messages for listing: ", error);
+          res.status(500).json({error: true, success: false, msg: 'Error getting messages for listing.'});
+        });
+    }
+  });
 
   // Create New Listing
   // TODO: ADD BACK THE EATAUTH!!!!!!!!
@@ -255,17 +382,17 @@ module.exports = function(router) {
 
     if(passesCriticalValidations(listingData)) {
       const preListing = {
-        category_id: listingData.category,
-        condition_id: listingData.condition,
+        categoryId: listingData.category,
+        conditionId: listingData.condition,
         title: listingData.title,
         description: listingData.description,
         price: listingData.price,
         linkUrl: listingData.linkUrl,
         keywords: listingData.keywords,
-        location_id: listingData.location,
-        hero_img: listingData.images[0],  // First image is hero
-        images_ref: "tbd",
-        user_id: listingData.userId,  // TODO: UPDATE THIS TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
+        locationId: listingData.location,
+        heroImg: listingData.images[0],  // First image is hero
+        imagesRef: "tbd",
+        userId: listingData.userId,  // TODO: UPDATE THIS TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
         slug: "tbd",
         status: 'ACTIVE'
       };
@@ -284,19 +411,19 @@ module.exports = function(router) {
 
               const responseListing = {
                 id:          newListing.id,
-                userId:      newListing.user_id,
-                categoryId:  newListing.category_id,  // TODO: Decide if UI does the name conversion or the API
-                conditionId: newListing.condition_id,  // TODO: Decide if UI does the name conversion or the API
+                userId:      newListing.userId,
+                categoryId:  newListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                conditionId: newListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                 title:       newListing.title,
                 description: newListing.description,
                 keywords:    newListing.keywords,
                 linkUrl:     newListing.linkUrl,
                 price:       newListing.price,
-                locationId:  newListing.location_id, // TODO: SHOULD THIS BE LOCATION???
+                locationId:  newListing.locationId, // TODO: SHOULD THIS BE LOCATION???
                 status:      newListing.status,
                 images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                hero:        newListing.hero_img,
-                imagesRef:   newListing.images_ref,
+                hero:        newListing.heroImg,
+                imagesRef:   newListing.imagesRef,
                 slug:        newListing.slug,
                 createdAt:   newListing.createdAt,
                 updatedAt:   newListing.updatedAt
@@ -362,17 +489,17 @@ module.exports = function(router) {
 
           // Specify fields we allow to be updated
           let allowedUpdates = {
-            category_id:  listingData.categoryId,
-            condition_id: listingData.conditionId,
+            categoryId:  listingData.categoryId,
+            conditionId: listingData.conditionId,
             title:        Utils.sanitizeString(listingData.title),
             description:  Utils.sanitizeString(listingData.description),
             price:        Utils.sanitizeString(listingData.price),
             linkUrl:      Utils.sanitizeUrl(listingData.linkUrl),
             keywords:     Utils.sanitizeString(keywords),
-            location_id:  listingData.locationId,
-            hero_img:     listingData.images[0],
-            images_ref:   imagesRef,
-            user_id:      userId,
+            locationId:  listingData.locationId,
+            heroImg:     listingData.images[0],
+            imagesRef:   imagesRef,
+            userId:      userId,
             slug:         Utils.generateUrlSlug(title),
             // status cannot be changed here for now (always active). Later may do deleted, fulfilled, private, etc.
           }
@@ -396,19 +523,19 @@ module.exports = function(router) {
                 // Success response & updated Listing (if needed)
                 res.json({error: false, success: true, listing: {
                   id:          updatedListing.id,
-                  userId:      updatedListing.user_id,
-                  categoryId:  updatedListing.category_id,  // TODO: Decide if UI does the name conversion or the API
-                  conditionId: updatedListing.condition_id,  // TODO: Decide if UI does the name conversion or the API
+                  userId:      updatedListing.userId,
+                  categoryId:  updatedListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                  conditionId: updatedListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                   title:       updatedListing.title,
                   description: updatedListing.description,
                   keywords:    updatedListing.keywords,
                   linkUrl:     updatedListing.linkUrl,
                   price:       updatedListing.price,
-                  locationId:  updatedListing.location_id, // TODO: SHOULD THIS BE LOCATION???
+                  locationId:  updatedListing.locationId, // TODO: SHOULD THIS BE LOCATION???
                   status:      updatedListing.status,
-                  hero:        updatedListing.hero_img,
+                  hero:        updatedListing.heroImg,
                   images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                  imagesRef:   updatedListing.images_ref,
+                  imagesRef:   updatedListing.imagesRef,
                   slug:        updatedListing.slug,
                   createdAt:   updatedListing.createdAt,
                   updatedAt:   updatedListing.updatedAt
@@ -477,8 +604,8 @@ module.exports = function(router) {
             origurl:    url,
             url:        url,        // Someday this may be different.
             position:   index,
-            listing_id: listingId,
-            user_id:    userId
+            listingId: listingId,
+            userId:    userId
           }})
           .spread(function(image, metadata) {
             console.log("CREATED IMAGE METADATA IS: ", metadata);
@@ -504,8 +631,8 @@ module.exports = function(router) {
           origurl:    url,
           url:        url,        // Someday this may be different.
           position:   index,
-          listing_id: listingId,
-          user_id:    userId
+          listingId:  listingId,
+          userId:     userId
         };
       });
 

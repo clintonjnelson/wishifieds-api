@@ -18,7 +18,7 @@ module.exports = function(router, passport) {
     res.json({
       eat:      req.eat,
       username: user.username,
-      userId:   user._id,
+      userId:   user.id,
       email:    user.email,
       role:     user.role
     });
@@ -44,6 +44,7 @@ module.exports = function(router, passport) {
           console.log('Error logging in user. Error: ', err);
           return res.status(404).json({ error: true, msg: 'error logging in' });
         }
+        console.log("USER FOR LOGIN IS: ", user);
         res.json({
           eat:      eat,
           username: user.username,
@@ -98,7 +99,7 @@ module.exports = function(router, passport) {
           from:    'Syynpost Password Reset <info@syynpost.com>',
           to:      user.email,   // Email provided by user
           subject: 'Syynpost Password Change Request',
-          html: EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email, host: req.headers.origin }),
+          html:    EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email, host: req.headers.origin }),
           // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
         };
 
@@ -172,7 +173,7 @@ module.exports = function(router, passport) {
               res.json({success: true,
                         user: { eat:      eat,
                                 username: updatedUser.username,
-                                userId:   updatedUser._id,
+                                userId:   updatedUser.id,
                                 email:    updatedUser.email,
                                 role:     updatedUser.role }
                       });
