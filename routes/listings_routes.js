@@ -13,7 +13,6 @@ var Listings   = require('../db/models/index.js').Listing;
 var Images     = require('../db/models/index.js').Image;
 var User       = require('../db/models/index.js').User;
 var Message    = require('../db/models/index.js').Message;
-var zipObject  = require('lodash').zipObject;
 var Sequelize  = require('sequelize');
 
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
@@ -48,7 +47,7 @@ module.exports = function(router) {
               { keywords: { [Sequelize.Op.iLike]: '%'+searchStr } }
             ]
           },
-          include: [Images]
+          include: [User]
         })
         .then(function(results) {
           console.log("RESULTS ARE: ", results);
@@ -66,6 +65,7 @@ module.exports = function(router) {
                   return {
                     id:          listing.id,
                     userId:      listing.userId,
+                    ownerUsername: listing['User']['username'],
                     categoryId:  listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
                     conditionId: listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                     title:       listing.title,
@@ -119,7 +119,7 @@ module.exports = function(router) {
     }
 
     Listings
-      .findOne({where: {id: listingId}})
+      .findOne({where: {id: listingId}, include: [User]})  // Join user on search
       .then(function(result) {
         console.log("Listing found is: ", result);
         if(!result || (result && result.length === 0)) {
@@ -136,6 +136,7 @@ module.exports = function(router) {
             var listing = {
                 id:          result.id,
                 userId:      result.userId,
+                ownerUsername: result['User']['username'],
                 categoryId:  result.categoryId,  // TODO: Decide if UI does the name conversion or the API
                 conditionId: result.conditionId,  // TODO: Decide if UI does the name conversion or the API
                 title:       result.title,
@@ -179,7 +180,9 @@ module.exports = function(router) {
           where: {
             userId: userId,
             status: 'ACTIVE'
-          }
+          },
+          include: [User],
+          // raw: true
         })
         .then(function(results) {
           console.log("RESULTS ARE: ", results);
@@ -193,25 +196,27 @@ module.exports = function(router) {
 
               console.log("SORTED IMAGES ARE: ", sortedImgs);
               var listings = results.map(function(listing) {
+                console.log("LISTING USER IS: ", listing.User);
                 return {
-                  id:          listing.id,
-                  userId:      listing.userId,
-                  categoryId:  listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                  conditionId: listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
-                  title:       listing.title,
-                  description: listing.description,
-                  keywords:    listing.keywords,
-                  linkUrl:     listing.linkUrl,
-                  price:       listing.price,
-                  locationId:  listing.locationId, // TODO: SHOULD THIS BE LOCATION???
-                  images:      sortedImgs
-                                .filter(function(img){ return img.listingId == listing.id})
-                                .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
-                  hero:        listing.heroImg,        // TODO: Send ONE of these
-                  imagesRef:   listing.imagesRef,
-                  slug:        listing.slug,
-                  createdAt:   listing.createdAt,
-                  updatedAt:   listing.updatedAt
+                  id:            listing.id,
+                  userId:        listing.userId,
+                  ownerUsername: listing['User']['username'],
+                  categoryId:    listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                  conditionId:   listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
+                  title:         listing.title,
+                  description:   listing.description,
+                  keywords:      listing.keywords,
+                  linkUrl:       listing.linkUrl,
+                  price:         listing.price,
+                  locationId:    listing.locationId, // TODO: SHOULD THIS BE LOCATION???
+                  images:        sortedImgs
+                                  .filter(function(img){ return img.listingId == listing.id})
+                                  .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
+                  hero:          listing.heroImg,        // TODO: Send ONE of these
+                  imagesRef:     listing.imagesRef,
+                  slug:          listing.slug,
+                  createdAt:     listing.createdAt,
+                  updatedAt:     listing.updatedAt
                 };
               });
               console.log("LISTINGS FOUND: ", listings);
@@ -373,7 +378,7 @@ module.exports = function(router) {
 
   // Create New Listing
   // TODO: ADD BACK THE EATAUTH!!!!!!!!
-  router.post('/listings', function(req, res) {
+  router.post('/listings', eatOnReq, eatAuth, function(req, res) {
     const user = req.user;
     const listingData = req.body.listingData;
 
@@ -382,14 +387,14 @@ module.exports = function(router) {
 
     if(passesCriticalValidations(listingData)) {
       const preListing = {
-        categoryId: listingData.category,
-        conditionId: listingData.condition,
+        categoryId: listingData.categoryId,
+        conditionId: listingData.conditionId,
         title: listingData.title,
         description: listingData.description,
         price: listingData.price,
         linkUrl: listingData.linkUrl,
         keywords: listingData.keywords,
-        locationId: listingData.location,
+        locationId: listingData.locationId,
         heroImg: listingData.images[0],  // First image is hero
         imagesRef: "tbd",
         userId: listingData.userId,  // TODO: UPDATE THIS TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
@@ -412,6 +417,7 @@ module.exports = function(router) {
               const responseListing = {
                 id:          newListing.id,
                 userId:      newListing.userId,
+                ownerUsername: user.username,
                 categoryId:  newListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
                 conditionId: newListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                 title:       newListing.title,
@@ -449,10 +455,11 @@ module.exports = function(router) {
 
   // Update Listing
   // TODO: ADD BACK THE EATAUTH!!!!!!!!
-  router.put('/listings/:listingId', function(req, res) {
+  router.put('/listings/:listingId', eatOnReq, eatAuth, function(req, res) {
     console.log("BODY IS: ", req.body);
 
     const user = req.user;
+    const userId = user.id;
     const listingId = req.params.listingId;
     const listingData = req.body.listingData;
 
@@ -467,8 +474,14 @@ module.exports = function(router) {
     // Verify no injection/scripting issues on the text
     if(passesCriticalValidations(listingData)) {
       Listings
-        .findOne({ where: {id: listingId} })
+        .findOne({
+          where: {
+            id: listingId,
+            userId: user.id
+          }
+        })
         .then(function(foundListing) {
+          var foundListingValues = foundListing.dataValues;
           if(!foundListing) {
             console.log('Could not find listing by id: ', listingId);
             return res.status(400).json({error: true, msg: 'Listing not found.'});
@@ -477,8 +490,8 @@ module.exports = function(router) {
 
           // Verify Listing & Requesting User ID's match
           // TODO: break this out into a helper method below routes?
-          if(foundListing.userId !== user.id) {
-            console.log('Error: Listing user ID: ', foundListing.userId, ' and requesting user ID: ', user.id, ' do not match.');
+          if(foundListingValues.userId !== userId) {
+            console.log('Error: Listing user ID: ', foundListingValues.userId, ' and requesting user ID: ', userId, ' do not match.');
             return res.status(401).json({error: true, msg: 'Unauthorized.'});
           }
 
@@ -487,6 +500,7 @@ module.exports = function(router) {
           // TODO: Should be able to use same URL, but do not want to save multiple of same image file
           const imagesRef = listingData.imagesRef || Utils.generateGenericToken();
 
+          console.log("Creating listing object updates...")
           // Specify fields we allow to be updated
           let allowedUpdates = {
             categoryId:  listingData.categoryId,
@@ -495,12 +509,12 @@ module.exports = function(router) {
             description:  Utils.sanitizeString(listingData.description),
             price:        Utils.sanitizeString(listingData.price),
             linkUrl:      Utils.sanitizeUrl(listingData.linkUrl),
-            keywords:     Utils.sanitizeString(keywords),
-            locationId:  listingData.locationId,
-            heroImg:     listingData.images[0],
-            imagesRef:   imagesRef,
-            userId:      userId,
-            slug:         Utils.generateUrlSlug(title),
+            keywords:     Utils.sanitizeString(listingData.keywords),
+            locationId:   listingData.locationId,
+            heroImg:      listingData.images[0],
+            // imagesRef:    foundListing.imagesRef,
+            userId:       userId,
+            slug:         Utils.generateUrlSlug(listingData.title),
             // status cannot be changed here for now (always active). Later may do deleted, fulfilled, private, etc.
           }
 
@@ -524,6 +538,7 @@ module.exports = function(router) {
                 res.json({error: false, success: true, listing: {
                   id:          updatedListing.id,
                   userId:      updatedListing.userId,
+                  ownerUsername: user.username,
                   categoryId:  updatedListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
                   conditionId: updatedListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                   title:       updatedListing.title,
@@ -574,12 +589,12 @@ module.exports = function(router) {
 
   // Critical pre-save checks
   function passesCriticalValidations(listingData) {
-    const checks = listingData.category &&
-    listingData.condition &&
+    const checks = listingData.categoryId &&
+    listingData.conditionId &&
     listingData.title &&
     listingData.description &&
     listingData.price &&
-    listingData.location &&
+    listingData.locationId &&
     (listingData.images.length > 0) &&
     listingData.keywords &&
     true;
