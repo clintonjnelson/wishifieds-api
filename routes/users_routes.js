@@ -8,9 +8,11 @@ var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
 var adminAuth    = require('../lib/routes_middleware/admin_auth.js');
 var MailService  = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder.js');
+var userMappers  = require('../lib/model_mappers/user_mapper.js');
 var Utils        = require('../lib/utils.js');
 var User         = require('../db/models/index.js').User;
 var Sequelize    = require('sequelize');
+
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
@@ -33,14 +35,7 @@ module.exports = function(router) {
         }
 
         console.log("USER FOUND: ", user);
-        return res.json({
-          username:  user.username,
-          email:     user.email,
-          userId:    user.id,
-          status:    user.status,
-          role:      user.role,
-          confirmed: user.confirmed
-        })
+        return res.json(userMappers.mapUser(user));  // FIX: return {data:...} or {user:...}. Not raw object
       })
       .catch(function(err) {
         console.log('Database error getting user by username or id:');
@@ -63,13 +58,39 @@ module.exports = function(router) {
       });
   });
 
+  // GET profile_pic for a requested user id
+  // TODO: Maybe get off of normal user route, but with special flag specifying fields?
+  router.get('/users/:id/profile_pic', eatOnReq, eatAuth, function(req, res) {
+    var profileUserId = req.params.id;
+    User
+      .findOne({
+        where: { id: profileUserId },
+        raw: true
+      })
+      .then(function(foundUser) {
+        if(!foundUser) {
+          console.log("Could not find profile pic url for user with ID: ", profileUserId);
+          return res.status(404).json({error: true, msg: 'no profile pic url found for user'});
+        }
+
+        console.log("AVATAR FOUND FOR USER: ", foundUser.profilePicUrl);
+        res.json({error: false, profilePicUrl: foundUser.profilePicUrl});
+      })
+      .catch(function(err) {
+        console.log('Error finding user for id: ', profileUserId);
+        return res.status(500).json({error: true, msg: 'database error'});
+      });
+  });
+
   // Create new user
   router.post('/users', function(req, res) {
-    var newEmail = req.body.email || 'e@example.com';
-    var newName = req.body.username || "toto6"
+    var newEmail = req.body.email;
+    var newName = req.body.username || newEmail.split('@')[0]; // TODO: need a username generator here
+    const defaultProfilePicUrl = '/assets/profile.png';
     var preUser = {  // Explicitly populate to avoid exploit
       username: newName,
-      email: newEmail
+      email: newEmail,
+      profilePicUrl: defaultProfilePicUrl
     };
 
     if(!newEmail || !EMAIL_REGEX.test(newEmail)) {
@@ -111,12 +132,7 @@ module.exports = function(router) {
                     return res.status(500).json({ error: 'login' });
                   }
                   console.log("EAT FOUND IS: ", encryptedToken);
-                  res.json({
-                    eat:      encryptedToken,  // NOTE: encrypted version (usr.eat is RAW)
-                    username: usr.username,
-                    role:     usr.role,
-                    email:    usr.email,
-                    userId:   usr.id });  // TODO: This seems like it should be userId, not userid (all LC). If doesn't work, flip back! Remove this comment if works.
+                  res.json( userMappers.mapUserSession(usr, encryptedToken) );  // TODO: This seems like it should be userId, not userid (all LC). If doesn't work, flip back! Remove this comment if works.
                 });
               });
             })
@@ -226,14 +242,7 @@ module.exports = function(router) {
             .save()
             .then(function(usr) {
               console.log("User returned from save is: ", usr);
-              return res.json({ success: true,
-                         user: {username:  usr.username,
-                                email:     usr.email,
-                                userId:    usr.id,
-                                status:    usr.status,
-                                role:      usr.role,
-                                confirmed: usr.confirmed}
-              });
+              return res.json({ success: true, user: userMappers.mapUser(usr) });
             })
             .catch(function(err) {
               console.log('Error updating user. Error: ', err);
@@ -246,6 +255,9 @@ module.exports = function(router) {
         });
     }
   });
+
+
+//--------------------- HELPERS ------------------------
 
   function makeUsernameOrIdQuery(usernameOrId) {
     let query = {};
@@ -282,7 +294,7 @@ module.exports = function(router) {
             console.log("RESULT OF SENDING EMAIL IS: ", result);
           });
 
-          callback(user);
+          callback(usr);
         });
     });
   }

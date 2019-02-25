@@ -9,10 +9,11 @@ var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.A
 // TODO: WILL NEED SERVICE FOR SMS INTERFACT HERE (service logic in /lib)
 // var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var Utils      = require('../lib/utils.js');
-var Listings   = require('../db/models/index.js').Listing;
-var Images     = require('../db/models/index.js').Image;
-var User       = require('../db/models/index.js').User;
-var Message    = require('../db/models/index.js').Message;
+var db         = require('../db/models/index.js');
+var Listings   = db.Listing;
+var Images     = db.Image;
+var User       = db.User;
+var Message    = db.Message;
 var Sequelize  = require('sequelize');
 
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
@@ -236,6 +237,11 @@ module.exports = function(router) {
   });
 
 
+
+  // Note, this route has two primary paths:
+    // 1) Get all of the users that have messaged owner on a given listing
+    // 2) Get all of the messages for owner/correspondant on a listing (has a correspondantId)
+
   // Get Messages for Listing
   router.get('/listings/:listingId/messages', eatOnReq, eatAuth, function(req, res) {
     // !!!!!!! WE NEED TO BRANCH THIS LOGIC TO HANDLE THE CORRESPONDANTS-ONLY case
@@ -259,115 +265,92 @@ module.exports = function(router) {
     }
 
     // TODO: break this logic into two separate functions or even start a Service Layer
-
-    // For case when NON-owner is requesting, get messages between themselves & listing owner
+    // GET messages specific to this correspondant/Owner pair for given listing
+    // Either Owner or correspondant could be requesting
     if(!!correspondantId) {
-      // First get all user messages that have a foreign key of this listingId
-      // Map the messages by the correspondence
-      // Messages should be sorted by MOST RECENT (createdAt DESC)
-          // If the recipient is primary user, add to the user list matching sender's id
-          // if the sender if primary user, add to the user list matching recipient recipient's id
-      // Return the mapped object
-      // Example. Remember ALL for one listing...
-
-      // User order to match the order of messages received
-      // Dedup, while keeping first-order
-      // OR, set an ordering by user on the user object itself & using a counter
-
-
-      // TODO: Make sure that the
+      console.log("EXECUTING THE SINGLE CORRESPONDANT QUERY...");
       Message
         .findAll({
           where: {
             listingId: listingId,
             $or: [
               { senderId: correspondantId },
-              { recipientId: correspondantId }
-            ]
+              { recipientId: correspondantId }]
           },
-          order: Sequelize.literal('"created_at" DESC'),  // [['createdAt', 'DESC']]
+          order: [['createdAt', 'ASC']],// Sequelize.literal('"Message"."created_at" DESC'), // [[Message, 'createdAt', 'ASC']],// Sequelize.literal('created_at ASC'),  // [['createdAt', 'ASC']] doesn't work
           raw: true  // JUST give the values back
         })
-        // This is going to list messages info by user name, so can order
-        // FIXME??? I'm not even sure this is what we want to do. May group all of a users messages together. :-P
-        //    Probably want more to arrange messages between two users by date, which the SQL should do anyway.
         .then(function(allMessages) {
-          // console.log("MESSAGES FOUND: ", allMessages);
-          // const ownerId = user.id;
-          // let userOrder = 0;
-          // let messagesByUser = {};
-          // let listingMessages = [];
-          // allMessages.forEach(message => {
-          //   // Build message info into correct user object
-          //   // Set the tracked user Id contacting ON the listing
-          //   let userId = (message.senderId !== ownerId ? message.senderId : message.recipientId);
-
-          //   // If user is not yet in the object, add them
-          //   if(!messagesByUser[userId]) {
-          //     messagesByUser[userId] = {};
-          //   }
-
-          //   // Create quick reference to user's spot
-          //   let usrObj = messagesByUser[userId];
-
-          //   // No order number yet? Set one & increment counter.
-          //   if(!usrObj.order) {
-          //     usrObj.order = userOrder;
-          //     userOrder++;
-          //   }
-          //   if(message.status === "UNREAD") {
-          //     usrObj.hasUnread = true;
-          //   }
-          //   // Add to or create messages array for user
-          //   if(usrObj.messages && usrObj.messages.length) {
-          //     usrObj.messages.push(message);
-          //   }
-          //   else {
-          //     usrObj['messages'] = [message];  // new array with one message in it
-          //   }
-          // });
-
-          // console.log("MESSAGES BY USER WITH ORDER IS: ", messagesByUser);
-
-          // // Order the response object to match messages priority order
-          // Object.keys(messagesByUser)
-          //   .sort(function(prior, current) { return messagesByUser[prior].order - messagesByUser[current].order; })
-          //   .forEach(function(usrId) {
-          //     listingMessages.push(messagesByUser[usrId]);
-          //   });
-
-          // TODO: Probably do want something like the above to highlight unread msga, but not sure about other logic.
+          var unreadCounts = allMessages.reduce(getUserListingMsgsMeta(user.id), {});  // Returns object of {userId1: count1, userId2: count2, ...}
+          console.log("UNREADS COUNT IS: ", unreadCounts);
           console.log("FINAL MESSAGES TO SEND ARE: ", allMessages);
 
-          res.json({error: false, success: true, listingMessages: allMessages});
+          // listingMessages: [ {msg1}, {msg2}, ... ]
+          res.json({
+            error: false,
+            success: true,
+            listingMessages: allMessages,  // FIXME - MAP THIS TO UI MODEL
+            unreadCounts: unreadCounts  // FIXME - THIS IS WRONG!!!!
+          });
         })
         .catch(function(error) {
           console.log("Caught error in getting messages for listing: ", error);
           res.status(500).json({error: true, success: false, msg: 'Error getting messages for listing.'});
         });
     }
-    // For case when listing owner wants to get all messages, we return list of correspondants so can rerieve messages for each
+
+    // For case when listing owner wants to get all messages
+      // We return list of correspondants so UI can rerieve messages for each.
     else if(!!correspondantsOnly) {
+      console.log("NOT THE QUERY I EXPECTED...");
       Message
         .findAll(
           {
             where: { listingId: listingId },
-            order: Sequelize.literal('"created_at" DESC'),
+            // order: Sequelize.literal('"created_at" DESC'),
+            include: [User],
             raw: true  // JUST give the values back
           }
         )
         .then(function(allMessages) {
           console.log("ALL MESSAGES FOUND ARE: ", allMessages);
           var uniqueCorrespondants = new Set();
-          allMessages.forEach(function(msg) {
-            // Attempt to add every correspondant to the set
-            uniqueCorrespondants.add(msg.senderId);
-            // Probably don't need this, since sender will first always be NOT the owner, so would cover everyone
-            uniqueCorrespondants.add(msg.recipientId);
-          });
-          console.log("Final correspondant's list for listing is: ", uniqueCorrespondants);
+          var unreadCount = {};
+          // allMessages.forEach(function(msg) {
+          //   // Attempt to add every correspondant to the set
+          //   uniqueCorrespondants.add(msg.senderId);
+          //   // Probably don't need this, since sender will first always be NOT the owner, so would cover everyone
+          //   uniqueCorrespondants.add(msg.recipientId);
+          // });
+          // uniqueCorrespondants.delete(user.id); // Delete owner from this list. Never need.
 
-          res.json({error: false, success: true, correspondants: Array.from(uniqueCorrespondants)});
+          // FIXME: shouldn't be counting in code, but in SQL (but hassle in sequelize)
+          // var totalUnread = allMessages.reduce(generateUnreadsCounter(user.id), {});
+          var initialMetaData = allMessages.reduce(getUserListingMsgsMeta(user.id), {});
+          var response = {
+            totalUnread: initialMetaData.totalUnread,
+            correspondants:
+              Object
+                .getOwnPropertyNames(initialMetaData)
+                .filter(function(key) { return (key !== 'totalUnread'); })  // remove totalUnreads
+                .map(function(key, keyInd, keyArr) {
+                  return initialMetaData[key];   // return the contents
+                })
+          };
+          console.log("Listing Messages response IS: ", response);
+
+          // {
+          //   totalUnread: 1,
+          //   correspondants: [
+          //    { userMsgMeta: {userId: 2, unreadCount: 1, picUrl: 'www'} }
+          //   ]
+          // }
+          res.json({
+            error: false,
+            success: true,
+            correspondants: response.correspondants,  // TODO: Change to: { id: 5, profile_pic_url: 'www', unreadsCount: 2}
+            totalUnread: response.totalUnread
+          });
         })
         .catch(function(error) {
           console.log("Caught error in getting messages for listing: ", error);
@@ -376,8 +359,39 @@ module.exports = function(router) {
     }
   });
 
+  // Uses closure to populate the userId field & return a function to use
+  // Returns: {
+  //   userMsgMeta: {2: {userId: 2, unreadCount: 1, picUrl: 'www'}},
+  //   totalCount:
+  // }
+  function getUserListingMsgsMeta(requestorId) {
+    // This function is to be used in a reducer
+    // Returns: {userId1: count1, userId2: count2, ...}
+    return function unreadCounter(countsObj, current) {
+      // Initialize user meta object, if not exist yet
+      if(!countsObj[current.senderId] && (current.senderId !== requestorId) ) {
+        countsObj[current.senderId] = {
+          userId: current.senderId,
+          unreadCount: 0,
+          picUrl: current["User.profilePicUrl"]
+        }
+      }
+      if(!countsObj['totalUnread']) {
+        countsObj['totalUnread'] = 0;
+      }
+
+      // Handle unreads, only counting messages sent by other than requestor
+      if( (current.status === "UNREAD") && (current.senderId !== requestorId) ) {
+        countsObj['totalUnread'] ++;
+        countsObj[current.senderId]['unreadCount'] ++
+      }
+      console.log("COUNTS OBJECT IS: ", countsObj);
+      return countsObj;
+    }
+  }
+
+
   // Create New Listing
-  // TODO: ADD BACK THE EATAUTH!!!!!!!!
   router.post('/listings', eatOnReq, eatAuth, function(req, res) {
     const user = req.user;
     const listingData = req.body.listingData;
@@ -397,7 +411,7 @@ module.exports = function(router) {
         locationId: listingData.locationId,
         heroImg: listingData.images[0],  // First image is hero
         imagesRef: "tbd",
-        userId: listingData.userId,  // TODO: UPDATE THIS TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
+        userId: user.id,
         slug: "tbd",
         status: 'ACTIVE'
       };
@@ -675,51 +689,6 @@ module.exports = function(router) {
     else {
       callback(parseInt(usernameOrId, 10), null);
     }
-
-    // console.log("ATTEMPTING TO PARSE: ", usernameOrId);
-    // try {
-    //   console.log("PARSES AS: ", parseInt(usernameOrId, 10));
-    //   return { id:  };
-    // }
-    // catch(e) {
-    //   console.log("Failed to convert param to ID, creating username query with username: ", usernameOrId);
-    //   return { username: usernameOrId };
-    // }
   }
 }
 
-//     eg: BODY IS:  { listingData:
-//      { category: '2',
-//        condition: '2',
-//        title: 'Cool Thing Wanted But Description Is Way Too Long',
-//        description: 'Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor Lorem ipsum dolor Lorem ipsu…
-//        linkUrl: 'https://www.etsy.com/listing/536967730/fox-baby-booties-baby-shoes-cotton-baby?ref=shop_home_active_48',
-//        images:
-//         [ 'https://i.etsystatic.com/isla/ecec84/16592530/isla_fullxfull.16592530_9kusymrl.jpg?version=0',
-//           'https://i.etsystatic.com/5937962/d/il/715023/1046253996/il_75x75.1046253996_m14j.jpg?version=0',
-//           'https://i.etsystatic.com/5937962/d/il/e2ba81/1046247554/il_75x75.1046247554_1082.jpg?version=0' ],
-//        heroImage: 'https://i.etsystatic.com/isla/ecec84/16592530/isla_fullxfull.16592530_9kusymrl.jpg?version=0',
-//        price: 100,
-//        location: '2',
-//        keywords: 'keyword, keyword, keyword, keyword',
-//        id: '1',
-//        userId: '1' } }
-
-// const listing = {
-//   id:          9,
-//   userId:      8,
-//   categoryId:  7,  // TODO: Decide if UI does the name conversion or the API
-//   conditionId: 6,  // TODO: Decide if UI does the name conversion or the API
-//   title:       "Update successful",
-//   description: "update successful",
-//   keywords:    "keywords, saved",
-//   linkUrl:     "https://www.etsy.com/shop/ThirstyCatFountains?ref=l2-shopheader-name",
-//   price:       "100",
-//   locationId:  5, // TODO: SHOULD THIS BE LOCATION???
-//   status:      "a",
-//   images:      ["https://i.etsystatic.com/5810688/r/il/e5c56d/482647422/il_570xN.482647422_ckku.jpg"],
-//   imagesRef:   "abcd1234",
-//   slug:        "super-cool-title",
-//   createdAt:   "2018-1-1",
-//   updatedAt:   "2018-2-2"
-// };
