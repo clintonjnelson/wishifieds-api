@@ -1,7 +1,6 @@
 
 
 -- $ pg_dump -U postgres --data-only --column-inserts wishifieds
-
 --
 -- PostgreSQL database dump
 --
@@ -23,109 +22,75 @@ SET row_security = off;
 -- Data for Name: Categories; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Categories" (id, name, icon, created_at, updated_at) FROM stdin;
-\.
 
 
 --
 -- Data for Name: Conditions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Conditions" (id, name, icon, created_at, updated_at) FROM stdin;
-\.
 
 
 --
 -- Data for Name: Images; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) FROM stdin;
-1 tbd ref https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_570xN.1773086461_9oon.jpg https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_570xN.1773086461_9oon.jpg 0 1 1 2019-03-07 23:38:49.955+00  2019-03-07 23:38:49.955+00
-2 tbd ref https://i.etsystatic.com/17346189/d/il/955509/1765125719/il_340x270.1765125719_tmic.jpg?version=0 https://i.etsystatic.com/17346189/d/il/955509/1765125719/il_340x270.1765125719_tmic.jpg?version=0 1 1 1 2019-03-07 23:38:49.955+00  2019-03-07 23:38:49.955+00
-3 tbd ref https://i.etsystatic.com/17346189/d/il/527659/1766807269/il_340x270.1766807269_9z3z.jpg?version=0 https://i.etsystatic.com/17346189/d/il/527659/1766807269/il_340x270.1766807269_9z3z.jpg?version=0 2 1 1 2019-03-07 23:38:49.955+00  2019-03-07 23:38:49.955+00
-4 tbd ref https://i.etsystatic.com/17163470/d/il/f1df99/1823579857/il_340x270.1823579857_7lrk.jpg?version=0 https://i.etsystatic.com/17163470/d/il/f1df99/1823579857/il_340x270.1823579857_7lrk.jpg?version=0 0 2 1 2019-03-07 23:47:14.906+00  2019-03-07 23:47:14.906+00
-5 tbd ref https://i.etsystatic.com/17163470/r/il/e0fc90/1846728861/il_794xN.1846728861_95f8.jpg https://i.etsystatic.com/17163470/r/il/e0fc90/1846728861/il_794xN.1846728861_95f8.jpg 1 2 1 2019-03-07 23:47:14.906+00  2019-03-07 23:47:14.906+00
-6 tbd ref https://i.etsystatic.com/10167223/d/il/c370dd/933572611/il_75x75.933572611_cuhj.jpg?version=0 https://i.etsystatic.com/10167223/d/il/c370dd/933572611/il_75x75.933572611_cuhj.jpg?version=0 0 3 2 2019-03-07 23:57:43.99+00 2019-03-07 23:57:43.99+00
-7 tbd ref https://i.etsystatic.com/10167223/r/il/c370dd/933572611/il_794xN.933572611_cuhj.jpg https://i.etsystatic.com/10167223/r/il/c370dd/933572611/il_794xN.933572611_cuhj.jpg 1 3 2 2019-03-07 23:57:43.99+00 2019-03-07 23:57:43.99+00
-8 tbd ref https://i.etsystatic.com/10167223/d/il/e01ae5/1174692831/il_340x270.1174692831_p3zc.jpg?version=0 https://i.etsystatic.com/10167223/d/il/e01ae5/1174692831/il_340x270.1174692831_p3zc.jpg?version=0 2 3 2 2019-03-07 23:57:43.99+00 2019-03-07 23:57:43.99+00
-9 tbd ref https://i.etsystatic.com/9164565/r/il/4d73c1/1745794125/il_794xN.1745794125_nwsk.jpg  https://i.etsystatic.com/9164565/r/il/4d73c1/1745794125/il_794xN.1745794125_nwsk.jpg  0 4 2 2019-03-08 00:06:12.691+00  2019-03-08 00:06:12.691+00
-\.
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (10, 'tbd ref', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 0, 5, 3, '2019-03-09 22:37:41.542+00', '2019-03-09 22:37:41.542+00');
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (11, 'tbd ref', 'https://i.etsystatic.com/17346189/d/il/955509/1765125719/il_340x270.1765125719_tmic.jpg?version=0', 'https://i.etsystatic.com/17346189/d/il/955509/1765125719/il_340x270.1765125719_tmic.jpg?version=0', 1, 5, 3, '2019-03-09 22:37:41.542+00', '2019-03-09 22:37:41.542+00');
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (12, 'tbd ref', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 0, 6, 3, '2019-03-09 22:41:16.14+00', '2019-03-09 22:41:16.14+00');
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (13, 'tbd ref', 'https://i.etsystatic.com/isla/a5c163/26194534/isla_75x75.26194534_dmko2dgx.jpg?version=0', 'https://i.etsystatic.com/isla/a5c163/26194534/isla_75x75.26194534_dmko2dgx.jpg?version=0', 1, 6, 3, '2019-03-09 22:41:16.14+00', '2019-03-09 22:41:16.14+00');
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (14, 'tbd ref', 'https://i.etsystatic.com/18282007/r/il/56dff6/1723602048/il_794xN.1723602048_p61o.jpg', 'https://i.etsystatic.com/18282007/r/il/56dff6/1723602048/il_794xN.1723602048_p61o.jpg', 0, 7, 4, '2019-03-09 22:43:44.178+00', '2019-03-09 22:43:44.178+00');
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (15, 'tbd ref', 'https://i.etsystatic.com/6079982/r/il/e83f03/661150582/il_794xN.661150582_i8bg.jpg', 'https://i.etsystatic.com/6079982/r/il/e83f03/661150582/il_794xN.661150582_i8bg.jpg', 0, 8, 4, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00');
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (16, 'tbd ref', 'https://i.etsystatic.com/isla/63ba79/30987754/isla_75x75.30987754_pio7jca9.jpg?version=0', 'https://i.etsystatic.com/isla/63ba79/30987754/isla_75x75.30987754_pio7jca9.jpg?version=0', 1, 8, 4, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00');
+INSERT INTO public."Images" (id, reftoken, origurl, url, "position", listing_id, user_id, created_at, updated_at) VALUES (17, 'tbd ref', 'https://i.etsystatic.com/6079982/d/il/6d2b84/380594775/il_340x270.380594775_m516.jpg?version=0', 'https://i.etsystatic.com/6079982/d/il/6d2b84/380594775/il_340x270.380594775_m516.jpg?version=0', 2, 8, 4, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00');
 
 
 --
 -- Data for Name: Listings; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Listings" (id, category_id, condition_id, title, description, price, "linkUrl", keywords, images_ref, hero_img, location_id, user_id, slug, status, created_at, updated_at) FROM stdin;
-1 11  6 Princess Shoes  Shoes that even a princess that would be proud to wear. 20  https://www.etsy.com/listing/655680492/princess-shoes?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=girls+princess+shoes&ref=sr_gallery-1-7  princess shoes  tbd https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_570xN.1773086461_9oon.jpg 1 1 tbd ACTIVE  2019-03-07 23:38:49.941+00  2019-03-07 23:38:49.941+00
-2 11  7 Nike Princess Athletic Shoes  Nike athletic shoes with princess flair.  25  https://www.etsy.com/listing/687643957/nike-roshe-mickey-disney-custom-made?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=disney+nike&ref=sr_gallery-1-1&pro=1&frs=1&col=1 Princess Athletic Shoes, Nike Princess  tbd https://i.etsystatic.com/17163470/d/il/f1df99/1823579857/il_340x270.1823579857_7lrk.jpg?version=0 2 1 tbd ACTIVE  2019-03-07 23:47:14.895+00  2019-03-07 23:47:14.895+00
-3 12  1 Belle's Book Emporium Looking for this book, which is really just an old version of Beauty & The Beast. Any condition, but better is preferable.  15   https://www.etsy.com/listing/270797917/belles-book-emporium-beauty-and-the?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+vintage&ref=sc_gallery-1-3&plkey=c3872e5f59fdcaba6d1447ecc930685b31c230bb%3A270797917&bes=1 Belle, Book Emporium, Belle's Book Emporium, Beauty, Beast  tbd https://i.etsystatic.com/10167223/d/il/c370dd/933572611/il_75x75.933572611_cuhj.jpg?version=0 1 2 tbd ACTIVE  2019-03-07 23:57:43.979+00  2019-03-07 23:57:43.979+00
-4 12  1 Princess Jewelry Holder Jewelry case fit for a princess.  30  https://www.etsy.com/listing/645394750/vintage-decorative-silverplated-ornate?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+vintage+decorative&ref=sr_gallery-1-37&organic_search_click=1 princess, jewelry case  tbd https://i.etsystatic.com/9164565/r/il/4d73c1/1745794125/il_794xN.1745794125_nwsk.jpg  1 2 tbd ACTIVE  2019-03-08 00:06:12.678+00  2019-03-08 00:06:12.678+00
-\.
+INSERT INTO public."Listings" (id, category_id, condition_id, title, description, price, "linkUrl", keywords, images_ref, hero_img, location_id, user_id, slug, status, created_at, updated_at) VALUES (5, 11, 7, 'Princess Shoes', 'Shoes even a princess would be happy to have.', '20', ' https://www.etsy.com/listing/655680492/princess-shoes?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=girls+princess+shoes&ref=sr_gallery-1-7', 'princess shoes, princess', 'tbd', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:37:41.527+00', '2019-03-09 22:37:41.527+00');
+INSERT INTO public."Listings" (id, category_id, condition_id, title, description, price, "linkUrl", keywords, images_ref, hero_img, location_id, user_id, slug, status, created_at, updated_at) VALUES (6, 12, 6, 'Princess Mirror', 'Mirror a princess would be happy to look into.', '22', ' https://www.etsy.com/listing/534350450/antique-baroque-mirror-rococo-antique?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+mirror&ref=sr_gallery-1-11&organic_search_click=1&cns=1', 'princess mirror', 'tbd', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
+INSERT INTO public."Listings" (id, category_id, condition_id, title, description, price, "linkUrl", keywords, images_ref, hero_img, location_id, user_id, slug, status, created_at, updated_at) VALUES (7, 12, 5, 'Princess Jewelry Box', 'A jewelry box that a princess would adore.', '40', ' https://www.etsy.com/listing/651256906/vintage-gold-filigree-jewelry-box?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-11&organic_search_click=1', 'princess jewelry box, princess', 'tbd', 'https://i.etsystatic.com/18282007/r/il/56dff6/1723602048/il_794xN.1723602048_p61o.jpg', 1, 4, 'tbd', 'ACTIVE', '2019-03-09 22:43:44.17+00', '2019-03-09 22:43:44.17+00');
+INSERT INTO public."Listings" (id, category_id, condition_id, title, description, price, "linkUrl", keywords, images_ref, hero_img, location_id, user_id, slug, status, created_at, updated_at) VALUES (8, 12, 7, 'Princess Tiara Display Case', 'A display case for my princess tiara', '25', ' https://www.etsy.com/listing/205408462/round-crown-tiara-display-case-with?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-7&organic_search_click=1&bes=1&col=1', 'princess tiara display, princess', 'tbd', 'https://i.etsystatic.com/6079982/r/il/e83f03/661150582/il_794xN.661150582_i8bg.jpg', 1, 4, 'tbd', 'ACTIVE', '2019-03-09 22:45:33.039+00', '2019-03-09 22:45:33.039+00');
 
 
 --
 -- Data for Name: Locations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Locations" (id, name, description, address1, address2, city, state, postalcode, country, created_at, updated_at) FROM stdin;
-\.
 
 
 --
 -- Data for Name: Logs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Logs" (id, log_type, created_at, updated_at) FROM stdin;
-\.
 
 
 --
 -- Data for Name: Messages; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) FROM stdin;
-1 2 1 2 I have one to sell! Girls outgrew before they could wear, so brand new. I would take $28. UNREAD2019-03-08 00:14:20.827+00  2019-03-08 00:14:20.827+00
-2 2 1 2 Come to think of it, I would even take $27. UNREAD  2019-03-08 00:14:44.506+00  2019-03-08 00:14:44.506+00
-3 1 2 4 I would totally trade you the shoes for this jewelry case.  UNREAD  2019-03-08 00:15:41.599+00  2019-03-08 00:15:41.599+00
-4 1 2 4 I think you'd be quite happy. UNREAD  2019-03-08 00:16:10.799+00  2019-03-08 00:16:10.799+00
-\.
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (5, 4, 3, 5, 'I have one I could sell you! $22 though. Sound ok?', 'UNREAD', '2019-03-09 22:51:48.89+00', '2019-03-09 22:51:48.89+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (6, 4, 3, 5, 'You would have to pay shipping or meet me nearby my house in Olympia.', 'UNREAD', '2019-03-09 22:52:23.106+00', '2019-03-09 22:52:23.106+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (7, 4, 3, 6, 'I own that store and could sell for $27.', 'UNREAD', '2019-03-09 22:53:33.177+00', '2019-03-09 22:53:33.177+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (8, 4, 3, 6, 'Oh, and free shipping.', 'UNREAD', '2019-03-09 22:53:40.911+00', '2019-03-09 22:53:40.911+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (9, 3, 4, 7, 'I have one to sell you. My kids outgrew & I''m not the princess type.', 'UNREAD', '2019-03-09 22:55:17.814+00', '2019-03-09 22:55:17.814+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (10, 3, 4, 7, 'It''s probably only worth $35, as maybe not in perfect condition anymore.', 'UNREAD', '2019-03-09 22:55:40.805+00', '2019-03-09 22:55:40.805+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (11, 3, 4, 8, 'I have something similar to this that should work. I''d attach a picture, but the site creator doesn''t support that feature yet.', 'UNREAD', '2019-03-09 22:56:44.401+00', '2019-03-09 22:56:44.401+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (12, 3, 4, 8, 'Sure would be nice to have in-line pictures in messages.', 'UNREAD', '2019-03-09 22:57:09.447+00', '2019-03-09 22:57:09.447+00');
+INSERT INTO public."Messages" (id, sender_id, recipient_id, listing_id, content, status, created_at, updated_at) VALUES (13, 3, 4, 8, 'Like a "send picture" feature for message.', 'UNREAD', '2019-03-09 22:57:24.893+00', '2019-03-09 22:57:24.893+00');
 
 
 --
 -- Data for Name: Phones; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Phones" (id, countrycode, areacode, prefix, line, created_at, updated_at) FROM stdin;
-\.
-
-
---
--- Data for Name: SequelizeMeta; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."SequelizeMeta" (name) FROM stdin;
-20180427224641-create-table-log.js
-20180427230650-create-table-user.js
-20180725044011-create-listing.js
-20180725050543-create-condition.js
-20180725050610-create-category.js
-20180725051435-create-location.js
-20180725053920-create-image.js
-20180725182306-create-phone.js
-20181018043649-create-message.js
-20181105050421-add_avatar_column_to_user_table.js
-\.
-
-
 --
 -- Data for Name: Users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Users" (id, eat, email, password, prt, prtexpiration, role, username, phone_id, confirmed, status, termsconditions, created_at, updated_at, profile_pic_url) FROM stdin;
-2 4783cf13e1e1a9449b857ca88907c3431c5470cf2b84e335  jen2@example.com  $2b$08$fnE6ZRbN0u0YMqntH25sYeuE/B2DY1tMeYUJvhuw/GJHE6y1me8iC  \N  \N  user  jen2  \N  $2b$08$I77wIdygNzg6HF4tIxe.dOGN1uh03V0pPCWf7TPYC/MoY4u.BVOkK  pending \N  2019-03-07 23:52:06.044+00  2019-03-07 23:52:06.116+00  /assets/profile_default.png
-1 85e10ff56b2369e4f863a4fa45424c41af3867eefd95a1c5  jen@example.com $2b$08$QhfphVCCb8fYpYEebTAhW.je0bGVzX18W75jGCrSW/nhwqNRc1t9W  \N  \N  user  jen \N  $2b$08$HwKVwT5sw/pOJTHSJRavb.BZX8OmdrKtG0EdlZlwmgokBhEdgzb0G  pending \N  2019-03-07 23:33:09.918+00  2019-03-08 00:14:57.669+00  /assets/profile_default.png
-\.
+INSERT INTO public."Users" (id, eat, email, password, prt, prtexpiration, role, username, phone_id, confirmed, status, termsconditions, created_at, updated_at, profile_pic_url) VALUES (4, '1da0e53d588c741ca179ca1444d3eaab8f62d1465abf42ba', 'jen2@example.com', '$2b$08$UzkW20d1Nw3xCl1C.gcNCu8Z1hmstkoLO/zyJTVsAz2tHd0z1Tnbe', NULL, NULL, 'user', 'jen2', NULL, '$2b$08$ZADkSYLMtxsvHfqnjhgw4ePF3/9F0/.GQtAJYJ3M5NPjSTosoBGHi', 'pending', NULL, '2019-03-09 22:41:39.551+00', '2019-03-09 22:41:39.611+00', '/assets/profile_default.png');
+INSERT INTO public."Users" (id, eat, email, password, prt, prtexpiration, role, username, phone_id, confirmed, status, termsconditions, created_at, updated_at, profile_pic_url) VALUES (3, '817f7ac260c654fdb75275d2986f3510905121318447f5f7', 'jen@example.com', '$2b$08$f6GVAxDVZOCyrDhkxCGmf.6g7vHVXgsUg/NGC0T1RBAg4lI2mF5wa', NULL, NULL, 'user', 'jen', NULL, '$2b$08$owHPRgwk.pxhqPbo2WxHOOrF1yvEml7T.brksIrULfxeozWERT4km', 'pending', NULL, '2019-03-09 22:34:34.305+00', '2019-03-09 22:54:39.349+00', '/assets/profile_default.png');
 
 
 --
@@ -146,14 +111,14 @@ SELECT pg_catalog.setval('public."Conditions_id_seq"', 1, false);
 -- Name: Images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Images_id_seq"', 9, true);
+SELECT pg_catalog.setval('public."Images_id_seq"', 17, true);
 
 
 --
 -- Name: Listings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Listings_id_seq"', 4, true);
+SELECT pg_catalog.setval('public."Listings_id_seq"', 8, true);
 
 
 --
@@ -174,7 +139,7 @@ SELECT pg_catalog.setval('public."Logs_id_seq"', 1, false);
 -- Name: Messages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Messages_id_seq"', 4, true);
+SELECT pg_catalog.setval('public."Messages_id_seq"', 13, true);
 
 
 --
@@ -188,7 +153,7 @@ SELECT pg_catalog.setval('public."Phones_id_seq"', 1, false);
 -- Name: Users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Users_id_seq"', 2, true);
+SELECT pg_catalog.setval('public."Users_id_seq"', 4, true);
 
 
 --
