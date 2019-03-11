@@ -1,5 +1,7 @@
-version: '3.1'
+version: '3.7'
 
+# RUN frm this directory with $ docker-compose up -d
+# The "-d" is to run in  background & not take up a tab
 services:
   db:
     image: "postgres:alpine"
@@ -10,6 +12,8 @@ services:
       POSTGRES_DB: wishifieds_dev
     ports:
       - "5432:5432"
+    volumes:
+      - ../db/seeders:/db
 
   # Can reference dynamic variables using ${MY_VAR}
   # Can set these before docker commands using something like:
@@ -21,6 +25,7 @@ services:
   #   image: wishifieds/dev
   #   ports:
   #     - "3000:3000"
+  #   VOLUMES ARE RELATIVE TO THE LOCATION OF THE docker-compose.yml directory
   #   volumes:
   #     - .:/app
   #   depends_on:
