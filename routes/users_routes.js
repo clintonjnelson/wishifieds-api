@@ -86,7 +86,7 @@ module.exports = function(router) {
   router.post('/users', function(req, res) {
     var newEmail = req.body.email;
     var newName = req.body.username || newEmail.split('@')[0]; // TODO: need a username generator here
-    const defaultProfilePicUrl = '/assets/profile.png';
+    const defaultProfilePicUrl = '/assets/profile_default.png';
     var preUser = {  // Explicitly populate to avoid exploit
       username: newName,
       email: newEmail,

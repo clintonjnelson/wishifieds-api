@@ -9,6 +9,7 @@ var Listing = db.Listing;
 var Message = db.Message;
 var User = db.User;
 var isEqual = require('../lib/utils.js').isToStringEqual;
+var Op = require('sequelize').Op;
 
 
 
@@ -17,6 +18,50 @@ module.exports = function(router) {
 
   // GET Messages By Listing (this is in the Listings routes)
 
+
+   // GET All Messages for requesting user, group by listing (unreads first)
+   // TODO: very similar to following endpoint. Maybe consolidate & use flag instead for UNREADs?
+     // Note: difference in recipient/sender query as well.
+  router.get('/messages', eatOnReq, eatAuth, function(req, res) {
+    var userId = req.user.id;
+    var username = req.user.username;
+    console.log("Getting all messages for user: ", req.user);
+
+    var orderStatement = '"Message"."created_at" ASC'
+
+    Message
+      .findAll({
+        where: {
+          [Op.and]: [
+            {[Op.or]: [{recipientId: userId}, {senderId: userId}]},  // ANY listing user has corresponded on
+            {[Op.or]: [{status: 'READ'}, {status: 'UNREAD'}]}
+          ]
+        },
+        order: db.Sequelize.literal(orderStatement),
+        include: [{
+          model: Listing,  // include the listing associated to the message
+          include: [{
+            model: User  // include the user associated to the listing
+          }]
+        }],
+        raw: true
+      })
+      .then(function(foundMsgs) {
+        console.log("FOUND USERs MESSAGES: ", foundMsgs);
+        var msgsByListing = foundMsgs.reduce(getMessagesByListingForUser(username), {});
+
+        var listingsWithMessages = Object.getOwnPropertyNames(msgsByListing)
+          .map(listingId => {
+            return msgsByListing[listingId];
+          });
+
+        res.json({error: false, listingsWithMessages: listingsWithMessages});
+      })
+      .catch(function(err) {
+        console.log('Error listings with messages for user: ', userId, '. Error is: ', err);
+        return res.status(500).json({error: true, msg: 'database error'});
+      });
+  });
 
   /*
     The GET messages by listing route needs to be able to return a flexible structure:
@@ -60,13 +105,13 @@ module.exports = function(router) {
       .then(function(foundMsgs) {
         console.log("UNREAD MESSAGES FOUND FOR USER: ", foundMsgs);
         var msgsByListing = foundMsgs.reduce(getMessagesByListingForUser(username), {});
-        var messages = Object
-          .getOwnPropertyNames(msgsByListing)
+        // Object fields into Array
+        var listingWithMessages = Object.getOwnPropertyNames(msgsByListing)
           .map(listingId => {
             return msgsByListing[listingId];
           });
 
-        res.json({error: false, messages: messages});
+        res.json({error: false, listingWithMessages: listingWithMessages});
       })
       .catch(function(err) {
         console.log('Error finding messages for user with id: ', userId, '. Error is: ', err);
@@ -242,6 +287,7 @@ function getMessagesByListingForUser(username) {
   return function mapToMessagesByListing(totalObj, current) {
     if(!totalObj[current.listingId]) {
       totalObj[current.listingId] = {
+        listingOwnerId: current['Listing.userId'],
         listingOwnerUsername: username,
         listingHeroImgUrl: current['Listing.heroImg'],
         listingId: current.listingId,
@@ -249,6 +295,7 @@ function getMessagesByListingForUser(username) {
       }
     }
 
+    // Get listing object by id, and add the message to its messages
     totalObj[current.listingId].messages.push(mapUnreadMessagesResponse(current));
 
     return totalObj;

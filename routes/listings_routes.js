@@ -239,7 +239,7 @@ module.exports = function(router) {
 
 
   // Note, this route has two primary paths:
-    // 1) Get all of the users that have messaged owner on a given listing
+    // 1) Get all of the users that have messaged owner on a given listing (no correspondantId)
     // 2) Get all of the messages for owner/correspondant on a listing (has a correspondantId)
 
   // Get Messages for Listing
@@ -248,7 +248,7 @@ module.exports = function(router) {
     console.log("MADE IT TO MESSAGES ROUTE. REQ QUERY IS: ", req.query);
     const user = req.user;
     const listingId = req.params.listingId;
-    const correspondantId = req.query.correspondant;
+    const correspondantId = req.query.correspondant;  // OPTIONAL: none or just 1:1
     const correspondantsOnly = req.query['correspondants_only'];
 
     if(!user) {
