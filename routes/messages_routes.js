@@ -49,11 +49,17 @@ module.exports = function(router) {
       .then(function(foundMsgs) {
         console.log("FOUND USERs MESSAGES: ", foundMsgs);
         var msgsByListing = foundMsgs.reduce(getMessagesByListingForUser(username), {});
+        var listingsSortByMsgs = userSortByUnreads(userId);
 
         var listingsWithMessages = Object.getOwnPropertyNames(msgsByListing)
-          .map(listingId => {
-            return msgsByListing[listingId];
-          });
+          .map(listingId => { return msgsByListing[listingId]; })
+          .sort(listingsSortByMsgs);  // sort mutates orig, no return
+        listingsWithMessages.forEach( li => {
+          console.log("LISTING: ", li.listingId);
+          li.messages.forEach( mg => { console.log("MESSAGE ID: ", mg.id); });
+        });
+        //console.log("FINAL ORDER LISTINGS IS: ", listingsWithMessages);
+
 
         res.json({error: false, listingsWithMessages: listingsWithMessages});
       })
@@ -299,6 +305,70 @@ function getMessagesByListingForUser(username) {
     totalObj[current.listingId].messages.push(mapUnreadMessagesResponse(current));
 
     return totalObj;
+  }
+}
+
+// TODO: Figure out how to get thie to sort by these factors:
+  // Sort on UNREADs
+    // Sort on date of latest message (latest first)
+  // Sort on date of latest message of reads
+
+  // First, check if unread. Sort the unread first.
+  // If BOTH unread, second layer of sorting is on date. Pick newest first.
+      // Compare the epoch times
+function userSortByUnreads(userId) {
+
+  // -1 = a comes first; 0 = no change; 1 = b comes first
+  return function sortByUnreads(listingA, listingB) {
+    var aMsgLength = listingA.messages.length;
+    var bMsgLength = listingB.messages.length;
+
+    var aLast = listingA.messages.length && listingA.messages[aMsgLength-1];
+    var bLast = listingB.messages.length && listingB.messages[bMsgLength-1];
+    // TODO: NEED TO MAKE SURE IT"S THE CORRESPONDANT"S MESSAGE THAT"S UNREAD, NOT OWNER's
+    console.log("aLast: ", aLast);
+    console.log("bLast: ", bLast);
+
+
+    // A vs B existence; Neither messages - no change; no A: b,a; no B: a,b
+    if(!aLast && !bLast) {
+      console.log("NO MSG A OR B; returning 0; no swap");
+      return 0;
+    }
+    if(!aLast) {
+      console.log("NO MSG A; returning -1; final order here", bLast.listingId, aLast.listingId);
+      return 1;
+    }
+    if(!bLast) {
+      console.log("NO MSG B; returning 1; final order here", bLast.listingId, aLast.listingId);
+      return -1;
+    }
+
+    // Unreads go first, when it's from someone else (not from self)
+    if( aLast.status == "UNREAD" &&
+        aLast.senderId != userId &&  // If unread, not own
+        !(bLast.status != "UNREAD" && bLast.senderId != userId) // Don't count ties
+      ) {
+      console.log("A HAS UNREAD; returning -1");
+      return -1;
+    }  // A unread & not owner, order A sooner
+    if( bLast.status == "UNREAD" &&
+        bLast.senderId != userId && // If unread, not own
+        !(aLast.status != "UNREAD" && aLast.senderId != userId)  // Don't count ties
+      ) {
+      console.log("B HAS UNREAD; returning 1; b comes first");
+      return 1;
+      }  // B unread & not owner, order B sooner
+
+    // Both Unread, lastst first
+    if(Date.parse(aLast.createdAt) > Date.parse(bLast.createdAt)) {
+      console.log("DATE; returning 1");
+      return -1;
+    }
+    else {
+      console.log("END; returning 1 to flip them (b created before a)");
+      return 1;
+    }
   }
 }
 
