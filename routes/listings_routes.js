@@ -236,10 +236,8 @@ module.exports = function(router) {
     });
   });
 
-
-
   // Note, this route has two primary paths:
-    // 1) Get all of the users that have messaged owner on a given listing (no correspondantId)
+    // 1) Get all of the users that have messaged owner on a given listing (no correspondantId, has correspondants_only)
     // 2) Get all of the messages for owner/correspondant on a listing (has a correspondantId)
 
   // Get Messages for Listing
@@ -302,7 +300,6 @@ module.exports = function(router) {
     // For case when listing owner wants to get all messages
       // We return list of correspondants so UI can rerieve messages for each.
     else if(!!correspondantsOnly) {
-      console.log("NOT THE QUERY I EXPECTED...");
       Message
         .findAll(
           {
