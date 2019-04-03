@@ -11,12 +11,62 @@ var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var userMappers  = require('../lib/model_mappers/user_mapper.js');
 var Utils        = require('../lib/utils.js');
 var User         = require('../db/models/index.js').User;
+var Images       = require('../db/models/index.js').Image;
 var Sequelize    = require('sequelize');
+var multer       = require('multer');
+var uuid         = require('uuid/v4');
+var multerS3 = require('multer-s3');
+var s3Utils = require('../lib/s3Utils.js');
+var s3AvatarUpload = multer({
+  storage: multerS3({
+    s3: s3Utils.defaultS3(),
+    bucket: process.env.WISHIFIEDS_AVATARS_S3BUCKET,
+    acl: 'public-read',
+    metadata: function(req, file, metaCallback) {
+      metaCallback(null, {fieldName: file.fieldname});  // TODO: Update this for userul stuff
+    },
+    key: function(req, file, keyCallback) {
+      console.log("FILE in KEY is: ", file);
+      var imageToken = uuid();
+      var baseKeyName = 'images/' + imageToken + '.';  // TODO: CHANGE THIS TO A SAVABLE TOKEN!
+      var fileExtension = s3Utils.getImageExtension([file.filename, file.originalname]);
+      var bucketKeyName = baseKeyName + fileExtension;
+      keyCallback(null, bucketKeyName);
+    },
+  })
+});  // TEMP FOR MULTER TESTING
 
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
 module.exports = function(router) {
+
+  // Upload/Update User Avatar (including saving uploaded file in S3)
+  router.post('/users/:id/profile_pic',
+    eatOnReq,
+    eatAuth,
+    bodyparser.urlencoded({ extended: true }),
+    s3AvatarUpload.single('avatar'),
+    function(req, res) {
+      console.log("USER ON REQ IS: ", req.user);
+      console.log("SUCCESSFULLY UPLOADED TO S3. NOW NEED TO SAVE TOKEN FILE NAME LOCALLY!!");
+      console.log("Body is: ", req.body);
+      console.log("File IS: ", req.file);
+      var userId = req.user.id;
+      var s3ImageUrl = req.file.location;
+
+      console.log("About to update the user with new avatar URL.", userId);
+      updateUserAvatar(userId, s3ImageUrl, function(err, savedUser) {
+        if(err) {
+          return res.status(500).json({error: true, message: 'Error saving/updating avatar image.'});
+        } else {
+          return res.json({error: false, user: userMappers.mapUser(savedUser)});
+        }
+      });
+  });
+
+
+  // Below routes all use bodyparser, but above routes conflict with it
   router.use(bodyparser.json());
 
 
@@ -35,7 +85,7 @@ module.exports = function(router) {
         }
 
         console.log("USER FOUND: ", user);
-        return res.json(userMappers.mapUser(user));  // FIX: return {data:...} or {user:...}. Not raw object
+        return res.json(userMappers.mapUser(user));  // FIXME: return {data:...} or {user:...}. Not raw object
       })
       .catch(function(err) {
         console.log('Database error getting user by username or id:');
@@ -273,6 +323,29 @@ module.exports = function(router) {
     return res.status(400).json({error: true, msg: errorMsg});
   }
 
+  function updateUserAvatar(userId, avatarImageUrl, callback) {
+    User
+      .findById(userId)
+      .then(function(foundUser) {
+        console.log("User found. Found user is : ", foundUser, " Updating with image url: ", avatarImageUrl);
+        foundUser.setDataValue('profilePicUrl', avatarImageUrl);
+        foundUser
+          .save()
+          .then(function(savedUser) {
+            console.log("User saved. Saved user is now: ", savedUser);
+            callback(null, savedUser);
+          })
+          .catch(function(errr) {
+            console.log("Error saving user's updated profile pic url. Error: ", errr);
+            callback(errr, null);
+          });
+      })
+      .catch(function(err) {
+        console.log("Error gettng user by ID so could save the new avatar. Error: ", err);
+        callback(err, null);
+      });
+  }
+
   // Fire & forget, except logging
   function sendEmail(user, req, callback) {
     Utils.generateUrlSafeTokenAndHash(function(errr, urlSafeToken, tokenHash) {
@@ -299,3 +372,25 @@ module.exports = function(router) {
     });
   }
 };
+
+// Saving Images in S3 Using plugins
+  // Save the token
+  // Save the file extension
+  // Save the URL
+  // Save the original file name
+  // { fieldname: 'avatar',
+    // originalname: 'profile.png',
+    // encoding: '7bit',
+    // mimetype: 'image/png',
+    // size: 1286,
+    // bucket: 'wishifieds-avatars',
+    // key: 'images/7f5cd593-f429-4c88-8339-8f89d164a3c7.png',
+    // acl: 'public-read',
+    // contentType: 'application/octet-stream',
+    // contentDisposition: null,
+    // storageClass: 'STANDARD',
+    // serverSideEncryption: null,
+    // metadata: { fieldName: 'avatar' },
+    // location: 'https://wishifieds-avatars.s3.us-west-2.amazonaws.com/images/7f5cd593-f429-4c88-8339-8f89d164a3c7.png',
+    // etag: '"38a3f764e52a95120502dd9b233fbb93"',
+    // versionId: undefined }

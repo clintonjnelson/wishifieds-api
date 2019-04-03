@@ -7,6 +7,7 @@ var superagent    = require('superagent');
 module.exports = function(router) {
   router.use(bodyparser.json());
 
+  // POST because needs to send a full URL
   // Takes a URL and returns a unique array of the image URLs on that page!
   // TODO: GO THROUGH & RENAME THINGS TO BETTER DESCRIBE THE FLOW OF DATA
   // TODO: SCRUB THE IMAGES OR REMOVE ANY SCRIPT-TYPE CONTENT FROM THEM.
