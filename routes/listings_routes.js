@@ -138,6 +138,7 @@ module.exports = function(router) {
                 id:          result.id,
                 userId:      result.userId,
                 ownerUsername: result['User']['username'],
+                ownerPicUrl: result['User']['profilePicUrl'],  // TOOD: Send for the full listing Header only. Maybe break out later?
                 categoryId:  result.categoryId,  // TODO: Decide if UI does the name conversion or the API
                 conditionId: result.conditionId,  // TODO: Decide if UI does the name conversion or the API
                 title:       result.title,

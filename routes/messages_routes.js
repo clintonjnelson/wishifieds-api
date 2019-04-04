@@ -38,12 +38,20 @@ module.exports = function(router) {
           ]
         },
         order: db.Sequelize.literal(orderStatement),
-        include: [{
-          model: Listing,  // include the listing associated to the message
-          include: [{
-            model: User  // include the user associated to the listing
-          }]
-        }],
+        include: [
+          {
+            // TODO: Specify the attributes needed to reduce the query size!
+            model: Listing,  // include the listing associated to the message
+            include: [{
+              model: User  // include the user associated to the listing
+            }]
+          },
+          // Maybe don't want profile pic url yet on the message avatars
+          // {
+          //   model: User,
+          //   attributes: ['profilePicUrl']  // Include the user associated to the message
+          // }
+        ],
         raw: true
       })
       .then(function(foundMsgs) {
@@ -54,6 +62,7 @@ module.exports = function(router) {
         var listingsWithMessages = Object.getOwnPropertyNames(msgsByListing)
           .map(listingId => { return msgsByListing[listingId]; })
           .sort(listingsSortByMsgs);  // sort mutates orig, no return
+        // vvv THIS APPEARS JUST TO BE LOGGING vvv
         listingsWithMessages.forEach( li => {
           console.log("LISTING: ", li.listingId);
           li.messages.forEach( mg => { console.log("MESSAGE ID: ", mg.id); });
