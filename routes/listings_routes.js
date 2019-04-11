@@ -3,8 +3,7 @@
 var bodyparser = require('body-parser'      );
 var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
 var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
-// var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
-// var adminAuth    = require('../lib/routes_middleware/admin_auth.js');
+var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
 // var MailService  = require('../lib/mailing/mail_service.js');
 // TODO: WILL NEED SERVICE FOR SMS INTERFACT HERE (service logic in /lib)
 // var EmailBuilder = require('../lib/mailing/email_content_builder.js');
@@ -79,7 +78,7 @@ module.exports = function(router) {
                                   .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
                     hero:        listing.heroImg,        // TODO: Send ONE of these
-                    imagesRef:   listing.imagesRef,
+                    // imagesRef:   listing.imagesRef,
                     slug:        listing.slug,
                     createdAt:   listing.createdAt,
                     updatedAt:   listing.updatedAt
@@ -128,7 +127,7 @@ module.exports = function(router) {
           return res.status(404).json({error: true, success: false, msg: 'No listing found.'});
         }
         Images
-          .findAll({ where: {listingId: listingId} })
+          .findAll({ where: {listingId: listingId, status: 'ACTIVE'} })
           .then(function(images) {
             console.log("IMAGES FOUND ARE: ", images);
             var sortedImgs = images.sort(function(a, b){ return a.position - b.position; });
@@ -149,7 +148,7 @@ module.exports = function(router) {
                 locationId:  result.locationId, // TODO: SHOULD THIS BE LOCATION???
                 images:      sortedImgs.map(function(img){ return img.url }),  // get only img urls
                 hero:        result.heroImg,  // TODO: Send ONE of these
-                imagesRef:   result.imagesRef,
+                // imagesRef:   result.imagesRef,
                 slug:        result.slug,
                 createdAt:   result.createdAt,
                 updatedAt:   result.updatedAt
@@ -190,7 +189,7 @@ module.exports = function(router) {
           console.log("RESULTS ARE: ", results);
           var listingIds = results.map(function(listing) { return listing.id; });
           Images
-            .findAll({ where: {listingId: listingIds} })
+            .findAll({ where: {listingId: listingIds, status: 'ACTIVE'} })
             .then(function(images) {
               console.log("IMAGES FOUND ARE: ", images);
               var sortedImgs = images
@@ -215,7 +214,7 @@ module.exports = function(router) {
                                   .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
                   hero:          listing.heroImg,        // TODO: Send ONE of these
-                  imagesRef:     listing.imagesRef,
+                  // imagesRef:     listing.imagesRef,
                   slug:          listing.slug,
                   createdAt:     listing.createdAt,
                   updatedAt:     listing.updatedAt
@@ -408,7 +407,7 @@ module.exports = function(router) {
         keywords: listingData.keywords,
         locationId: listingData.locationId,
         heroImg: listingData.images[0],  // First image is hero
-        imagesRef: "tbd",
+        // imagesRef: "tbd",
         userId: user.id,
         slug: "tbd",
         status: 'ACTIVE'
@@ -441,7 +440,7 @@ module.exports = function(router) {
                 status:      newListing.status,
                 images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
                 hero:        newListing.heroImg,
-                imagesRef:   newListing.imagesRef,
+                // imagesRef:   newListing.imagesRef,
                 slug:        newListing.slug,
                 createdAt:   newListing.createdAt,
                 updatedAt:   newListing.updatedAt
@@ -510,7 +509,7 @@ module.exports = function(router) {
           // Save imageUrls/images with reference
           // TODO: SHOULD LOOK FOR IMAGE BEFORE CREATING COMPLETE NEW ONE
           // TODO: Should be able to use same URL, but do not want to save multiple of same image file
-          const imagesRef = listingData.imagesRef || Utils.generateGenericToken();
+          // const imagesRef = foundListing.imagesRef || Utils.generateGenericToken();
 
           console.log("Creating listing object updates...")
           // Specify fields we allow to be updated
@@ -543,8 +542,8 @@ module.exports = function(router) {
           foundListing
             .save()
             .then(function(updatedListing) {
-              saveImages(listingData.images, false, imagesRef, listingId, userId, function(wasSuccessful) {
-                console.log("SAVING IMAGES WAS SUCCESSFUL: ", wasSuccesful);
+              saveImages(listingData.images, false, listingId, userId, function(wasSuccessful) {
+                console.log("SAVING IMAGES WAS SUCCESSFUL: ", wasSuccessful);
 
                 // Success response & updated Listing (if needed)
                 res.json({error: false, success: true, listing: {
@@ -562,7 +561,7 @@ module.exports = function(router) {
                   status:      updatedListing.status,
                   hero:        updatedListing.heroImg,
                   images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                  imagesRef:   updatedListing.imagesRef,
+                  // imagesRef:   updatedListing.imagesRef,
                   slug:        updatedListing.slug,
                   createdAt:   updatedListing.createdAt,
                   updatedAt:   updatedListing.updatedAt
@@ -620,33 +619,96 @@ module.exports = function(router) {
 
   // Same for creation & update
   // TODO: Break out into separate functions for create vs update
-  function saveImages(images, newListing, imagesRef, listingId, userId, callback) {
+  function saveImages(images, newListing, listingId, userId, callback) {
 
     // Listing Updates
     if(!newListing) {
-      const imagesMetadata = images.map( (url, index) => {
-        Images
-          .findOrCreate({ where: {
-            reftoken:   imagesRef,
-            origurl:    url,
-            url:        url,        // Someday this may be different.
-            position:   index,
-            listingId: listingId,
-            userId:    userId
-          }})
-          .spread(function(image, metadata) {
-            console.log("CREATED IMAGE METADATA IS: ", metadata);
-            return metadata;  // metadata about what happened
+      // Make sure to order by POSITION
+      const imagesMetadata = Images
+        .findAll({
+          where: { listingId: listingId, status: 'ACTIVE' },
+          order: [['position', 'ASC']],
+        })
+        .then(function(existingImages) {
+          console.log("Initial images found prior to updating are: ", existingImages);
+          const existingUrls = existingImages.map(function(img) { return img.url; });
+          console.log("Existing urls found are: ", existingUrls);
+
+          // Add First
+          const adds = images.filter(function(url) {
+            return !existingUrls.includes(url); // ONLY keep urls we don't have already
           });
-      });
+          console.log("Found all images to add: ", adds);
+          console.log("CONDITIONAL FOR ADDS IS: ", (adds & adds.length));
+          if(adds && adds.length) {
+            console.log("Adding new images: ", adds);
+            const imageAdds = adds.map(function(url, index) {  // Build array of objects to create
+              return {
+                origurl:    url,
+                url:        url,        // Someday this may be different.
+                position:   index,
+                listingId:  listingId,
+                userId:     userId
+              };
+            });
+
+            console.log("IMAGE OBJECTS TO CREATE ARE: ", imageAdds);
+            Images.bulkCreate(imageAdds);
+          }
+
+          // Then Delete
+          const dels = existingUrls.filter(function(url) {
+            return !images.includes(url);
+          });
+          console.log("Found all images to delete: ", dels);
+          if(dels && dels.length) {
+            // TODO: This will be SLOW matching on string; fix by getting image ID from code instead
+            Images.update({status: 'DELETED'}, {where: { url: dels }});
+          }
+
+          // Update Position
+          images.forEach(function(img, index) {
+            Images
+              .update({position: index}, {where: {url: img.url}})
+              .then( (result) => { console.log("Success updating img index: ", index); })
+              .catch( (err) => { console.log("Error updating img:", img.url, " position: ", index); });
+          });
+        });
+
+      // const imagesMetadata = images.map( (url, index) => {
+      //   Images
+      //     .findOrCreate({ where: {
+      //       // reftoken:   imagesRef,
+      //       // origurl:    url,
+      //       url:    url,
+      //       // position:   index,
+      //       listingId: listingId,
+      //       userId:    userId
+      //     }})
+      //     .spread(function(image, metadata) {
+      //       console.log("CREATED IMAGE METADATA IS: ", metadata);
+      //       return metadata;  // metadata about what happened
+      //     });
+      // });
 
       // Wait for all to resolve
       Sequelize.Promise
-        .all(imagesMetadata)
-        .then(function(results) {
-          console.log("SAVED IMAGES RESULTS METADATA IS: ", results);
-          const success = (results.length === images.length);
-          callback(success);
+        .all([imagesMetadata])
+        .then(function(responses) {
+          Images
+            .findAll({
+              where: { listingId: listingId, status: 'ACTIVE'},
+              order: [['position', 'ASC']],
+            })
+            .then(function(updatedImages) {
+              console.log("Updated images are: ", updatedImages);
+              const success = (updatedImages.length === images.length);
+              callback(success);
+            })
+            .catch( (err) => {
+              console.log("Error updating images: ", err);
+              callback(false);  // TODO: update this to something more useful someday
+            });
         });
     }
 
@@ -654,7 +716,7 @@ module.exports = function(router) {
     else {
       const imagesForCreation = images.map( (url, index) => {
         return {
-          reftoken:   imagesRef,
+          // reftoken:   imagesRef,
           origurl:    url,
           url:        url,        // Someday this may be different.
           position:   index,

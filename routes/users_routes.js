@@ -5,7 +5,6 @@ var contains     = require('lodash'           ).contains;
 var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
 var eatAuth      = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
 var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
-var adminAuth    = require('../lib/routes_middleware/admin_auth.js');
 var MailService  = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var userMappers  = require('../lib/model_mappers/user_mapper.js');
