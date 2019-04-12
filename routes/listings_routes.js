@@ -54,7 +54,10 @@ module.exports = function(router) {
           if(results && results.length > 0) {
             var listingIds = results.map(function(listing) { return listing.id; });
             Images
-              .findAll({ where: {listingId: listingIds} })
+              .findAll({
+                where: {listingId: listingIds},
+                order: [['position', 'ASC']]
+              })
               .then(function(images) {
                 console.log("IMAGES FOUND ARE: ", images);
                 var sortedImgs = images
@@ -127,7 +130,10 @@ module.exports = function(router) {
           return res.status(404).json({error: true, success: false, msg: 'No listing found.'});
         }
         Images
-          .findAll({ where: {listingId: listingId, status: 'ACTIVE'} })
+          .findAll({
+            where: {listingId: listingId, status: 'ACTIVE'},
+            order: [['position', 'ASC']]
+          })
           .then(function(images) {
             console.log("IMAGES FOUND ARE: ", images);
             var sortedImgs = images.sort(function(a, b){ return a.position - b.position; });
@@ -189,7 +195,10 @@ module.exports = function(router) {
           console.log("RESULTS ARE: ", results);
           var listingIds = results.map(function(listing) { return listing.id; });
           Images
-            .findAll({ where: {listingId: listingIds, status: 'ACTIVE'} })
+            .findAll({
+              where: {listingId: listingIds, status: 'ACTIVE'},
+              order: [['position', 'ASC']]
+            })
             .then(function(images) {
               console.log("IMAGES FOUND ARE: ", images);
               var sortedImgs = images
@@ -667,11 +676,12 @@ module.exports = function(router) {
           }
 
           // Update Position
-          images.forEach(function(img, index) {
+          images.forEach(function(url, index) {
+            console.log("Next image for update is: ", url);
             Images
-              .update({position: index}, {where: {url: img.url}})
-              .then( (result) => { console.log("Success updating img index: ", index); })
-              .catch( (err) => { console.log("Error updating img:", img.url, " position: ", index); });
+              .update({position: index}, {where: {url: url}})
+              .then( (result) => { console.log("Success updating img index: ", index, " and url: ", url); })
+              .catch( (err) => { console.log("Error updating img:", url.url, " position: ", index); });
           });
         });
 
