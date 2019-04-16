@@ -37,6 +37,7 @@ var s3AvatarUpload = multer({
 
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+const DEFAULT_AVATAR_URL = '/assets/profile_default.png';
 
 module.exports = function(router) {
 
@@ -135,11 +136,10 @@ module.exports = function(router) {
   router.post('/users', function(req, res) {
     var newEmail = req.body.email;
     var newName = req.body.username || newEmail.split('@')[0]; // TODO: need a username generator here
-    const defaultProfilePicUrl = '/assets/profile_default.png';
     var preUser = {  // Explicitly populate to avoid exploit
       username: newName,
       email: newEmail,
-      profilePicUrl: defaultProfilePicUrl
+      profilePicUrl: DEFAULT_AVATAR_URL
     };
 
     if(!newEmail || !EMAIL_REGEX.test(newEmail)) {
@@ -208,6 +208,7 @@ module.exports = function(router) {
     var allowedUpdates = {
       username: reqUser.username,
       email:    reqUser.email,
+      // TODO: ABILITY TO SET BACK THE PROFILE PIC URL (avatar) to DEFAULT_AVATAR_URL
     }
 
     var userId = reqUser.userId;
