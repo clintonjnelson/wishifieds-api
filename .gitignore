@@ -5,6 +5,7 @@
 **/bower_components
 **/build/
 **/dist/
+**/db/config/
 
 ## General Files
 *.DS_Store

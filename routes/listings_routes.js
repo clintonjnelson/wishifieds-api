@@ -13,6 +13,7 @@ var Listings   = db.Listing;
 var Images     = db.Image;
 var User       = db.User;
 var Message    = db.Message;
+var Favorites  = db.Favorite;
 var Sequelize  = require('sequelize');
 
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
@@ -111,6 +112,86 @@ module.exports = function(router) {
     }
   });
 
+  // Get the favorites for the requesting user
+  router.get('/listings/favorites', eatOnReq, eatAuth, function(req, res) {
+    const userId = req.user.id;
+    console.log("IN FAVORITES ROUTE. USER ID IS: ", userId);
+    Favorites
+      .findAll({
+        where: {
+          userId: userId,
+          status: 'ACTIVE'
+        },
+        include: [
+          {
+            // TODO: Specify the attributes needed to reduce the query size!
+            model: Listings,  // include the listing associated to the message
+            include: [{
+              model: User  // include the user associated to the listing
+            }]
+          },
+        ]
+      })
+      .then(function(favs) {
+
+        console.log("FAVS ARE: ", favs);
+        var results = favs.map(function(fav) {
+          // console.log("fav is: ", fav);
+          // console.log("fav Listing is: ", fav.Listing);
+          // console.log("fav Listing values is: ", fav.Listing.get());
+          return fav.Listing.get();
+        });
+        // Could break here to avoid an unnecessary query if results count = 0
+        var listingIds = results.map(function(listing) { return listing.id; });
+        Images
+          .findAll({
+            where: {listingId: listingIds, status: 'ACTIVE'},
+            order: [['position', 'ASC']]
+          })
+          .then(function(images) {
+            console.log("FAVS IMAGES FOUND ARE: ", images);
+            var sortedImgs = images
+              .sort(function(a, b){ return a.position - b.position; })
+
+            console.log("SORTED IMAGES ARE: ", sortedImgs);
+            var listings = results.map(function(listing) {
+              console.log("FAVS USER IS: ", listing.User);
+              return {
+                id:            listing.id,
+                userId:        listing.userId,
+                ownerUsername: listing['User']['username'],
+                categoryId:    listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                conditionId:   listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
+                title:         listing.title,
+                description:   listing.description,
+                keywords:      listing.keywords,
+                linkUrl:       listing.linkUrl,
+                price:         listing.price,
+                locationId:    listing.locationId, // TODO: SHOULD THIS BE LOCATION???
+                images:        sortedImgs
+                                .filter(function(img){ return img.listingId == listing.id})
+                                .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
+                hero:          listing.heroImg,        // TODO: Send ONE of these
+                // imagesRef:     listing.imagesRef,
+                slug:          listing.slug,
+                createdAt:     listing.createdAt,
+                updatedAt:     listing.updatedAt
+              };
+            });
+            console.log("FAVS FOUND: ", listings);
+
+            res.json({error: false, success: true, listings: listings });
+          })
+          .catch(function(errr) {
+            console.log("Caught error in searching for favorites. Error getting images: ", errr);
+            res.status(500).json({error: true, success: false});
+          });
+      })
+      .catch(function(err) {
+        console.log("Caught error in searching for favorites. Error getting listings: ", err);
+        res.status(500).json({error: true, success: false});
+      });
+  });
 
   // GET by listing ID
   router.get('/listings/:id', function(req, res) {

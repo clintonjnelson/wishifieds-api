@@ -95,6 +95,13 @@ INSERT INTO public."Listings" (id, category_id, condition_id, title, description
 
 
 --
+-- Data for Name: Favorites; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+INSERT INTO public."Favorites"(id, user_id, listing_id, status, created_at, updated_at) VALUES (1, 3, 7, 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
+INSERT INTO public."Favorites"(id, user_id, listing_id, status, created_at, updated_at) VALUES (2, 4, 5, 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
+
+
+--
 -- Data for Name: Locations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 

@@ -45,6 +45,7 @@ module.exports = function(router) {
   // TODO: SCRUB THE IMAGES OR REMOVE ANY SCRIPT-TYPE CONTENT FROM THEM.
   router.post('/external/getimages', function(req, res) {
     if(process.env.ENVIRONMENT === 'offline') {
+      console.log("IN OFFLINE MODE - returning mock local images as external.")
       return res.json({urls: [
         '/assets/profile_default.png',
         '/assets/profile_default.png',
@@ -125,7 +126,7 @@ module.exports = function(router) {
   }
 
   function handleOfflineProcessing(req, res, next) {
-    if(process.env.ENVIRONMENT) {
+    if(process.env.ENVIRONMENT === 'offline') {
       return res.json({savedImages: ['/assets/profile_default.png']});
     }
     else {

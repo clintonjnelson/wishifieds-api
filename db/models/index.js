@@ -54,13 +54,15 @@ db.Sequelize = Sequelize;
 // Models
 //db.User.hasOne(db.Phone, {foreignKey: 'user_id'});
 // db.Phone.belongsTo(db.User);  // Doesn't this do same thing as above?
-db.User.hasMany(db.Listing, {foreignKey: 'user_id', sourceKey: 'id'});
-db.Listing.belongsTo(db.User, {foreignKey: 'user_id', targetKey: 'id'});
-db.Listing.hasMany(db.Message, {foreignKey: 'listing_id', sourceKey: 'id'});
-db.Listing.hasMany(db.Favorite, {foreignKey: 'listing_id', sourceKey: 'id'});
-db.Message.belongsTo(db.Listing, {foreignKey: 'listing_id', sourceKey: 'id'});
-db.Message.belongsTo(db.User, {foreignKey: 'sender_id', targetKey: 'id'});
-db.Favorite.belongsTo(db.User, {foreignKey: 'user_id', targetKey: 'id'});
+db.User.hasMany(      db.Listing,  {foreignKey: 'user_id',    sourceKey: 'id'});
+db.Message.belongsTo( db.Listing,  {foreignKey: 'listing_id', sourceKey: 'id'});
+db.Listing.hasMany(   db.Message,  {foreignKey: 'listing_id', sourceKey: 'id'});
+db.Listing.hasMany(   db.Favorite, {foreignKey: 'listing_id', sourceKey: 'id'});
+db.Listing.belongsTo( db.User,     {foreignKey: 'user_id',    targetKey: 'id'});
+db.Favorite.belongsTo(db.User,     {foreignKey: 'user_id',    targetKey: 'id'});
+db.Favorite.belongsTo(db.Listing,  {foreignKey: 'listing_id', targetKey: 'id'});
+db.Message.belongsTo( db.User,     {foreignKey: 'sender_id',  targetKey: 'id'});
+db.Listing.hasMany(   db.Image,    {foreignKey: 'listing_id'});
 // db.Message.hasOne(db.User, {foreignKey: 'recipient_id', targetKey: 'id'});
 // db.Category.hasMany(db.Listing);
 // db.Category.hasMany(db.Condition);
@@ -68,7 +70,6 @@ db.Favorite.belongsTo(db.User, {foreignKey: 'user_id', targetKey: 'id'});
 // db.Condition.hasMany(db.Listing);
 // db.Location.hasMany(db.Listing);
 // db.Listing.belongsTo(db.Location);
-db.Listing.hasMany(db.Image, {foreignKey: 'listing_id'});
 // db.Image.belongsTo(db.Listing);
 
 module.exports = db;

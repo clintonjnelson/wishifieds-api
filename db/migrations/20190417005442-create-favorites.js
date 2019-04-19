@@ -2,7 +2,12 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Favorites', {
-      id:        { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, primaryKey: true },
+      id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true
+      },
       userId:    { type: Sequelize.INTEGER, field: 'user_id' },
       listingId: { type: Sequelize.INTEGER, field: 'listing_id' },
       status:    { type: Sequelize.ENUM('ACTIVE', 'DELETED'), allowNull: false },
