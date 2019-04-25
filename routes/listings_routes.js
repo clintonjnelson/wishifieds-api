@@ -112,6 +112,7 @@ module.exports = function(router) {
     }
   });
 
+  // DOES THIS GO HERE??  MAY HAVE ROUTE CLASHES IF IN FAVS ROUTES. PLUS RESOURCE RETURNED IS LISTINGS...
   // Get the favorites for the requesting user
   router.get('/listings/favorites', eatOnReq, eatAuth, function(req, res) {
     const userId = req.user.id;
