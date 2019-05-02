@@ -1,17 +1,19 @@
-'use strict';
-const fs = require('fs');
-console.log("LOGGING:", path.resolve(__dirname, './dev_base_data.sql'));
+// MAY NEED TO DO MIGRATIONS VIA SEQUELIZE FOR DEPLOYMENTS IN HEROKU
 
-module.exports = {
-  up: fs.readFile(path.resolve(__dirname, './dev_base_data.sql')).then(sql => sequelize.query(sql)),
+// 'use strict';
+// const fs = require('fs');
+// console.log("LOGGING:", path.resolve(__dirname, './dev_base_data.sql'));
 
-  down: (queryInterface, Sequelize) => {
-    /*
-      Add reverting commands here.
-      Return a promise to correctly handle asynchronicity.
+// module.exports = {
+//   up: fs.readFile(path.resolve(__dirname, './dev_base_data.sql')).then(sql => sequelize.query(sql)),
 
-      Example:
-      return queryInterface.bulkDelete('Person', null, {});
-    */
-  }
-};
+//   down: (queryInterface, Sequelize) => {
+//     /*
+//       Add reverting commands here.
+//       Return a promise to correctly handle asynchronicity.
+
+//       Example:
+//       return queryInterface.bulkDelete('Person', null, {});
+//     */
+//   }
+// };

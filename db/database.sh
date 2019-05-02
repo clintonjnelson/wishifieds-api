@@ -6,13 +6,18 @@ docker exec -it $(docker ps | grep db_1 | awk '{ print $1 }') /bin/sh -c 'dropdb
 echo "Creating the new db"
 docker exec -it $(docker ps | grep db_1 | awk '{ print $1 }') /bin/sh -c 'createdb -U postgres wishifieds'
 
+# Run basic DB setup script
+echo "Setting up database...."
+docker exec -it $(docker ps | grep db_1 | awk '{ print $1 }') /bin/sh -c 'psql -d wishifieds -U postgres -f /db/db_setup.sql'
+
 # Run the migrations command
 ./node_modules/.bin/sequelize db:migrate
 
 # Temporary - works for LOCAL ONLY, and shouldn't work for other environments
 echo "Migrating the test data"
 docker exec -it $(docker ps | grep db_1 | awk '{ print $1 }') bash -c 'psql -d wishifieds -U postgres -f /db/dev_base_data.sql'
-# docker exec -it $(docker ps | grep db_1 | awk '{ print $1 }') bash -c 'psql -d wishifieds -h localhost -U postgres < /db/dev_base_data.sql'
+docker exec -it $(docker ps | grep db_1 | awk '{ print $1 }') bash -c 'psql -d wishifieds -U postgres -f /db/base_us_zipcode_locations.sql'
+#docker exec -it $(docker ps | grep db_1 | awk '{ print $1 }') bash -c 'psql -d wishifieds -h localhost -U postgres < /db/dev_base_data.sql'
 
 
 # TODO:
