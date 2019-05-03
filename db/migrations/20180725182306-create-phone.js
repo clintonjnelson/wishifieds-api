@@ -3,7 +3,7 @@
 // https://stackoverflow.com/questions/41925/is-there-a-standard-for-storing-normalized-phone-numbers-in-a-database
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Phones', {
+    return queryInterface.createTable('phones', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -19,6 +19,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Phones');
+    return queryInterface.dropTable('phones');
   }
 };

@@ -18,7 +18,7 @@ module.exports = function(sequelize, DataTypes) {
     password:        { type: DataTypes.STRING },
     prt:             { type: DataTypes.STRING },
     prtexpiration:   { type: DataTypes.DATE },
-    role:            { type: DataTypes.ENUM('admin', 'user'), defaultValue: 'user'},
+    role:            { type: DataTypes.ENUM('ADMIN', 'USER'), defaultValue: 'USER'},
     username:        { type: DataTypes.STRING, validate: {isAlphanumeric: true, isLowercase: true},
                        unique: true,
                        validate: {
@@ -33,7 +33,7 @@ module.exports = function(sequelize, DataTypes) {
     profilePicUrl:   { type: DataTypes.STRING, field: 'profile_pic_url' },
     // Checks
     confirmed:       { type: DataTypes.STRING },
-    status:          { type: DataTypes.ENUM('active', 'inactive', 'pending'), defaultValue: 'pending'},
+    status:          { type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'PENDING'), defaultValue: 'PENDING'},
     termsconditions: { type: DataTypes.BOOLEAN },
 
     // Timestamps

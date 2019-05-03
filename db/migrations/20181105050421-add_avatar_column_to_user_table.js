@@ -4,7 +4,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     queryInterface.addColumn(
-      'Users',
+      'users',
       'profile_pic_url',
       {
         type: Sequelize.STRING,
@@ -14,6 +14,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    queryInterface.removeColumn('Users', 'profile_pic_url');
+    queryInterface.removeColumn('users', 'profile_pic_url');
   }
 };

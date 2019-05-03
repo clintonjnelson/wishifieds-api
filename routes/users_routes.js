@@ -38,6 +38,7 @@ var s3AvatarUpload = multer({
 // relocate this for sharing with password reset function
 var EMAIL_REGEX = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 const DEFAULT_AVATAR_URL = '/assets/profile_default.png';
+const DEFAULT_ZIPCODE = '98101';
 
 module.exports = function(router) {
 

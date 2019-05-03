@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Messages', {
+    return queryInterface.createTable('messages', {
       id:          { type: Sequelize.INTEGER, allowNull: false, autoIncrement: true, primaryKey: true },
       senderId:    { type: Sequelize.INTEGER, allowNull: false, field: 'sender_id' },
       recipientId: { type: Sequelize.INTEGER, allowNull: false, field: 'recipient_id' },
@@ -13,6 +13,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Messages');
+    return queryInterface.dropTable('messages');
   }
 };

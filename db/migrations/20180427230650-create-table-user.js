@@ -2,7 +2,7 @@
 
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Users', {
+    return queryInterface.createTable('users', {
       // Primary attributes
       id: {
         type: Sequelize.INTEGER,
@@ -14,13 +14,13 @@ module.exports = {
       password:      { type: Sequelize.STRING },
       prt:           { type: Sequelize.STRING },
       prtexpiration: { type: Sequelize.DATE },
-      role:          { type: Sequelize.ENUM('admin', 'user'), allowNull: false },
+      role:          { type: Sequelize.ENUM('ADMIN', 'USER'), allowNull: false },
       username:      { type: Sequelize.STRING, unique: true },
       phoneId:       { type: Sequelize.INTEGER, unique: true, field: 'phone_id' },
 
       // Checks
       confirmed:       { type: Sequelize.STRING },
-      status:          { type: Sequelize.ENUM('active', 'inactive', 'pending'), allowNull: false },
+      status:          { type: Sequelize.ENUM('ACTIVE', 'INACTIVE', 'PENDING'), allowNull: false },
       termsconditions: { type: Sequelize.BOOLEAN },
 
       // Timestamps
@@ -30,6 +30,6 @@ module.exports = {
   },
 
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Users');
+    return queryInterface.dropTable('users');
   }
 };
