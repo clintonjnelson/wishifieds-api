@@ -12,7 +12,11 @@ module.exports = (Sequelize, DataTypes) => {
     status:      { type: DataTypes.ENUM('UNREAD', 'READ', 'DELETED'), allowNull: false, defaultValue: 'UNREAD'},
     createdAt:   { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
     updatedAt:   { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
-  }, { timestamps : true });
+  }, {
+    timestamps : true,
+    tableName: 'messages',
+    freezeTableName: true
+  });
 
   Message.associate = function(models){
     // associations can be defined here

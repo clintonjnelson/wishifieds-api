@@ -7,7 +7,11 @@ module.exports = (sequelize, DataTypes) => {
     icon: DataTypes.STRING,
     createdAt:   { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
     updatedAt:   { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
-  }, { timestamps : true });
+  }, {
+    timestamps : true,
+    tableName: 'conditions',
+    freezeTableName: true
+  });
 
   Condition.associate = function(models) {
     // associations can be defined here

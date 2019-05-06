@@ -6,7 +6,11 @@ module.exports = function (sequelize, DataTypes) {
     logType: { type: DataTypes.STRING, field: 'log_type' },
     createdAt:   { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
     updatedAt:   { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
-  }, { timestamps : true });
+  }, {
+    timestamps : true,
+    tableName: 'logs',
+    freezeTableName: true
+  });
 
   Log.associate = function(models) {
     // associations can be defined here

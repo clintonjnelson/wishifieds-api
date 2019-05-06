@@ -21,7 +21,11 @@ module.exports = (sequelize, DataTypes) => {
     status:       { type: DataTypes.ENUM('ACTIVE', 'PRIVATE', 'INACTIVE', 'DELETED') },   // ENUM
     createdAt:    { type: DataTypes.DATE, field: 'created_at' },
     updatedAt:    { type: DataTypes.DATE, field: 'updated_at' }
-  }, { timestamps : true });
+  }, {
+    timestamps : true,
+    tableName: 'listings',
+    freezeTableName: true
+  });
   // Listing.associate = function(models) {
   //   // associations can be defined here
   // };

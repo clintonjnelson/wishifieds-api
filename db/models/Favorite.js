@@ -7,7 +7,11 @@ module.exports = (sequelize, DataTypes) => {
     status:     { type: DataTypes.ENUM('ACTIVE', 'DELETED'), defaultValue: 'ACTIVE' },
     createdAt:  { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
     updatedAt:  { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
-  }, { timestamps : true });
+  }, {
+    timestamps : true,
+    tableName: 'favorites',
+    freezeTableName: true
+  });
 
   Favorite.associate = function(models) {
     // associations can be defined here

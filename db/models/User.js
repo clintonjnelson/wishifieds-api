@@ -31,15 +31,21 @@ module.exports = function(sequelize, DataTypes) {
                      },
     phoneId:         { type: DataTypes.INTEGER, unique: true, field: 'phone_id' },
     profilePicUrl:   { type: DataTypes.STRING, field: 'profile_pic_url' },
+    defaultUserLocation: { type: DataTypes.INTEGER, field: 'default_user_location', allowNull: true },
+
     // Checks
     confirmed:       { type: DataTypes.STRING },
     status:          { type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'PENDING'), defaultValue: 'PENDING'},
     termsconditions: { type: DataTypes.BOOLEAN },
 
     // Timestamps
-    createdAt:       { type: DataTypes.DATE, field: 'created_at' },
-    updatedAt:       { type: DataTypes.DATE, field: 'updated_at' },
-  }, { timestamps : true });
+    createdAt:       { type: DataTypes.DATE, field: 'created_at', allowNull: false },
+    updatedAt:       { type: DataTypes.DATE, field: 'updated_at', allowNull: false },
+  }, {
+    timestamps : true,
+    tableName: 'users',
+    freezeTableName: true
+  });
 
   // Instance Methods
   User.prototype.generateHash = function generateHash(password, callback) {

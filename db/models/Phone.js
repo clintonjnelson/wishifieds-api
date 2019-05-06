@@ -8,7 +8,11 @@ module.exports = (sequelize, DataTypes) => {
     line: DataTypes.STRING,
     createdAt:       { type: DataTypes.DATE, field: 'created_at' },
     updatedAt:       { type: DataTypes.DATE, field: 'updated_at' },
-  }, { timestamps : true });
+  }, {
+    timestamps : true,
+    tableName: 'phones',
+    freezeTableName: true
+  });
   Phone.associate = function(models) {
     // associations can be defined here
   };

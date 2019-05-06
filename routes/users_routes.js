@@ -9,8 +9,10 @@ var MailService  = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var userMappers  = require('../lib/model_mappers/user_mapper.js');
 var Utils        = require('../lib/utils.js');
-var User         = require('../db/models/index.js').User;
-var Images       = require('../db/models/index.js').Image;
+var db           = require('../db/models/index.js');
+var User         = db.User;
+var Images       = db.Image;
+var UserLocation = db.UserLocation;
 var Sequelize    = require('sequelize');
 var multer       = require('multer');
 var uuid         = require('uuid/v4');
@@ -147,7 +149,7 @@ module.exports = function(router) {
       return res.status(400).json({error: 'email'});
     }
 
-    console.log("USER IS: ", User);
+    console.log("USER IS: ", preUser);
     // Validate Email is not Duplicate
     User
       .create(preUser)
@@ -165,6 +167,27 @@ module.exports = function(router) {
           newUser
             .save()
             .then(function(user){
+              // User saved, set user's default location
+              // TODO: Should probably wrap this in a transaction with User creation...
+              console.log("about to save the new default user location...");
+              UserLocation
+                .create({
+                  userId: user.id,
+                  locationId: 38512
+                    // {[Sequelize.Op.eq]: sequelize.literal('(SELECT id FROM public.locations WHERE postal=\'' + DEFAULT_ZIPCODE + '\' LIMIT 1;)')}
+                })
+                .then(function(userLoc){
+                  console.log("UserLocation saved as: ", userLoc);
+                  console.log("about to save the default user location to the user...");
+                  user.setDataValue('default_user_location', userLoc.id)
+                    .save()
+                    .then(function(savedUser){
+                      console.log('UserLocation saved to User: ', savedUser);
+                    });
+                })
+                .catch(function(err) {
+                  console.log("Error saving UserLocation: ", err);
+                });
 
               // TODO: REFACTOR TO ITS OWN HELPER METHOD & USE A CONFIG FOR EMAIL
               // Generate confirmation token & send email (ASYNC)

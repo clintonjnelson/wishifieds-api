@@ -10,7 +10,11 @@ module.exports = (sequelize, DataTypes) => {
     createdAt:  { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
     updatedAt:  { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
     status:     { type: DataTypes.ENUM('ACTIVE', 'DELETED'), defaultValue: 'ACTIVE' },
-  }, { timestamps : true });
+  }, {
+    timestamps : true,
+    tableName: 'images',
+    freezeTableName: true
+  });
   Image.associate = function(models) {
     // associations can be defined here
   };
