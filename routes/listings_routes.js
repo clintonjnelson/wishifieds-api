@@ -77,7 +77,7 @@ module.exports = function(router) {
                     keywords:    listing.keywords,
                     linkUrl:     listing.linkUrl,
                     price:       listing.price,
-                    locationId:  listing.locationId, // TODO: SHOULD THIS BE LOCATION???
+                    locationId:  listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                     images:      sortedImgs
                                   .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
@@ -168,7 +168,7 @@ module.exports = function(router) {
                 keywords:      listing.keywords,
                 linkUrl:       listing.linkUrl,
                 price:         listing.price,
-                locationId:    listing.locationId, // TODO: SHOULD THIS BE LOCATION???
+                locationId:    listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                 images:        sortedImgs
                                 .filter(function(img){ return img.listingId == listing.id})
                                 .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
@@ -233,7 +233,7 @@ module.exports = function(router) {
                 keywords:    result.keywords,
                 linkUrl:     result.linkUrl,
                 price:       result.price,
-                locationId:  result.locationId, // TODO: SHOULD THIS BE LOCATION???
+                locationId:  result.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                 images:      sortedImgs.map(function(img){ return img.url }),  // get only img urls
                 hero:        result.heroImg,  // TODO: Send ONE of these
                 // imagesRef:   result.imagesRef,
@@ -300,7 +300,7 @@ module.exports = function(router) {
                   keywords:      listing.keywords,
                   linkUrl:       listing.linkUrl,
                   price:         listing.price,
-                  locationId:    listing.locationId, // TODO: SHOULD THIS BE LOCATION???
+                  locationId:    listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                   images:        sortedImgs
                                   .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
@@ -496,12 +496,11 @@ module.exports = function(router) {
         price: listingData.price,
         linkUrl: listingData.linkUrl,
         keywords: listingData.keywords,
-        locationId: listingData.locationId,
+        userLocationId: listingData.locationId,
         heroImg: listingData.images[0],  // First image is hero
-        // imagesRef: "tbd",
         userId: user.id,
         slug: "tbd",
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       };
 
       Listings
@@ -527,7 +526,7 @@ module.exports = function(router) {
                 keywords:    newListing.keywords,
                 linkUrl:     newListing.linkUrl,
                 price:       newListing.price,
-                locationId:  newListing.locationId, // TODO: SHOULD THIS BE LOCATION???
+                locationId:  newListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                 status:      newListing.status,
                 images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
                 hero:        newListing.heroImg,
@@ -605,18 +604,18 @@ module.exports = function(router) {
           console.log("Creating listing object updates...")
           // Specify fields we allow to be updated
           let allowedUpdates = {
-            categoryId:  listingData.categoryId,
-            conditionId: listingData.conditionId,
-            title:        Utils.sanitizeString(listingData.title),
-            description:  Utils.sanitizeString(listingData.description),
-            price:        Utils.sanitizeString(listingData.price),
-            linkUrl:      Utils.sanitizeUrl(listingData.linkUrl),
-            keywords:     Utils.sanitizeString(listingData.keywords),
-            locationId:   listingData.locationId,
-            heroImg:      listingData.images[0],
+            categoryId:     listingData.categoryId,
+            conditionId:    listingData.conditionId,
+            title:          Utils.sanitizeString(listingData.title),
+            description:    Utils.sanitizeString(listingData.description),
+            price:          Utils.sanitizeString(listingData.price),
+            linkUrl:        Utils.sanitizeUrl(listingData.linkUrl),
+            keywords:       Utils.sanitizeString(listingData.keywords),
+            userLocationId: listingData.locationId,
+            heroImg:        listingData.images[0],
             // imagesRef:    foundListing.imagesRef,
-            userId:       userId,
-            slug:         Utils.generateUrlSlug(listingData.title),
+            userId:         userId,
+            slug:           Utils.generateUrlSlug(listingData.title),
             // status cannot be changed here for now (always active). Later may do deleted, fulfilled, private, etc.
           }
 
@@ -638,24 +637,24 @@ module.exports = function(router) {
 
                 // Success response & updated Listing (if needed)
                 res.json({error: false, success: true, listing: {
-                  id:          updatedListing.id,
-                  userId:      updatedListing.userId,
+                  id:            updatedListing.id,
+                  userId:        updatedListing.userId,
                   ownerUsername: user.username,
-                  categoryId:  updatedListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                  conditionId: updatedListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
-                  title:       updatedListing.title,
-                  description: updatedListing.description,
-                  keywords:    updatedListing.keywords,
-                  linkUrl:     updatedListing.linkUrl,
-                  price:       updatedListing.price,
-                  locationId:  updatedListing.locationId, // TODO: SHOULD THIS BE LOCATION???
-                  status:      updatedListing.status,
-                  hero:        updatedListing.heroImg,
-                  images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                  // imagesRef:   updatedListing.imagesRef,
-                  slug:        updatedListing.slug,
-                  createdAt:   updatedListing.createdAt,
-                  updatedAt:   updatedListing.updatedAt
+                  categoryId:    updatedListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
+                  conditionId:   updatedListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
+                  title:         updatedListing.title,
+                  description:   updatedListing.description,
+                  keywords:      updatedListing.keywords,
+                  linkUrl:       updatedListing.linkUrl,
+                  price:         updatedListing.price,
+                  locationId:    updatedListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                  status:        updatedListing.status,
+                  hero:          updatedListing.heroImg,
+                  images:        listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
+                  // imagesRef   updatedListing.imagesRef,
+                  slug:          updatedListing.slug,
+                  createdAt:     updatedListing.createdAt,
+                  updatedAt:     updatedListing.updatedAt
                 }})
               });
             })

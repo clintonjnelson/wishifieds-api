@@ -12,6 +12,7 @@ var Utils        = require('../lib/utils.js');
 var db           = require('../db/models/index.js');
 var User         = db.User;
 var Images       = db.Image;
+var Locations    = db.Location;
 var UserLocation = db.UserLocation;
 var Sequelize    = require('sequelize');
 var multer       = require('multer');
@@ -111,6 +112,41 @@ module.exports = function(router) {
       });
   });
 
+  // Get user's locations
+  router.get('/users/:id/locations', function(req, res) {
+    var userId = req.params.id;
+    UserLocation
+      .findAll({
+        where: { userId: userId },
+        include: [ Locations ]
+      })
+      .then(function(foundLocations) {
+        console.log("Found user's locations! Locations: ", foundLocations);
+
+        const locations = foundLocations.map(mapLocations)
+        res.json({locations: locations});
+      })
+      .catch(function(err) {
+        console.log("Error getting user's locations: ", err);
+        return res.status(500).json({error: true, msg: 'Error getting user\'s locations'});
+      });
+
+    function mapLocations(dbUserLoc) {
+      console.log("One location to map is: ", dbUserLoc);
+      const loc = dbUserLoc.Location.get();
+      console.log("Location found is: ", loc);
+      return {
+        locationId:  dbUserLoc.id,  // the user's location, not the UL join table
+        description: (dbUserLoc.description || loc.description),  // try both
+        status:      dbUserLoc.status,
+        isDefault:   dbUserLoc.isDefault,
+        postal:      loc.postal,
+        latitude:    loc.geometry.coordinates[0],
+        longitude:   loc.geometry.coordinates[1],
+      };
+    }
+  });
+
   // GET profile_pic for a requested user id
   // TODO: Maybe get off of normal user route, but with special flag specifying fields?
   router.get('/users/:id/profile_pic', eatOnReq, eatAuth, function(req, res) {
@@ -173,7 +209,8 @@ module.exports = function(router) {
               UserLocation
                 .create({
                   userId: user.id,
-                  locationId: 38512
+                  locationId: 38512,
+                  description: 'Default',
                     // {[Sequelize.Op.eq]: sequelize.literal('(SELECT id FROM public.locations WHERE postal=\'' + DEFAULT_ZIPCODE + '\' LIMIT 1;)')}
                 })
                 .then(function(userLoc){
@@ -332,7 +369,6 @@ module.exports = function(router) {
 
 
 //--------------------- HELPERS ------------------------
-
   function makeUsernameOrIdQuery(usernameOrId) {
     let query = {};
     try      { query['id'] = parseInt(usernameOrId, 10); }

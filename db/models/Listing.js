@@ -6,21 +6,21 @@ const Sequelize = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   // Table name will match the definition name here
   var Listing = sequelize.define('Listing', {
-    categoryId:   { type: DataTypes.INTEGER, field: 'category_id' },  // FK
-    conditionId:  { type: DataTypes.INTEGER, field: 'condition_id' },  // FK
-    title:        { type: DataTypes.STRING },
-    description:  { type: DataTypes.STRING },
-    price:        { type: DataTypes.STRING },
-    linkUrl:      { type: DataTypes.STRING },
-    keywords:     { type: DataTypes.STRING },
-    locationId:   { type: DataTypes.INTEGER, field: 'location_id' },  // FK constraint someday
-    heroImg:      { type: DataTypes.STRING, field: 'hero_img' },
+    categoryId:     { type: DataTypes.INTEGER, field: 'category_id' },  // FK
+    conditionId:    { type: DataTypes.INTEGER, field: 'condition_id' },  // FK
+    title:          { type: DataTypes.STRING },
+    description:    { type: DataTypes.STRING },
+    price:          { type: DataTypes.STRING },
+    linkUrl:        { type: DataTypes.STRING },
+    keywords:       { type: DataTypes.STRING },
+    userLocationId: { type: DataTypes.INTEGER, field: 'user_location_id' },  // FK constraint someday
+    heroImg:        { type: DataTypes.STRING,  field: 'hero_img' },
     // imagesRef:    { type: DataTypes.STRING, field: 'images_ref' },   // Intended to be a reference to where storied in AWS
-    userId:       { type: DataTypes.INTEGER, field: 'user_id' },  // FK
-    slug:         { type: DataTypes.STRING },   // Someday will populate
-    status:       { type: DataTypes.ENUM('ACTIVE', 'PRIVATE', 'INACTIVE', 'DELETED') },   // ENUM
-    createdAt:    { type: DataTypes.DATE, field: 'created_at' },
-    updatedAt:    { type: DataTypes.DATE, field: 'updated_at' }
+    userId:         { type: DataTypes.INTEGER, field: 'user_id' },  // FK
+    slug:           { type: DataTypes.STRING },   // Someday will populate
+    status:         { type: DataTypes.ENUM('ACTIVE', 'PRIVATE', 'INACTIVE', 'DELETED') },   // ENUM
+    createdAt:      { type: DataTypes.DATE, field: 'created_at' },
+    updatedAt:      { type: DataTypes.DATE, field: 'updated_at' }
   }, {
     timestamps : true,
     tableName: 'listings',

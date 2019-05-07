@@ -54,15 +54,23 @@ db.Sequelize = Sequelize;
 // Models
 //db.User.hasOne(db.Phone, {foreignKey: 'user_id'});
 // db.Phone.belongsTo(db.User);  // Doesn't this do same thing as above?
-db.User.hasMany(      db.Listing,  {foreignKey: 'user_id',    sourceKey: 'id'});
-db.Message.belongsTo( db.Listing,  {foreignKey: 'listing_id', sourceKey: 'id'});
-db.Listing.hasMany(   db.Message,  {foreignKey: 'listing_id', sourceKey: 'id'});
-db.Listing.hasMany(   db.Favorite, {foreignKey: 'listing_id', sourceKey: 'id'});
-db.Listing.belongsTo( db.User,     {foreignKey: 'user_id',    targetKey: 'id'});
-db.Favorite.belongsTo(db.User,     {foreignKey: 'user_id',    targetKey: 'id'});
-db.Favorite.belongsTo(db.Listing,  {foreignKey: 'listing_id', targetKey: 'id'});
-db.Message.belongsTo( db.User,     {foreignKey: 'sender_id',  targetKey: 'id'});
-db.Listing.hasMany(   db.Image,    {foreignKey: 'listing_id'});
+db.User.hasMany(       db.Listing,      {foreignKey: 'user_id',     sourceKey: 'id'});
+db.Message.belongsTo(     db.Listing,      {foreignKey: 'listing_id',  sourceKey: 'id'});
+db.Listing.hasMany(       db.Favorite,     {foreignKey: 'listing_id',  sourceKey: 'id'});
+db.Listing.hasMany(       db.Message,      {foreignKey: 'listing_id',  sourceKey: 'id'});
+db.Listing.belongsTo(     db.User,         {foreignKey: 'user_id',     targetKey: 'id'});
+db.Favorite.belongsTo(    db.User,         {foreignKey: 'user_id',     targetKey: 'id'});
+db.Favorite.belongsTo(    db.Listing,      {foreignKey: 'listing_id',  targetKey: 'id'});
+db.Message.belongsTo(     db.User,         {foreignKey: 'sender_id',   targetKey: 'id'});
+db.Listing.hasMany(       db.Image,        {foreignKey: 'listing_id'});
+// db.Listing.hasOne(        db.UserLocation, {foreignKey: 'user_listing_id', sourceKey: 'id'});
+
+// Many-to-Many Relationships
+db.UserLocation.hasOne(   db.Location,     {foreignKey: 'id',          targetKey: 'location_id'});
+db.UserLocation.hasOne(   db.User,         {foreignKey: 'id',          targetKey: 'user_id'});
+// db.User.belongsToMany(    db.Location,     {foreignKey: 'user_id',     through: 'users_locations'});
+// db.Location.belongsToMany(db.User,         {foreignKey: 'location_id', through: 'users_locations'});
+
 // db.Message.hasOne(db.User, {foreignKey: 'recipient_id', targetKey: 'id'});
 // db.Category.hasMany(db.Listing);
 // db.Category.hasMany(db.Condition);

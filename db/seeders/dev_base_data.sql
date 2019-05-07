@@ -98,7 +98,7 @@ VALUES
 -- Data for Name: Listings; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "listings" (id, category_id, condition_id, title, description, price, "linkUrl", keywords, hero_img, location_id, user_id, slug, status, created_at, updated_at)
+INSERT INTO "listings" (id, category_id, condition_id, title, description, price, "linkUrl", keywords, hero_img, user_location_id, user_id, slug, status, created_at, updated_at)
 VALUES
 (5, 11, 7, 'Princess Shoes', 'Shoes even a princess would be happy to have.', '20', ' https://www.etsy.com/listing/655680492/princess-shoes?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=girls+princess+shoes&ref=sr_gallery-1-7', 'princess shoes, princess', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:37:41.527+00', '2019-03-09 22:37:41.527+00'),
 (6, 12, 6, 'Princess Mirror', 'Mirror a princess would be happy to look into.', '22', ' https://www.etsy.com/listing/534350450/antique-baroque-mirror-rococo-antique?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+mirror&ref=sr_gallery-1-11&organic_search_click=1&cns=1', 'princess mirror', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
@@ -163,10 +163,10 @@ VALUES
 -- Data for Name: users_locations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "users_locations"(id, user_id, location_id, description, created_at, updated_at)
+INSERT INTO "users_locations"(id, user_id, location_id, description, is_default, created_at, updated_at)
 VALUES
-(1, 3, 38512, 'default', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
-(2, 4, 38512, 'default', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
+(1, 3, 38512, 'default', true, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
+(2, 4, 38512, 'default', true, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
 
 
 

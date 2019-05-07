@@ -17,7 +17,7 @@ module.exports = {
       keywords:    { type: Sequelize.STRING },
       // imagesRef:   { type: Sequelize.STRING, field: 'images_ref' },
       heroImg:     { type: Sequelize.STRING, allowNull: false, field: 'hero_img'},
-      locationId:  { type: Sequelize.INTEGER, allowNull: false, field: 'location_id' },
+      userlocationId:{ type: Sequelize.INTEGER, allowNull: false, field: 'user_location_id' },
       userId:      { type: Sequelize.INTEGER, allowNull: false, field: 'user_id' },
       slug:        { type: Sequelize.STRING, allowNull: false },
       status:      { type: Sequelize.ENUM('ACTIVE', 'PRIVATE', 'INACTIVE', 'DELETED'), allowNull: false},

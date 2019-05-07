@@ -12,6 +12,7 @@ module.exports = {
       locationId:  { type: Sequelize.INTEGER, field: 'location_id' },
       description: { type: Sequelize.STRING },
       status:      { type: Sequelize.ENUM('ACTIVE', 'DELETED'), allowNull: false, defaultValue: 'ACTIVE'},
+      isDefault:   { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false, field: 'is_default' },
       createdAt:   { type: Sequelize.DATE, allowNull: false, field: 'created_at' },
       updatedAt:   { type: Sequelize.DATE, allowNull: false, field: 'updated_at' }
     });

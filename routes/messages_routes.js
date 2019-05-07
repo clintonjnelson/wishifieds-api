@@ -145,11 +145,11 @@ module.exports = function(router) {
     db.sequelize
       .query(
         'SELECT COUNT(*) ' +
-          'FROM "Messages" ' +
-            'JOIN "Listings" ON "Messages".listing_id = "Listings".id ' +
-            'JOIN "Users" ON "Listings".user_id = "Users".id ' +
-          'WHERE "Users".id = $userid ' +
-          "AND \"Messages\".status = 'UNREAD';",
+          'FROM "messages" ' +
+            'JOIN "listings" ON "messages".listing_id = "listings".id ' +
+            'JOIN "users" ON "listings".user_id = "users".id ' +
+          'WHERE "users".id = $userid ' +
+          "AND \"messages\".status = 'UNREAD';",
         {
           bind: { userid: userId },
           type: db.Sequelize.QueryTypes.SELECT
@@ -235,7 +235,7 @@ module.exports = function(router) {
     // Convert this to a stored procedure function & call via that!
     db.sequelize
       .query(
-        'UPDATE "Messages" SET status=\'READ\' ' +
+        'UPDATE "messages" SET status=\'READ\' ' +
         "WHERE id = ANY($ids) " +
         "AND recipient_id = $userid;",
         {

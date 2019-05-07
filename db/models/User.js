@@ -44,7 +44,8 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     timestamps : true,
     tableName: 'users',
-    freezeTableName: true
+    freezeTableName: true,
+    underscored: true
   });
 
   // Instance Methods
