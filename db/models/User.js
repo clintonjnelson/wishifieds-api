@@ -39,8 +39,8 @@ module.exports = function(sequelize, DataTypes) {
     termsconditions: { type: DataTypes.BOOLEAN },
 
     // Timestamps
-    createdAt:       { type: DataTypes.DATE, field: 'created_at', allowNull: false },
-    updatedAt:       { type: DataTypes.DATE, field: 'updated_at', allowNull: false },
+    createdAt:       { type: DataTypes.DATE, field: 'created_at' }, // Null ok here, PG will set them itselfk
+    updatedAt:       { type: DataTypes.DATE, field: 'updated_at' }, // Null ok here, PG will set them itselfk
   }, {
     timestamps : true,
     tableName: 'users',

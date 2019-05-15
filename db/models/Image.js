@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     position:   { type: DataTypes.INTEGER },
     listingId:  { type: DataTypes.INTEGER, field: 'listing_id' },
     userId:     { type: DataTypes.INTEGER, field: 'user_id' },
-    createdAt:  { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
-    updatedAt:  { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
+    createdAt:  { type: DataTypes.DATE, field: 'created_at' }, // Null ok here, PG will set them itself
+    updatedAt:  { type: DataTypes.DATE, field: 'updated_at' }, // Null ok here, PG will set them itself
     status:     { type: DataTypes.ENUM('ACTIVE', 'DELETED'), defaultValue: 'ACTIVE' },
   }, {
     timestamps : true,

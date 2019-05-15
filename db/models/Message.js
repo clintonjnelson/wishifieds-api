@@ -10,8 +10,8 @@ module.exports = (Sequelize, DataTypes) => {
     listingId:   { type: DataTypes.INTEGER, allowNull: false, field: 'listing_id' },  // LATER may remove this constraint for person-to-person conversations
     content:     { type: DataTypes.STRING, allowNull: false },
     status:      { type: DataTypes.ENUM('UNREAD', 'READ', 'DELETED'), allowNull: false, defaultValue: 'UNREAD'},
-    createdAt:   { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
-    updatedAt:   { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
+    createdAt:   { type: DataTypes.DATE, field: 'created_at' }, // Null ok here, PG will set them itself
+    updatedAt:   { type: DataTypes.DATE, field: 'updated_at' }, // Null ok here, PG will set them itself
   }, {
     timestamps : true,
     tableName: 'messages',

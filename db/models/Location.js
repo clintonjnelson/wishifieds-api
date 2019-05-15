@@ -5,8 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     geometry:     { type: DataTypes.GEOMETRY('POINT', 4326), allowNull: false },
     geometrytype: { type: DataTypes.STRING, allowNull: false, defaultValue: 'POINT' },
     postal:       { type: DataTypes.STRING, allowNull: true },
-    createdAt:    { type: DataTypes.DATE, allowNull: false, field: 'created_at'  },
-    updatedAt:    { type: DataTypes.DATE, allowNull: false, field: 'updated_at'  }
+    createdAt:    { type: DataTypes.DATE, field: 'created_at'  }, // Null ok here, PG will set them itself
+    updatedAt:    { type: DataTypes.DATE, field: 'updated_at'  }  // Null ok here, PG will set them itself
   }, {
     timestamps : false,
     tableName: 'locations',

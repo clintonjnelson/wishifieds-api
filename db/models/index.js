@@ -66,8 +66,10 @@ db.Listing.hasMany(       db.Image,        {foreignKey: 'listing_id'});
 // db.Listing.hasOne(        db.UserLocation, {foreignKey: 'user_listing_id', sourceKey: 'id'});
 
 // Many-to-Many Relationships
-db.UserLocation.hasOne(   db.Location,     {foreignKey: 'id',          targetKey: 'location_id'});
-db.UserLocation.hasOne(   db.User,         {foreignKey: 'id',          targetKey: 'user_id'});
+db.UserLocation.belongsTo(   db.Location,  {foreignKey: 'location_id', targetKey: 'id'});
+db.UserLocation.belongsTo(   db.User,      {foreignKey: 'user_id',     targetKey: 'id'});
+// db.UserLocation.hasOne(   db.Location,     {foreignKey: 'id',          sourceKey: 'location_id'});
+// db.UserLocation.hasOne(   db.User,         {foreignKey: 'id',          sourceKey: 'user_id'});
 // db.User.belongsToMany(    db.Location,     {foreignKey: 'user_id',     through: 'users_locations'});
 // db.Location.belongsToMany(db.User,         {foreignKey: 'location_id', through: 'users_locations'});
 

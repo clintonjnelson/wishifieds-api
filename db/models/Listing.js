@@ -19,8 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     userId:         { type: DataTypes.INTEGER, field: 'user_id' },  // FK
     slug:           { type: DataTypes.STRING },   // Someday will populate
     status:         { type: DataTypes.ENUM('ACTIVE', 'PRIVATE', 'INACTIVE', 'DELETED') },   // ENUM
-    createdAt:      { type: DataTypes.DATE, field: 'created_at' },
-    updatedAt:      { type: DataTypes.DATE, field: 'updated_at' }
+    createdAt:      { type: DataTypes.DATE, field: 'created_at' }, // Null ok here, PG will set them itself
+    updatedAt:      { type: DataTypes.DATE, field: 'updated_at' }  // Null ok here, PG will set them itself
   }, {
     timestamps : true,
     tableName: 'listings',

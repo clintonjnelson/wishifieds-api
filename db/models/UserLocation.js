@@ -7,10 +7,10 @@ module.exports = (sequelize, DataTypes) => {
     description: { type: DataTypes.STRING },  // TODO: Should we have a default of empty string?? That's what we want null to do.
     status:      { type: DataTypes.ENUM('ACTIVE', 'DELETED'), defaultValue: 'ACTIVE', allowNull: false },
     isDefault:   { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false, field: 'is_default' },
-    createdAt:   { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
-    updatedAt:   { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
+    createdAt:   { type: DataTypes.DATE, field: 'created_at' },  // Null ok here, PG will set them itself
+    updatedAt:   { type: DataTypes.DATE, field: 'updated_at' },  // Null ok here, PG will set them itself
   }, {
-    timestamps : false, // TODO: Breaks the sequelize association
+    timestamps: true, // TODO: "true" Breaks the sequelize association. VERIFY IF STILL DOES.
     tableName: 'users_locations',
     freezeTableName: true,
     underscored: true

@@ -4,8 +4,8 @@ module.exports = (sequelize, DataTypes) => {
   var Category = sequelize.define('Category', {
     name: DataTypes.STRING,
     icon: DataTypes.STRING,
-    createdAt:   { type: DataTypes.DATE, allowNull: false, field: 'created_at' },
-    updatedAt:   { type: DataTypes.DATE, allowNull: false, field: 'updated_at' },
+    createdAt:   { type: DataTypes.DATE, field: 'created_at' }, // Null ok here, PG will set them itself
+    updatedAt:   { type: DataTypes.DATE, field: 'updated_at' }, // Null ok here, PG will set them itself
   }, {
     timestamps : true,
     tableName: 'categories',

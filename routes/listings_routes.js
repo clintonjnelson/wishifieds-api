@@ -16,6 +16,8 @@ var Message    = db.Message;
 var Favorites  = db.Favorite;
 var Sequelize  = require('sequelize');
 
+var DEFAULT_ANY_CATEGORY_ID = 1;
+var DEFAULT_ANY_CONDITION_ID = 1;
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
 
 // Images should have table structure something like this:
@@ -77,7 +79,7 @@ module.exports = function(router) {
                     keywords:    listing.keywords,
                     linkUrl:     listing.linkUrl,
                     price:       listing.price,
-                    locationId:  listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                    userLocationId:  listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                     images:      sortedImgs
                                   .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
@@ -168,7 +170,7 @@ module.exports = function(router) {
                 keywords:      listing.keywords,
                 linkUrl:       listing.linkUrl,
                 price:         listing.price,
-                locationId:    listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                userLocationId: listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                 images:        sortedImgs
                                 .filter(function(img){ return img.listingId == listing.id})
                                 .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
@@ -233,7 +235,7 @@ module.exports = function(router) {
                 keywords:    result.keywords,
                 linkUrl:     result.linkUrl,
                 price:       result.price,
-                locationId:  result.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                userLocationId: result.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                 images:      sortedImgs.map(function(img){ return img.url }),  // get only img urls
                 hero:        result.heroImg,  // TODO: Send ONE of these
                 // imagesRef:   result.imagesRef,
@@ -300,7 +302,7 @@ module.exports = function(router) {
                   keywords:      listing.keywords,
                   linkUrl:       listing.linkUrl,
                   price:         listing.price,
-                  locationId:    listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                  userLocationId: listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                   images:        sortedImgs
                                   .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
@@ -489,14 +491,14 @@ module.exports = function(router) {
 
     if(passesCriticalValidations(listingData)) {
       const preListing = {
-        categoryId: listingData.categoryId,
-        conditionId: listingData.conditionId,
+        categoryId: listingData.categoryId || DEFAULT_ANY_CATEGORY_ID,
+        conditionId: listingData.conditionId || DEFAULT_ANY_CONDITION_ID,
         title: listingData.title,
         description: listingData.description,
         price: listingData.price,
         linkUrl: listingData.linkUrl,
         keywords: listingData.keywords,
-        userLocationId: listingData.locationId,
+        userLocationId: listingData.userLocationId,
         heroImg: listingData.images[0],  // First image is hero
         userId: user.id,
         slug: "tbd",
@@ -510,7 +512,7 @@ module.exports = function(router) {
           const newListing = listingObject.dataValues;
 
           // Save Images
-          saveImages(listingData.images, true, 'tbd ref', newListing.id, newListing.userId, function(wasSuccessful) {    // TODO: UPDATE userId TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
+          saveImages(listingData.images, true, newListing.id, newListing.userId, function(wasSuccessful) {    // TODO: UPDATE userId TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
             if(wasSuccessful) {
               console.log("Successfully saved images.");
               newListing['images'] = listingData.images;
@@ -526,7 +528,7 @@ module.exports = function(router) {
                 keywords:    newListing.keywords,
                 linkUrl:     newListing.linkUrl,
                 price:       newListing.price,
-                locationId:  newListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                userLocationId: newListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                 status:      newListing.status,
                 images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
                 hero:        newListing.heroImg,
@@ -611,7 +613,7 @@ module.exports = function(router) {
             price:          Utils.sanitizeString(listingData.price),
             linkUrl:        Utils.sanitizeUrl(listingData.linkUrl),
             keywords:       Utils.sanitizeString(listingData.keywords),
-            userLocationId: listingData.locationId,
+            userLocationId: listingData.userLocationId,
             heroImg:        listingData.images[0],
             // imagesRef:    foundListing.imagesRef,
             userId:         userId,
@@ -647,7 +649,7 @@ module.exports = function(router) {
                   keywords:      updatedListing.keywords,
                   linkUrl:       updatedListing.linkUrl,
                   price:         updatedListing.price,
-                  locationId:    updatedListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                  userLocationId: updatedListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                   status:        updatedListing.status,
                   hero:          updatedListing.heroImg,
                   images:        listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
@@ -690,14 +692,11 @@ module.exports = function(router) {
 
   // Critical pre-save checks
   function passesCriticalValidations(listingData) {
-    const checks = listingData.categoryId &&
-    listingData.conditionId &&
-    listingData.title &&
+    const checks = listingData.title &&
     listingData.description &&
     listingData.price &&
-    listingData.locationId &&
-    (listingData.images.length > 0) &&
-    listingData.keywords &&
+    listingData.userLocationId &&
+    (listingData.images.length > 0)
     true;
 
     // TODO: CHECK FOR MALICIOUS CONTENT HERE!!!!!!!!
