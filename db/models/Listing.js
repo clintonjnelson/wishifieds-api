@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     title:          { type: DataTypes.STRING },
     description:    { type: DataTypes.STRING },
     price:          { type: DataTypes.STRING },
-    linkUrl:        { type: DataTypes.STRING },
+    linkUrl:        { type: DataTypes.STRING, field: 'link_url' },
     keywords:       { type: DataTypes.STRING },
     userLocationId: { type: DataTypes.INTEGER, field: 'user_location_id' },  // FK constraint someday
     heroImg:        { type: DataTypes.STRING,  field: 'hero_img' },

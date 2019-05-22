@@ -9,7 +9,9 @@ var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
 // var EmailBuilder = require('../lib/mailing/email_content_builder.js');
 var Utils      = require('../lib/utils.js');
 var db         = require('../db/models/index.js');
+var sequelize  = db.sequelize;
 var Listings   = db.Listing;
+var Locations  = db.Locations;
 var Images     = db.Image;
 var User       = db.User;
 var Message    = db.Message;
@@ -18,6 +20,8 @@ var Sequelize  = require('sequelize');
 
 var DEFAULT_ANY_CATEGORY_ID = 1;
 var DEFAULT_ANY_CONDITION_ID = 1;
+var DEFAULR_SEARCH_RADIUS_DISTANCE = 100;  // 100 miles is a lot, but will shrink later on
+var DEFAULT_SEARCH_ZIPCODE = '98101';
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
 
 // Images should have table structure something like this:
@@ -37,81 +41,105 @@ module.exports = function(router) {
     console.log("REQUEST QUERY IS: ", req.query);
     console.log("Made it to SEARCH. Query param: ", req.query['search']);
 
-    // Make the attributes variable for Advanced searches by a user.
-    // FIXME: THIS IS SUPER INEFFICIENT. WRITE CUSTOMER QUERY TO GATHER IMAGES IN SQL.
-    if(req.query['search'].length > 0) {
-      var searchStr = req.query['search'].trim();
-      Listings
-        .findAll({
-          where: {
-            status: 'ACTIVE',
-            $or: [
-              { title: { [Sequelize.Op.iLike]: '%'+searchStr } },
-              { keywords: { [Sequelize.Op.iLike]: '%'+searchStr } }
-            ]
-          },
-          include: [User]
-        })
-        .then(function(results) {
-          console.log("RESULTS ARE: ", results);
-          if(results && results.length > 0) {
-            var listingIds = results.map(function(listing) { return listing.id; });
-            Images
-              .findAll({
-                where: {listingId: listingIds},
-                order: [['position', 'ASC']]
-              })
-              .then(function(images) {
-                console.log("IMAGES FOUND ARE: ", images);
-                var sortedImgs = images
-                  .sort(function(a, b){ return a.position - b.position; })
-
-                console.log("SORTED IMAGES ARE: ", sortedImgs);
-                var listings = results.map(function(listing) {
-                  return {
-                    id:          listing.id,
-                    userId:      listing.userId,
-                    ownerUsername: listing['User']['username'],
-                    categoryId:  listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                    conditionId: listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
-                    title:       listing.title,
-                    description: listing.description,
-                    keywords:    listing.keywords,
-                    linkUrl:     listing.linkUrl,
-                    price:       listing.price,
-                    userLocationId:  listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                    images:      sortedImgs
-                                  .filter(function(img){ return img.listingId == listing.id})
-                                  .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
-                    hero:        listing.heroImg,        // TODO: Send ONE of these
-                    // imagesRef:   listing.imagesRef,
-                    slug:        listing.slug,
-                    createdAt:   listing.createdAt,
-                    updatedAt:   listing.updatedAt
-                  };
-                });
-                console.log("LISTINGS FOUND: ", listings);
-
-                res.json({error: false, success: true, listings: listings });
-              })
-              .catch(function(errr) {
-                console.log("Caught error in searching for listings. Error getting images: ", err);
-                res.json({error: true, success: false});
-              });;
-          }
-          // No listings found
-          else {
-            res.json({error: false, success: true, listings: []});
-          }
-        })
-        .catch(function(err) {
-          console.log("Caught error in searching for listings. Error getting listings: ", err);
-          res.status(500).json({error: true, success: false});
-        });
+    if(req.query['search'].length == 0) {
+      return res.json({error: false, success: true, listings: []});  // No search, no results
     }
-    else {
-      res.json({error: false, success: true, listings: []});  // No search, no results
-    }
+
+    var distQuery = req.query['distance'];
+    var distance = ( (distQuery && distQuery.length == 0) ? distQuery : DEFAULR_SEARCH_RADIUS_DISTANCE);
+
+    var postalQuery = req.query['postal'];
+    var postal = ( (postalQuery && postalQuery.length == 0) ? postalQuery : DEFAULT_SEARCH_ZIPCODE);
+
+    var searchStr = req.query['search'].trim();
+
+    sequelize
+      .query(
+        `SELECT * FROM find_listings_within_distance_v1(\'${searchStr}\'::VARCHAR, \'${postal}\'::VARCHAR(16), ${distance}::INTEGER);`, // '
+        { type: sequelize.QueryTypes.SELECT }
+      )
+    // Listings
+    //   .findAll({
+    //     where: {
+    //       status: 'ACTIVE',
+    //       $or: [
+    //         { title: { [Sequelize.Op.iLike]: '%'+searchStr+'%' } },
+    //         { keywords: { [Sequelize.Op.iLike]: '%'+searchStr+'%' } }
+    //       ],
+    //       Sequelize.where(
+    //         Sequelize.fn(
+    //           'ST_DWithin',
+    //           Sequelize.col('$location.geography$'),
+    //           Sequelize.fn('ST_MakePoint',
+    //             Sequelize.literal('SELECT ST_'), //longitude
+    //             latitude), //latitude
+    //           searchRadius
+    //           ),
+    //         true
+    //       )
+    //     },
+    //     include: [
+    //       { model: User },
+    //       { model: Location, through: User }
+    //     ]
+    //   })'
+      .then(function(results, metadata) {
+        console.log("RESULTS ARE: ", results);
+        if(results && results.length > 0) {
+          // var listingIds = results.map(function(listing) { return listing.id; });
+          // Images
+          //   .findAll({
+          //     where: {listingId: listingIds},
+          //     order: [['position', 'ASC']]
+          //   })
+          //   .then(function(images) {
+          //     console.log("IMAGES FOUND ARE: ", images);
+          //     var sortedImgs = images
+          //       .sort(function(a, b){ return a.position - b.position; })
+
+          //     console.log("SORTED IMAGES ARE: ", sortedImgs);
+              var listings = results.map(function(listing) {
+                return {
+                  id:             listing.listingid,
+                  userId:         listing.userid,
+                  ownerUsername:  listing.username,
+                  categoryId:     listing.categoryid,  // TODO: Decide if UI does the name conversion or the API
+                  conditionId:    listing.conditionid,  // TODO: Decide if UI does the name conversion or the API
+                  title:          listing.title,
+                  description:    listing.description,
+                  keywords:       listing.keywords,
+                  linkUrl:        listing.linkurl,
+                  price:          listing.price,
+                  userLocationId: listing.userlocationid, // TODO: SHOULD THIS BE LOCATION???
+                  images:         listing.images,  // sorted in the query
+                                // sortedImgs
+                                // .filter(function(img){ return img.listingId == listing.id})
+                                // .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
+                  hero:           listing.heroimg,        // TODO: Send ONE of these
+                  // imagesRef:   listing.imagesRef,
+                  slug:           listing.slug,
+                  createdAt:      listing.createdat,
+                  updatedAt:      listing.updatedat
+                };
+              });
+              console.log("LISTINGS FOUND: ", listings);
+
+              res.json({error: false, success: true, listings: listings });
+            // })
+            // .catch(function(errr) {
+            //   console.log("Caught error in searching for listings. Error getting images: ", err);
+            //   res.json({error: true, success: false});
+            // });;
+        }
+        // No listings found
+        else {
+          res.json({error: false, success: true, listings: []});
+        }
+      })
+      .catch(function(err) {
+        console.log("Caught error in searching for listings. Error getting listings: ", err);
+        res.status(500).json({error: true, success: false});
+      });
   });
 
   // DOES THIS GO HERE??  MAY HAVE ROUTE CLASHES IF IN FAVS ROUTES. PLUS RESOURCE RETURNED IS LISTINGS...

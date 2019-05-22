@@ -13,7 +13,7 @@ module.exports = {
       title:       { type: Sequelize.STRING, allowNull: false },
       description: { type: Sequelize.STRING, allowNull: false },
       price:       { type: Sequelize.STRING, allowNull: false },
-      linkUrl:     { type: Sequelize.STRING, field: 'linkUrl' },  // FIXME!!! to understore in DB
+      linkUrl:     { type: Sequelize.STRING, field: 'link_url' },  // FIXME!!! to understore in DB
       keywords:    { type: Sequelize.STRING },
       // imagesRef:   { type: Sequelize.STRING, field: 'images_ref' },
       heroImg:     { type: Sequelize.STRING, allowNull: false, field: 'hero_img'},
