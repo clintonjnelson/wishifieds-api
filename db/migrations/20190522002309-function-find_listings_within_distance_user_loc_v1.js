@@ -1,9 +1,13 @@
 'use strict';
 
+// Example Call
+// SELECT * FROM find_listings_within_distance_user_loc_v1('shoe'::VARCHAR, 2::INTEGER, 5::INTEGER);
+
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      CREATE OR REPLACE FUNCTION find_listings_within_distance_v1(search_str_p VARCHAR, postal_p VARCHAR(16), distance_miles_p INTEGER)
+      CREATE OR REPLACE FUNCTION find_listings_within_distance_user_loc_v1(search_str_p VARCHAR, user_location_id_p INTEGER, distance_miles_p INTEGER)
       RETURNS table(
         listingId INTEGER,
         userId INTEGER,
@@ -23,7 +27,7 @@ module.exports = {
         updatedAt TIMESTAMP WITH TIME ZONE
       )
       AS $$
-        SELECT DISTINCT ON (l.id)
+        SELECT DISTINCT ON (l.id)  --FIX THIS! GETTING DUPS ON SOMETHING, but DISTINCT IS SLOW.
           l.id AS listingId,
             l.user_id AS userId,
           u.username,
@@ -53,7 +57,10 @@ module.exports = {
         -- Location filter first, because that will quickly limit results
         WHERE ST_DWITHIN(
           loc.geography::geography,  -- geography point
-          (SELECT geography FROM public.locations WHERE postal = postal_p)::geography,  -- geography point
+          (SELECT centerloc.geography
+             FROM public.users_locations AS centeruserloc
+             JOIN public.locations AS centerloc ON centerloc.id = centeruserloc.location_id
+             WHERE centeruserloc.id = user_location_id_p)::geography,  -- geography point
           (1609.344 * distance_miles_p)::float8  -- distance from miles to meters
         )
         -- Search query next, because case-insensitive text partial match searching is slower
@@ -69,7 +76,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      DROP FUNCTION find_listings_within_distance_v1(character varying,character varying,integer);
+      DROP FUNCTION find_listings_within_distance_user_loc_v1(character varying,integer,integer);
     `);
   }
 };
