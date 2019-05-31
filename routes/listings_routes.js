@@ -2,8 +2,9 @@
 
 var bodyparser = require('body-parser'      );
 var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
-var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
-var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
+var eatAuth    = require('../lib/routes_middleware/eat_auth.js'   )(process.env.AUTH_SECRET);
+var userOnReq  = require('../lib/routes_middleware/user_on_req.js')(process.env.AUTH_SECRET);
+var ownerAuth  = require('../lib/routes_middleware/owner_auth.js');
 var Utils      = require('../lib/utils.js');
 var db         = require('../db/models/index.js');
 var sequelize  = db.sequelize;
@@ -34,24 +35,31 @@ var DEFAULT_SEARCH_ZIPCODE = '98101';
 module.exports = function(router) {
   router.use(bodyparser.json());
 
-  router.get('/listings/search', eatOnReq, function(req, res) {
+  router.get('/listings/search', eatOnReq, userOnReq, function(req, res) {
     if(req.query['search'].length == 0) {
       return res.json({error: false, success: true, listings: []});  // No search, no results
     }
-
+    console.log("USER ON REQ IS: ", req.user);
     var maybeUserId = req.user && req.user.id;  // WARN: May or may NOT have userId available on request
+    var maybeUserLoc = req.query['locationId'];
     var postalQuery = req.query['postal'];  // Centroid: Postal, User Default, Generic
     var distQuery = req.query['distance'];
     var searchStr = req.query['search'].trim();
 
+    console.log("MaybeUserId IS: ", maybeUserId);
+    console.log("POSTAL QUERY IS: ", postalQuery);
+    console.log("DIST QUERY IS: ", distQuery);
+    console.log("LOCATION QUERY IS: ", maybeUserLoc);
+
     var params = {
       search: searchStr,
-      distance: ( (distQuery && distQuery.length == 0) ? distQuery : DEFAULR_SEARCH_RADIUS_DISTANCE),
-      postal: ( (postalQuery && postalQuery.length == 0) ? postalQuery : DEFAULT_SEARCH_ZIPCODE),
+      distance: ( (distQuery && distQuery.length != 0) ? distQuery : DEFAULR_SEARCH_RADIUS_DISTANCE),
+      postal: ( (postalQuery && postalQuery.length != 0) ? postalQuery : DEFAULT_SEARCH_ZIPCODE),
+      userLocationId: maybeUserLoc,
       userId: maybeUserId
     };
     console.log("PARAMS FOR QUERY ARE: ", params);
-    var sqlQuery = selectSearchQuery(params['postal'], params['maybeUserId']);
+    var sqlQuery = selectSearchQuery(postalQuery, params['userId'], params['userLocationId']);
 
     sequelize
       .query(
@@ -100,13 +108,17 @@ module.exports = function(router) {
     // 98101 zip => locationId
     // generic zip => locationId
     // userId => user_location => 2 ==> locationId
-    function selectSearchQuery(uiPostal, userIdForDefault) {
+    function selectSearchQuery(uiPostal, userId, userLocationId) {
       var query;
       if(uiPostal) {
         console.log("USING THE DISTANCE WITH ZIP SEARCH.");
         query = "SELECT * FROM find_listings_within_distance_zip_v1(:search::VARCHAR, :postal::VARCHAR(16), :distance::INTEGER);"
       }
-      else if(userIdForDefault) {
+      else if(userLocationId && userId) {
+        console.log("USING THE DISTANCE WITH SPECIFIC USER LOCATION...");
+        query = "SELECT * FROM find_listings_within_distance_user_loc_v1(:search::VARCHAR, :userLocationId::INTEGER, :distance::INTEGER);"
+      }
+      else if(userId) {
         console.log("USING THE DISTANCE WITH USER LOC DEFAULT...");
         query = "SELECT * FROM find_listings_within_distance_user_default_v1(:search::VARCHAR, :userId::INTEGER, :distance::INTEGER);"
       }

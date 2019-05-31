@@ -42,8 +42,8 @@ module.exports = function(router) {
         status:         dbUserLoc.status,
         isDefault:      dbUserLoc.isDefault,
         postal:         loc.postal,
-        latitude:       loc.geometry.coordinates[0],
-        longitude:      loc.geometry.coordinates[1],
+        latitude:       loc.geography.coordinates[0],
+        longitude:      loc.geography.coordinates[1],
       };
     }
   });
@@ -129,8 +129,8 @@ module.exports = function(router) {
         status:         userLoc.status,
         isDefault:      userLoc.isDefault,
         postal:         loc.postal,
-        latitude:       loc.geometry.coordinates[0],
-        longitude:      loc.geometry.coordinates[1],
+        latitude:       loc.geography.coordinates[0],
+        longitude:      loc.geography.coordinates[1],
       };
     }
   });
