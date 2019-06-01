@@ -61,28 +61,44 @@ module.exports = function(router) {
           // console.log("BODY: ", ress.text);
           const $ = cheerio.load(ress.text);
 
+          // Get all of the background image urls from their css attributes
+          // TODO: CAN DO AN EXCLUSION QUERY TO REDUCE OBVIOUSLY WRONG RESULTS
+            // SOMETHING LIKE $('*[^p,span'])... so that less to iterate through
+          const bkgImgTags = $('*').attr('style', 'background-image')
+          const bkgrnds = Object.keys(bkgImgTags).map( key => {
+            var elem = bkgImgTags[key];
+            // TODO: MAYBE GET MORE FORMATS THAN JUST 'data-src'??
+            var src = elem.attribs && elem.attribs['data-src'];
+            if(src) {
+              if(src.includes('http')) {
+                return src;
+              }
+            }
+          });
+
+          // Get all of the html img tag url src's
           const imgTags = $('img');
-          console.log(imgTags);
-
-          var keys = Object.keys(imgTags);
-
-          const want = keys.map( key => {
+          const want = Object.keys(imgTags).map( key => {
             var imgTag = imgTags[key];
-            // FIXME: HERE IF THE ATTRIBS HAS HTTP/HTTPS ALREADY IN THE NAME, THEN DON"T ADD NAMESPACE
-            // IF ATTRIBS.SRC DOES N-O-T HAVE THE HTTP/HTTPS IN THE NAME, THEN COMBINE
             if(imgTag.namespace && imgTag.attribs && imgTag.attribs.src) {
               // TODO: Fix, since does not capture image links attached to "data-src=_____"
               if(imgTag.attribs.src.includes('http')) {
                 return imgTag.attribs.src;  // image url is complete (ie: externally saved)
               }
               else {
+                // TODO: VERIFY IF THIS ALWAYS WORKS. SOMETIMES NAMESPACE IS LIKE A www.w3.org url...
                 return imgTag.namespace + imgTag.attribs.src;  // image is internal to site & needs to be combined with namespace
               }
             }
           });
-          const results = Array.from(new Set(want));
+
+          // Combine results
+          const resultsImg = Array.from(new Set(want));
+          const resultsBkg = Array.from(new Set(bkgrnds));
+          const results = resultsImg.concat(resultsBkg);
+
           const limited = results.filter( url => imagesFilter(url));
-          console.log("Final", limited);
+          console.log("Final:", limited);
 
           res.json({urls: limited})
         });

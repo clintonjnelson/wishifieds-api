@@ -18,8 +18,9 @@ var Sequelize  = require('sequelize');
 
 var DEFAULT_ANY_CATEGORY_ID = 1;
 var DEFAULT_ANY_CONDITION_ID = 1;
-var DEFAULR_SEARCH_RADIUS_DISTANCE = 100;  // 100 miles is a lot, but will shrink later on
+var DEFAULT_SEARCH_RADIUS_DISTANCE = 100;  // 100 miles is a lot, but will shrink later on
 var DEFAULT_SEARCH_ZIPCODE = '98101';
+var ANY_DISTANCE = 'ANY';
 // FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
 
 // Images should have table structure something like this:
@@ -53,13 +54,13 @@ module.exports = function(router) {
 
     var params = {
       search: searchStr,
-      distance: ( (distQuery && distQuery.length != 0) ? distQuery : DEFAULR_SEARCH_RADIUS_DISTANCE),
+      distance: ( (distQuery && distQuery.length != 0) ? distQuery : DEFAULT_SEARCH_RADIUS_DISTANCE),
       postal: ( (postalQuery && postalQuery.length != 0) ? postalQuery : DEFAULT_SEARCH_ZIPCODE),
       userLocationId: maybeUserLoc,
       userId: maybeUserId
     };
     console.log("PARAMS FOR QUERY ARE: ", params);
-    var sqlQuery = selectSearchQuery(postalQuery, params['userId'], params['userLocationId']);
+    var sqlQuery = selectSearchQuery(distQuery, postalQuery, params['userId'], params['userLocationId']);
 
     sequelize
       .query(
@@ -105,27 +106,35 @@ module.exports = function(router) {
         res.status(500).json({error: true, success: false});
       });
 
-    // 98101 zip => locationId
-    // generic zip => locationId
-    // userId => user_location => 2 ==> locationId
-    function selectSearchQuery(uiPostal, userId, userLocationId) {
+    // Return the appripriate SPROC template per search request params
+    function selectSearchQuery(distance, uiPostal, userId, userLocationId) {
       var query;
-      if(uiPostal) {
+      // Any distance, then location/distance don't matter
+      if(distance && distance.toUpperCase() === ANY_DISTANCE) {
+        console.log("USING THE ANY DISTANCE SEARCH (ALL LISTINGS MATCH)");
+        query = "SELECT * FROM find_listings_any_distance_v1(:search::VARCHAR);"
+      }
+      // Zipcode, then that primary/override governs
+      else if(uiPostal) {
         console.log("USING THE DISTANCE WITH ZIP SEARCH.");
         query = "SELECT * FROM find_listings_within_distance_zip_v1(:search::VARCHAR, :postal::VARCHAR(16), :distance::INTEGER);"
       }
+      // Specific user location & user (logged in), then use specified
       else if(userLocationId && userId) {
         console.log("USING THE DISTANCE WITH SPECIFIC USER LOCATION...");
         query = "SELECT * FROM find_listings_within_distance_user_loc_v1(:search::VARCHAR, :userLocationId::INTEGER, :distance::INTEGER);"
       }
+      // User logged in, but no specifics, then use default for user
       else if(userId) {
         console.log("USING THE DISTANCE WITH USER LOC DEFAULT...");
         query = "SELECT * FROM find_listings_within_distance_user_default_v1(:search::VARCHAR, :userId::INTEGER, :distance::INTEGER);"
       }
+      // Must be guest & no specifics, so use generic default zip
       else {
         console.log("USING THE DISTANCE WITH GENERIC DEFAULT ZIP...");
-        query = "SELECT * FROM find_listings_within_distance_zip_v1("+ DEFAULT_SEARCH_ZIPCODE + "::VARCHAR, :postal::VARCHAR(16), :distance::INTEGER);"
+        query = "SELECT * FROM find_listings_within_distance_zip_v1(:search::VARCHAR, :postal::VARCHAR(16), :distance::INTEGER);"
       }
+
       console.log("Query to use is: ", query);
       return query;
     }
