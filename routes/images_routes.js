@@ -1,10 +1,13 @@
 'use strict';
 
+var urlParser = require('url');
 var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
 var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
 // var ownerAuth  = require('../lib/routes_middleware/owner_auth.js');
 var bodyparser = require('body-parser');
 var cheerio    = require('cheerio');
+const puppeteer = require('puppeteer');
+// var juice = require('juice');
 var superagent = require('superagent');
 
 var Images    = require('../db/models/index.js').Image;
@@ -53,55 +56,84 @@ module.exports = function(router) {
         ]});
     }
     else {
+      console.log("ABOUT TO SCRAPE...");
       const url = req.body.url.trim(); // req.body.url
-      superagent
-        .get(url)
-        .end( function(reqq, ress) {
+      const parsed = urlParser.parse(url);
+      const site = parsed.protocol + '//' + parsed.host;  // https://somesite.com:777
 
-          // console.log("BODY: ", ress.text);
-          const $ = cheerio.load(ress.text);
+      // TODO: Break out to ASYNC callable function that returns img urls. DONE?
+      // https://nodejs.org/ja/docs/guides/dont-block-the-event-loop/
+      async function scrape(callback) {
+        const browser = await puppeteer.launch({headless: true});
+        const page = await browser.newPage();
+        await page.goto(url);
+        const pupHtml = await page.content();
 
-          // Get all of the background image urls from their css attributes
-          // TODO: CAN DO AN EXCLUSION QUERY TO REDUCE OBVIOUSLY WRONG RESULTS
-            // SOMETHING LIKE $('*[^p,span'])... so that less to iterate through
-          const bkgImgTags = $('*').attr('style', 'background-image')
-          const bkgrnds = Object.keys(bkgImgTags).map( key => {
-            var elem = bkgImgTags[key];
-            // TODO: MAYBE GET MORE FORMATS THAN JUST 'data-src'??
-            var src = elem.attribs && elem.attribs['data-src'];
-            if(src) {
-              if(src.includes('http')) {
-                return src;
-              }
+        // Cheeio taking the puppeteer built HTML (via JS)
+        const $c = cheerio.load(pupHtml);
+
+        // Get all of the background image urls from their css attributes
+        // Example: www.discoverboating.com
+        const bkgImgTags = $c('*').attr('style', 'background-image');
+        const bkgrnds = Object.keys(bkgImgTags).map( key => {
+          var elem = bkgImgTags[key];
+          // TODO: MAYBE GET MORE FORMATS THAN JUST 'data-src'??
+          var src = elem.attribs && elem.attribs['data-src'];
+          if(src) {
+            if(src.includes('http')) {
+              return src;
             }
-          });
-
-          // Get all of the html img tag url src's
-          const imgTags = $('img');
-          const want = Object.keys(imgTags).map( key => {
-            var imgTag = imgTags[key];
-            if(imgTag.namespace && imgTag.attribs && imgTag.attribs.src) {
-              // TODO: Fix, since does not capture image links attached to "data-src=_____"
-              if(imgTag.attribs.src.includes('http')) {
-                return imgTag.attribs.src;  // image url is complete (ie: externally saved)
-              }
-              else {
-                // TODO: VERIFY IF THIS ALWAYS WORKS. SOMETIMES NAMESPACE IS LIKE A www.w3.org url...
-                return imgTag.namespace + imgTag.attribs.src;  // image is internal to site & needs to be combined with namespace
-              }
-            }
-          });
-
-          // Combine results
-          const resultsImg = Array.from(new Set(want));
-          const resultsBkg = Array.from(new Set(bkgrnds));
-          const results = resultsImg.concat(resultsBkg);
-
-          const limited = results.filter( url => imagesFilter(url));
-          console.log("Final:", limited);
-
-          res.json({urls: limited})
+          }
         });
+
+        // Parse via regex because JQuery not pulling reliably...
+        // Examples: shop.nordstrom.com
+        const parsedCssImgs = [];
+        const regex = /((?<="ImageUrl":")((\\"|[^"])*)(?="))+/igm;
+        var result;
+        while((result = regex.exec(pupHtml)) !== null) {
+          if(result.index === regex.lastIndex) { regex.lastIndex; }
+          parsedCssImgs.push(result[0]);
+        }
+
+        // Get all of the html img tag url src's
+        // Example: https://www.gap.com/ (JS loaded)
+        const imgTags = $c('img');
+        // console.log("IMG TAGS FROM SITE ARE: ", imgTags);
+        const want = Object.keys(imgTags).map( key => {
+          var imgTag = imgTags[key];
+          var src = imgTag && imgTag.attribs && getSrcFromAttribs(imgTag.attribs);
+          if(src) {
+            // TODO: Fix, since does not capture image links attached to "data-src=_____"
+            if(src.includes('http')) {
+              return src;  // image url is complete (ie: externally saved)
+            }
+            else if(src.startsWith('//')) {
+              return ('https:' + src);
+            }
+            // Add base site into to src routing info
+            else {
+              return site + imgTag.attribs.src;  // image is internal to site & needs to be combined with namespace
+            }
+          }
+        });
+
+        // Combine results
+        const resultsImg = Array.from(new Set(want));
+        const resultsCss = Array.from(new Set(parsedCssImgs));
+        const resultsBkg = Array.from(new Set(bkgrnds));
+        var results = resultsImg.concat(resultsCss).concat(resultsBkg);
+
+        const limited = results.filter( url => imagesFilter(url));
+        console.log("Final:", limited);
+        browser.close();  // REMOVED AWAIT!!
+        callback(limited);
+      }
+
+      scrape(function(foundUrls) {
+        console.log("FOUND SCRAPE RESULTS:::::", foundUrls);
+        res.json({urls: foundUrls});
+      });
     }
   });
 
@@ -139,6 +171,12 @@ module.exports = function(router) {
     return url &&
       url.includes('http') &&
       !url.includes('www.w3.org');
+  }
+
+  function getSrcFromAttribs(attribs) {
+    return attribs.src ||
+      attribs['data-src'] ||
+      attribs['data-lazysrc'];
   }
 
   function handleOfflineProcessing(req, res, next) {
