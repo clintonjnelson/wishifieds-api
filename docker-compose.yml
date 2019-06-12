@@ -13,8 +13,12 @@ services:
       POSTGRES_DB: wishifieds_dev
     ports:
       - "5432:5432"
+    user: root
     volumes:
-      - ../db/seeders:/db
+      - ./db/seeders:/db/seeders
+      # - ./db/config:/db/config
+      # - ./db/migrations:/db/migrations
+      # - ./db/seeders/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   # Can reference dynamic variables using ${MY_VAR}
   # Can set these before docker commands using something like:
