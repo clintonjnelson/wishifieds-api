@@ -43,8 +43,8 @@ module.exports = function(router) {
   router.use(bodyparser.json());
 
   // POST because needs to send a full URL
-  // Takes a URL and returns a unique array of the image URLs on that page!
-  // TODO: GO THROUGH & RENAME THINGS TO BETTER DESCRIBE THE FLOW OF DATA
+  // SETUP A REGEX THAT MATCHES THINGS SRC-IMG-SOURCE-IMAGE -like- fields & grabs them if have slashes (/)
+  // ALSO ALLOW TYPE: PNG/JPG/JPEG/....
   // TODO: SCRUB THE IMAGES OR REMOVE ANY SCRIPT-TYPE CONTENT FROM THEM.
   router.post('/external/getimages', function(req, res) {
     if(process.env.ENVIRONMENT === 'offline') {
@@ -78,7 +78,7 @@ module.exports = function(router) {
         const bkgrnds = Object.keys(bkgImgTags).map( key => {
           var elem = bkgImgTags[key];
           // TODO: MAYBE GET MORE FORMATS THAN JUST 'data-src'??
-          var src = elem.attribs && elem.attribs['data-src'];
+          var src = elem.attribs && (elem.attribs['data-src']);
           if(src) {
             if(src.includes('http')) {
               return src;

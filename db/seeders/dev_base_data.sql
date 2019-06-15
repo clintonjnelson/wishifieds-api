@@ -58,7 +58,8 @@ VALUES
 (32, 'sporting goods', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
 (33, 'tickets & events', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
 (34, 'tools & equipment', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(35, 'travel & accommodations', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00');
+(35, 'travel & accommodations', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00')
+ON CONFLICT DO NOTHING;;
 
 
 
@@ -75,7 +76,50 @@ VALUES
 (6, 'excellent', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
 (7, 'new', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
 (8, 'not applicable', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(9, 'n/a', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00');
+(9, 'n/a', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00')
+ON CONFLICT DO NOTHING;
+
+
+--
+-- Data for Name: Users; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO "users" (id, eat, email, password, prt, prtexpiration, role, username, phone_id, default_user_location, confirmed, status, termsconditions, created_at, updated_at, profile_pic_url)
+VALUES
+(4, '1da0e53d588c741ca179ca1444d3eaab8f62d1465abf42ba', 'jen2@example.com', '$2b$08$UzkW20d1Nw3xCl1C.gcNCu8Z1hmstkoLO/zyJTVsAz2tHd0z1Tnbe', NULL, NULL, 'USER', 'jen2', NULL, NULL, '$2b$08$ZADkSYLMtxsvHfqnjhgw4ePF3/9F0/.GQtAJYJ3M5NPjSTosoBGHi', 'PENDING', NULL, '2019-03-09 22:41:39.551+00', '2019-03-09 22:41:39.611+00', '/assets/profile_default.png'),
+(3, '817f7ac260c654fdb75275d2986f3510905121318447f5f7', 'jen@example.com', '$2b$08$f6GVAxDVZOCyrDhkxCGmf.6g7vHVXgsUg/NGC0T1RBAg4lI2mF5wa', NULL, NULL, 'USER', 'jen', NULL, NULL, '$2b$08$owHPRgwk.pxhqPbo2WxHOOrF1yvEml7T.brksIrULfxeozWERT4km', 'PENDING', NULL, '2019-03-09 22:34:34.305+00', '2019-03-09 22:54:39.349+00', '/assets/profile_default.png');
+--NOTE, WILL NEED TO LATER DO A SEPARATE UPDATE OF THE USER LOCATION ONCE THE FK ARE IN PLACE & CANNOT ASSIGN IT BEFORE EXISTS
+
+
+
+--
+-- Data for Name: users_locations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO "users_locations"(id, user_id, location_id, description, is_default, created_at, updated_at)
+VALUES
+(1, 3, 38512, 'starbucks', true, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
+(2, 3, 38496, 'default', false, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
+(3, 4, 38512, 'default', true, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
+
+
+-- Now that have the users_locations in, set the defaults on each user.
+UPDATE "users" SET default_user_location=2 WHERE id=3;
+UPDATE "users" SET default_user_location=3 WHERE id=4;
+
+
+
+--
+-- Data for Name: Listings; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO "listings" (id, category_id, condition_id, title, description, price, link_url, keywords, hero_img, user_location_id, user_id, slug, status, created_at, updated_at)
+VALUES
+(5, 11, 7, 'Princess Shoes', 'Shoes even a princess would be happy to have.', '20', ' https://www.etsy.com/listing/655680492/princess-shoes?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=girls+princess+shoes&ref=sr_gallery-1-7', 'princess shoes, princess', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:37:41.527+00', '2019-03-09 22:37:41.527+00'),
+(6, 12, 6, 'Princess Mirror', 'Mirror a princess would be happy to look into.', '22', ' https://www.etsy.com/listing/534350450/antique-baroque-mirror-rococo-antique?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+mirror&ref=sr_gallery-1-11&organic_search_click=1&cns=1', 'princess mirror', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 2, 3, 'tbd', 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
+(7, 12, 5, 'Princess Jewelry Box', 'A jewelry box that a princess would adore.', '40', ' https://www.etsy.com/listing/651256906/vintage-gold-filigree-jewelry-box?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-11&organic_search_click=1', 'princess jewelry box, princess', 'https://i.etsystatic.com/18282007/r/il/56dff6/1723602048/il_794xN.1723602048_p61o.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:43:44.17+00', '2019-03-09 22:43:44.17+00'),
+(8, 12, 7, 'Princess Tiara Display Case', 'A display case for my princess tiara', '25', ' https://www.etsy.com/listing/205408462/round-crown-tiara-display-case-with?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-7&organic_search_click=1&bes=1&col=1', 'princess tiara display, princess', 'https://i.etsystatic.com/6079982/r/il/e83f03/661150582/il_794xN.661150582_i8bg.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:45:33.039+00', '2019-03-09 22:45:33.039+00');
+
 
 
 --
@@ -93,17 +137,6 @@ VALUES
 (16, 'https://i.etsystatic.com/isla/63ba79/30987754/isla_75x75.30987754_pio7jca9.jpg?version=0', 'https://i.etsystatic.com/isla/63ba79/30987754/isla_75x75.30987754_pio7jca9.jpg?version=0', 1, 8, 4, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00', 'ACTIVE'),
 (17, 'https://i.etsystatic.com/6079982/d/il/6d2b84/380594775/il_340x270.380594775_m516.jpg?version=0', 'https://i.etsystatic.com/6079982/d/il/6d2b84/380594775/il_340x270.380594775_m516.jpg?version=0', 2, 8, 4, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00', 'ACTIVE');
 
-
---
--- Data for Name: Listings; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "listings" (id, category_id, condition_id, title, description, price, link_url, keywords, hero_img, user_location_id, user_id, slug, status, created_at, updated_at)
-VALUES
-(5, 11, 7, 'Princess Shoes', 'Shoes even a princess would be happy to have.', '20', ' https://www.etsy.com/listing/655680492/princess-shoes?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=girls+princess+shoes&ref=sr_gallery-1-7', 'princess shoes, princess', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:37:41.527+00', '2019-03-09 22:37:41.527+00'),
-(6, 12, 6, 'Princess Mirror', 'Mirror a princess would be happy to look into.', '22', ' https://www.etsy.com/listing/534350450/antique-baroque-mirror-rococo-antique?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+mirror&ref=sr_gallery-1-11&organic_search_click=1&cns=1', 'princess mirror', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 2, 3, 'tbd', 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
-(7, 12, 5, 'Princess Jewelry Box', 'A jewelry box that a princess would adore.', '40', ' https://www.etsy.com/listing/651256906/vintage-gold-filigree-jewelry-box?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-11&organic_search_click=1', 'princess jewelry box, princess', 'https://i.etsystatic.com/18282007/r/il/56dff6/1723602048/il_794xN.1723602048_p61o.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:43:44.17+00', '2019-03-09 22:43:44.17+00'),
-(8, 12, 7, 'Princess Tiara Display Case', 'A display case for my princess tiara', '25', ' https://www.etsy.com/listing/205408462/round-crown-tiara-display-case-with?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-7&organic_search_click=1&bes=1&col=1', 'princess tiara display, princess', 'https://i.etsystatic.com/6079982/r/il/e83f03/661150582/il_794xN.661150582_i8bg.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:45:33.039+00', '2019-03-09 22:45:33.039+00');
 
 
 --
@@ -147,32 +180,6 @@ VALUES
 --
 -- Data for Name: Phones; Type: TABLE DATA; Schema: public; Owner: postgres
 --
-
---
--- Data for Name: Users; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "users" (id, eat, email, password, prt, prtexpiration, role, username, phone_id, default_user_location, confirmed, status, termsconditions, created_at, updated_at, profile_pic_url)
-VALUES
-(4, '1da0e53d588c741ca179ca1444d3eaab8f62d1465abf42ba', 'jen2@example.com', '$2b$08$UzkW20d1Nw3xCl1C.gcNCu8Z1hmstkoLO/zyJTVsAz2tHd0z1Tnbe', NULL, NULL, 'USER', 'jen2', NULL, 1, '$2b$08$ZADkSYLMtxsvHfqnjhgw4ePF3/9F0/.GQtAJYJ3M5NPjSTosoBGHi', 'PENDING', NULL, '2019-03-09 22:41:39.551+00', '2019-03-09 22:41:39.611+00', '/assets/profile_default.png'),
-(3, '817f7ac260c654fdb75275d2986f3510905121318447f5f7', 'jen@example.com', '$2b$08$f6GVAxDVZOCyrDhkxCGmf.6g7vHVXgsUg/NGC0T1RBAg4lI2mF5wa', NULL, NULL, 'USER', 'jen', NULL, 1, '$2b$08$owHPRgwk.pxhqPbo2WxHOOrF1yvEml7T.brksIrULfxeozWERT4km', 'PENDING', NULL, '2019-03-09 22:34:34.305+00', '2019-03-09 22:54:39.349+00', '/assets/profile_default.png');
---NOTE, WILL NEED TO LATER DO A SEPARATE UPDATE OF THE USER LOCATION ONCE THE FK ARE IN PLACE & CANNOT ASSIGN IT BEFORE EXISTS
-
-
---
--- Data for Name: users_locations; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "users_locations"(id, user_id, location_id, description, is_default, created_at, updated_at)
-VALUES
-(1, 3, 38512, 'starbucks', true, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
-(2, 3, 38496, 'default', false, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
-(3, 4, 38512, 'default', true, '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
-
-
--- Now that have the users_locations in, set the defaults on each user.
-UPDATE "users" SET default_user_location=2 WHERE id=3;
-UPDATE "users" SET default_user_location=3 WHERE id=4;
 
 
 --
