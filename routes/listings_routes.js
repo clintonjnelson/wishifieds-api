@@ -570,12 +570,12 @@ module.exports = function(router) {
           })
         })
         .catch(function(error) {
-          console.log('Error finding listing. Error: ', error);
-          return res.status(404).json({ error: true });
+          console.log('Error creating listing. Error: ', error);
+          return res.status(500).json({ error: true });
         });
     }
     else {
-      return res.status(400).json({error: true, msg: 'Did not pass basic content checks.'});
+      return res.status(400).json({error: true, msg: 'validation errors'});
     }
     // Save basic listing info
     // Save images info; save reference to the primary image
@@ -641,7 +641,6 @@ module.exports = function(router) {
             keywords:       Utils.sanitizeString(listingData.keywords),
             userLocationId: listingData.userLocationId,
             heroImg:        listingData.images[0],
-            // imagesRef:    foundListing.imagesRef,
             userId:         userId,
             slug:           Utils.generateUrlSlug(listingData.title),
             // status cannot be changed here for now (always active). Later may do deleted, fulfilled, private, etc.
@@ -679,7 +678,6 @@ module.exports = function(router) {
                   status:        updatedListing.status,
                   hero:          updatedListing.heroImg,
                   images:        listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                  // imagesRef   updatedListing.imagesRef,
                   slug:          updatedListing.slug,
                   createdAt:     updatedListing.createdAt,
                   updatedAt:     updatedListing.updatedAt
@@ -693,16 +691,12 @@ module.exports = function(router) {
         })
         .catch(function(error) {
           console.log('Error finding listing. Error: ', error);
-          return res.status(404).json({ error: true });
+          return res.status(404).json({ error: true, msg: 'Error finding listing.' });
         });
     }
     else {
-      return res.status(400).json({error: true, msg: 'Did not pass basic content checks.'});
+      return res.status(400).json({error: true, msg: 'validation errors'});
     }
-
-    // Save basic listing info
-    // Save images info; save reference to the primary image
-    // Save new location (no ID) or reference existing one (has existing ID)
   });
 
 
@@ -722,14 +716,25 @@ module.exports = function(router) {
     listingData.description &&
     listingData.price &&
     listingData.userLocationId &&
-    (listingData.images.length > 0)
+    (listingData.images.length > 0) &&
+    noScriptInjection(listingData.title) &&
+    noScriptInjection(listingData.description) &&
+    noUrlScriptInjection(listingData.images) &&
     true;
-
-    // TODO: CHECK FOR MALICIOUS CONTENT HERE!!!!!!!!
-    // TODO: ALSO CHECK EACH OF THE IMAGE URLS TO SCRUB ANY JS CONTENT OR DELETE THE IMAGE.
 
     console.log("CHECKS IS: ", checks);
     return !!checks;
+  }
+
+  // TODO: MOVE THIS TO LIBRARY TO BE SHARED AS NEEDED
+  function noScriptInjection(str) {
+    // TODO/FIXME: Ensure no issues or take out the bad stuff
+    return true;
+  }
+  // TODO: MOVE THIS TO LIBRARY TO BE SHARED AS NEEDED
+  function noUrlScriptInjection(urls) {
+    // TODO/FIXME: GO THROUGH THE LIST OF THINGS & ENSURE NO ISSUES OR SCRUB ISSUES
+    return true;
   }
 
   // Same for creation & update
@@ -790,22 +795,6 @@ module.exports = function(router) {
               .catch( (err) => { console.log("Error updating img:", url.url, " position: ", index); });
           });
         });
-
-      // const imagesMetadata = images.map( (url, index) => {
-      //   Images
-      //     .findOrCreate({ where: {
-      //       // reftoken:   imagesRef,
-      //       // origurl:    url,
-      //       url:    url,
-      //       // position:   index,
-      //       listingId: listingId,
-      //       userId:    userId
-      //     }})
-      //     .spread(function(image, metadata) {
-      //       console.log("CREATED IMAGE METADATA IS: ", metadata);
-      //       return metadata;  // metadata about what happened
-      //     });
-      // });
 
       // Wait for all to resolve
       Sequelize.Promise

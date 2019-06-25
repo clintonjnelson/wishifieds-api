@@ -52,7 +52,6 @@
     "aws-sdk": "2.429.0",
     "bcrypt": "2.0.1",
     "body-parser": "1.18.2",
-    "cheerio": "1.0.0-rc.2",
     "compression": "1.7.2",
     "eat": "0.2.1",
     "express": "4.16.3",
