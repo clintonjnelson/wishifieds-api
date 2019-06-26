@@ -24,8 +24,6 @@ module.exports = {
       ALTER TABLE public.users ADD CONSTRAINT fk_users_phone_id_users_id FOREIGN KEY (phone_id) REFERENCES public.phones (id);
       ALTER TABLE public.users ADD CONSTRAINT fk_users_default_user_location_users_locations_id FOREIGN KEY (default_user_location) REFERENCES public.users_locations (id);
 
-      ALTER TABLE public.listings ADD CONSTRAINT fk_listings_category_id_categories_id FOREIGN KEY (category_id) REFERENCES public.categories (id);
-      ALTER TABLE public.listings ADD CONSTRAINT fk_listings_condition_id_conditions_id FOREIGN KEY (condition_id) REFERENCES public.conditions (id);
       ALTER TABLE public.listings ADD CONSTRAINT fk_listings_user_location_id_users_locations_id FOREIGN KEY (user_location_id) REFERENCES public.users_locations (id);
       ALTER TABLE public.listings ADD CONSTRAINT fk_listings_user_id_users_id FOREIGN KEY (user_id) REFERENCES public.users (id);
 
@@ -37,6 +35,9 @@ module.exports = {
 
       ALTER TABLE public.users_locations ADD CONSTRAINT fk_users_locations_user_id_users_id FOREIGN KEY (user_id) REFERENCES public.users (id);
       ALTER TABLE public.users_locations ADD CONSTRAINT fk_users_locations_location_id_locations_id FOREIGN KEY (location_id) REFERENCES public.locations (id);
+
+      ALTER TABLE public.listings_tags ADD CONSTRAINT fk_listings_tags_listing_id_listings_id FOREIGN KEY (listing_id) REFERENCES public.listings (id);
+      ALTER TABLE public.listings_tags ADD CONSTRAINT fk_listings_tags_tag_id_tags_id FOREIGN KEY (tag_id) REFERENCES public.tags (id);
     `);
   },
 
@@ -49,8 +50,6 @@ module.exports = {
       ALTER TABLE public.users DROP CONSTRAINT IF EXISTS fk_users_phone_id_users_id;
       ALTER TABLE public.users DROP CONSTRAINT IF EXISTS fk_users_default_user_location_users_locations_id;
 
-      ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS fk_listings_category_id_categories_id;
-      ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS fk_listings_condition_id_conditions_id;
       ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS fk_listings_user_location_id_users_locations_id;
       ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS fk_listings_user_id_users_id;
 
@@ -62,6 +61,9 @@ module.exports = {
 
       ALTER TABLE public.users_locations DROP CONSTRAINT IF EXISTS fk_users_locations_user_id_users_id;
       ALTER TABLE public.users_locations DROP CONSTRAINT IF EXISTS fk_users_locations_location_id_locations_id;
+
+      ALTER TABLE public.listings_tags DROP CONSTRAINT IF EXISTS fk_listings_tags_listing_id_listings_id;
+      ALTER TABLE public.listings_tags DROP CONSTRAINT IF EXISTS fk_listings_tags_tag_id_tags_id;
     `);
   }
 };

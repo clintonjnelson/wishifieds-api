@@ -25,8 +25,6 @@ module.exports = {
       CREATE INDEX idx_users_phone_id ON public.users (phone_id);
       CREATE INDEX idx_users_default_user_location ON public.users (default_user_location);
 
-      CREATE INDEX idx_listings_category_id ON public.listings (category_id);
-      CREATE INDEX idx_listings_condition_id ON public.listings (condition_id);
       CREATE INDEX idx_listings_user_location_id ON public.listings (user_location_id);
       CREATE INDEX idx_listings_user_id ON public.listings (user_id);
 
@@ -38,6 +36,9 @@ module.exports = {
 
       CREATE INDEX idx_users_locations_user_id ON public.users_locations (user_id);
       CREATE INDEX idx_users_locations_location_id ON public.users_locations (location_id);
+
+      CREATE INDEX idx_listings_tags_listing_id ON public.listings_tags (listing_id);
+      CREATE INDEX idx_listings_tags_tag_id ON public.listings_tags (tag_id);
     `);
   },
 
@@ -48,8 +49,6 @@ module.exports = {
       DROP INDEX idx_messages_listing_id;
       DROP INDEX idx_users_phone_id;
       DROP INDEX idx_users_default_user_location;
-      DROP INDEX idx_listings_category_id;
-      DROP INDEX idx_listings_condition_id;
       DROP INDEX idx_listings_user_location_id;
       DROP INDEX idx_listings_user_id;
       DROP INDEX idx_images_listing_id;
@@ -58,6 +57,8 @@ module.exports = {
       DROP INDEX idx_favorites_user_id;
       DROP INDEX idx_users_locations_user_id;
       DROP INDEX idx_users_locations_location_id;
+      DROP INDEX idx_listings_tags_listing_id;
+      DROP INDEX idx_listings_tags_tag_id;
     `);
   }
 };

@@ -22,62 +22,115 @@ SET SEARCH_PATH to 'public';
 --
 -- Data for Name: Categories; Type: TABLE DATA; Schema: public; Owner: postgres
 --
-INSERT INTO "categories"(id, name, icon, created_at, updated_at)
-VALUES
-(1, 'any', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(2, 'antiques', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(3, 'art', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(4, 'atv & off-road', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(5, 'autoparts', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(6, 'autos', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(7, 'baby & kids', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(8, 'bicycles & parts', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(9, 'boats & watercraft', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(10, 'books & magazines', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(11, 'camera & video', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(12, 'clothing & assessories', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(13, 'collectibles', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(14, 'computers', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(15, 'electronics', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(16, 'farm & agriculture', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(17, 'furniture', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(18, 'games & toys', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(19, 'gigs', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(20, 'health & beauty', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(21, 'housewares', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(22, 'housing & apartments', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(23, 'jewelery', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(24, 'lawn & garden', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(25, 'materials', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(26, 'motorcycles & scooters', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(27, 'musical goods', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(28, 'other', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(29, 'real estate', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(30, 'rentals', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(31, 'services & consulting', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(32, 'sporting goods', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(33, 'tickets & events', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(34, 'tools & equipment', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(35, 'travel & accommodations', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00')
-ON CONFLICT DO NOTHING;;
+-- INSERT INTO "categories"(id, name, icon, created_at, updated_at)
+-- VALUES
+-- (1, 'any', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (2, 'antiques', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (3, 'art', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (4, 'atv & off-road', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (5, 'autoparts', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (6, 'autos', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (7, 'baby & kids', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (8, 'bicycles & parts', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (9, 'boats & watercraft', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (10, 'books & magazines', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (11, 'camera & video', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (12, 'clothing & assessories', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (13, 'collectibles', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (14, 'computers', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (15, 'electronics', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (16, 'farm & agriculture', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (17, 'furniture', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (18, 'games & toys', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (19, 'gigs', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (20, 'health & beauty', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (21, 'housewares', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (22, 'housing & apartments', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (23, 'jewelery', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (24, 'lawn & garden', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (25, 'materials', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (26, 'motorcycles & scooters', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (27, 'musical goods', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (28, 'other', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (29, 'real estate', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (30, 'rentals', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (31, 'services & consulting', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (32, 'sporting goods', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (33, 'tickets & events', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (34, 'tools & equipment', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (35, 'travel & accommodations', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00')
+-- ON CONFLICT DO NOTHING;
 
 
 
 --
 -- Data for Name: Conditions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
-INSERT INTO "conditions"(id, name, icon, created_at, updated_at)
+-- INSERT INTO "conditions"(id, name, icon, created_at, updated_at)
+-- VALUES
+-- (1, 'any', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (2, 'as-is', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (3, 'poor', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (4, 'fair', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (5, 'good', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (6, 'excellent', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (7, 'new', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (8, 'not applicable', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- (9, 'n/a', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00')
+-- ON CONFLICT DO NOTHING;
+
+
+
+--Data for Name: Categories; Type: TABLE DATA; Schema: public; Owner: postgres
+
+INSERT INTO "tags"(id, name, tag_type, created_at, updated_at)
 VALUES
-(1, 'any', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(2, 'as-is', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(3, 'poor', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(4, 'fair', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(5, 'good', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(6, 'excellent', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(7, 'new', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(8, 'not applicable', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
-(9, 'n/a', null, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00')
-ON CONFLICT DO NOTHING;
+-- Categories tags
+(1, 'any', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(2, 'antiques', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(3, 'art', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(4, 'atv & off-road', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(5, 'autoparts', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(6, 'autos', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(7, 'baby & kids', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(8, 'bicycles & parts', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(9, 'boats & watercraft', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(10, 'books & magazines', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(11, 'camera & video', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(12, 'clothing & assessories', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(13, 'collectibles', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(14, 'computers', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(15, 'electronics', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(16, 'farm & agriculture', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(17, 'furniture', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(18, 'games & toys', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(19, 'gigs', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(20, 'health & beauty', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(21, 'housewares', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(22, 'housing & apartments', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(23, 'jewelery', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(24, 'lawn & garden', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(25, 'materials', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(26, 'motorcycles & scooters', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(27, 'musical goods', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(28, 'other', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(29, 'real estate', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(30, 'rentals', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(31, 'services & consulting', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(32, 'sporting goods', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(33, 'tickets & events', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(34, 'tools & equipment', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(35, 'travel & accommodations', 'CATEGORY', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+-- Condition Tags
+(36, 'any', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(37, 'as-is', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(38, 'poor', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(39, 'fair', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(40, 'good', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(41, 'excellent', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(42, 'new', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(43, 'not applicable', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(44, 'n/a', 'CONDITION', '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00');
 
 
 --
@@ -113,12 +166,33 @@ UPDATE "users" SET default_user_location=3 WHERE id=4;
 -- Data for Name: Listings; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "listings" (id, category_id, condition_id, title, description, price, link_url, keywords, hero_img, user_location_id, user_id, slug, status, created_at, updated_at)
+INSERT INTO "listings" (id, title, description, price, link_url, keywords, hero_img, user_location_id, user_id, slug, status, created_at, updated_at)
 VALUES
-(5, 11, 7, 'Princess Shoes', 'Shoes even a princess would be happy to have.', '20', ' https://www.etsy.com/listing/655680492/princess-shoes?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=girls+princess+shoes&ref=sr_gallery-1-7', 'princess shoes, princess', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:37:41.527+00', '2019-03-09 22:37:41.527+00'),
-(6, 12, 6, 'Princess Mirror', 'Mirror a princess would be happy to look into.', '22', ' https://www.etsy.com/listing/534350450/antique-baroque-mirror-rococo-antique?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+mirror&ref=sr_gallery-1-11&organic_search_click=1&cns=1', 'princess mirror', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 2, 3, 'tbd', 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
-(7, 12, 5, 'Princess Jewelry Box', 'A jewelry box that a princess would adore.', '40', ' https://www.etsy.com/listing/651256906/vintage-gold-filigree-jewelry-box?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-11&organic_search_click=1', 'princess jewelry box, princess', 'https://i.etsystatic.com/18282007/r/il/56dff6/1723602048/il_794xN.1723602048_p61o.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:43:44.17+00', '2019-03-09 22:43:44.17+00'),
-(8, 12, 7, 'Princess Tiara Display Case', 'A display case for my princess tiara', '25', ' https://www.etsy.com/listing/205408462/round-crown-tiara-display-case-with?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-7&organic_search_click=1&bes=1&col=1', 'princess tiara display, princess', 'https://i.etsystatic.com/6079982/r/il/e83f03/661150582/il_794xN.661150582_i8bg.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:45:33.039+00', '2019-03-09 22:45:33.039+00');
+(5, 'Princess Shoes', 'Shoes even a princess would be happy to have.', '20', ' https://www.etsy.com/listing/655680492/princess-shoes?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=girls+princess+shoes&ref=sr_gallery-1-7', 'princess shoes, princess', 'https://i.etsystatic.com/17346189/r/il/42ead1/1773086461/il_794xN.1773086461_9oon.jpg', 1, 3, 'tbd', 'ACTIVE', '2019-03-09 22:37:41.527+00', '2019-03-09 22:37:41.527+00'),
+(6, 'Princess Mirror', 'Mirror a princess would be happy to look into.', '22', ' https://www.etsy.com/listing/534350450/antique-baroque-mirror-rococo-antique?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+mirror&ref=sr_gallery-1-11&organic_search_click=1&cns=1', 'princess mirror', 'https://i.etsystatic.com/15498919/c/2485/1973/229/10/il/784159/1676039173/il_340x270.1676039173_3cad.jpg', 2, 3, 'tbd', 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
+(7, 'Princess Jewelry Box', 'A jewelry box that a princess would adore.', '40', ' https://www.etsy.com/listing/651256906/vintage-gold-filigree-jewelry-box?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-11&organic_search_click=1', 'princess jewelry box, princess', 'https://i.etsystatic.com/18282007/r/il/56dff6/1723602048/il_794xN.1723602048_p61o.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:43:44.17+00', '2019-03-09 22:43:44.17+00'),
+(8, 'Princess Tiara Display Case', 'A display case for my princess tiara', '25', ' https://www.etsy.com/listing/205408462/round-crown-tiara-display-case-with?ga_order=most_relevant&ga_search_type=all&ga_view_type=gallery&ga_search_query=princess+jewelery+box&ref=sr_gallery-1-7&organic_search_click=1&bes=1&col=1', 'princess tiara display, princess', 'https://i.etsystatic.com/6079982/r/il/e83f03/661150582/il_794xN.661150582_i8bg.jpg', 3, 4, 'tbd', 'ACTIVE', '2019-03-09 22:45:33.039+00', '2019-03-09 22:45:33.039+00');
+
+
+
+--
+-- Data for Name: Images; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO "listings_tags" (id, listing_id, tag_id, created_at, updated_at)
+VALUES
+(1, 5, 1, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(2, 5, 40, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(3, 5, 41, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(4, 6, 2, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(5, 6, 42, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(6, 6, 43, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(7, 6, 2, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(8, 6, 42, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(9, 7, 3, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(10, 7, 44, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(11, 8, 36, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00'),
+(12, 8, 37, '2019-03-09 22:45:33.05+00', '2019-03-09 22:45:33.05+00');
 
 
 
@@ -182,73 +256,16 @@ VALUES
 --
 
 
---
--- Name: Categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
 
-SELECT pg_catalog.setval(pg_get_serial_sequence('categories', 'id'), coalesce(MAX(id),0) + 1, false) from categories;
-
-
---
--- Name: Conditions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval(pg_get_serial_sequence('conditions', 'id'), coalesce(MAX(id),0) + 1, false) from conditions;
-
-
---
--- Name: Images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
+-- RESET Serial Sequences
 SELECT pg_catalog.setval(pg_get_serial_sequence('images', 'id'), coalesce(MAX(id),0) + 1, false) from images;
-
-
---
--- Name: Listings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
 SELECT pg_catalog.setval(pg_get_serial_sequence('listings', 'id'), coalesce(MAX(id),0) + 1, false) from listings;
-
-
---
--- Name: Locations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
+SELECT pg_catalog.setval(pg_get_serial_sequence('listings_tags', 'id'), coalesce(MAX(id),0) + 1, false) from listings_tags;
 SELECT pg_catalog.setval(pg_get_serial_sequence('locations', 'id'), coalesce(MAX(id),0) + 1, false) from locations;
-
-
---
--- Name: Logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
 SELECT pg_catalog.setval(pg_get_serial_sequence('logs', 'id'), coalesce(MAX(id),0) + 1, false) from logs;
-
-
---
--- Name: Messages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
 SELECT pg_catalog.setval(pg_get_serial_sequence('messages', 'id'), coalesce(MAX(id),0) + 1, false) from messages;
-
-
---
--- Name: Phones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
 SELECT pg_catalog.setval(pg_get_serial_sequence('phones', 'id'), coalesce(MAX(id),0) + 1, false) from phones;
-
-
---
--- Name: Users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
 SELECT pg_catalog.setval(pg_get_serial_sequence('users', 'id'), coalesce(MAX(id),0) + 1, false) from users;
-
-
---
--- Name: Users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
 SELECT pg_catalog.setval(pg_get_serial_sequence('users_locations', 'id'), coalesce(MAX(id),0) + 1, false) from users_locations;
 
 

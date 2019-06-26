@@ -16,12 +16,10 @@ var Message    = db.Message;
 var Favorites  = db.Favorite;
 var Sequelize  = require('sequelize');
 
-var DEFAULT_ANY_CATEGORY_ID = 1;
-var DEFAULT_ANY_CONDITION_ID = 1;
 var DEFAULT_SEARCH_RADIUS_DISTANCE = 100;  // 100 miles is a lot, but will shrink later on
 var DEFAULT_SEARCH_ZIPCODE = '98101';
 var ANY_DISTANCE = 'ANY';
-// FK Constraints (self-verify existence): UserId, CategoryId, ConditionId,
+// FK Constraints (self-verify existence): UserId
 
 // Images should have table structure something like this:
   // id, ref_token, url, position, listing_id, userId
@@ -77,8 +75,6 @@ module.exports = function(router) {
                   id:             listing.listingid,
                   userId:         listing.userid,
                   ownerUsername:  listing.username,
-                  categoryId:     listing.categoryid,  // TODO: Decide if UI does the name conversion or the API
-                  conditionId:    listing.conditionid,  // TODO: Decide if UI does the name conversion or the API
                   title:          listing.title,
                   description:    listing.description,
                   keywords:       listing.keywords,
@@ -189,8 +185,6 @@ module.exports = function(router) {
                 id:            listing.id,
                 userId:        listing.userId,
                 ownerUsername: listing['User']['username'],
-                categoryId:    listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                conditionId:   listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                 title:         listing.title,
                 description:   listing.description,
                 keywords:      listing.keywords,
@@ -254,8 +248,6 @@ module.exports = function(router) {
                 userId:      result.userId,
                 ownerUsername: result['User']['username'],
                 ownerPicUrl: result['User']['profilePicUrl'],  // TOOD: Send for the full listing Header only. Maybe break out later?
-                categoryId:  result.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                conditionId: result.conditionId,  // TODO: Decide if UI does the name conversion or the API
                 title:       result.title,
                 description: result.description,
                 keywords:    result.keywords,
@@ -321,8 +313,6 @@ module.exports = function(router) {
                   id:            listing.id,
                   userId:        listing.userId,
                   ownerUsername: listing['User']['username'],
-                  categoryId:    listing.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                  conditionId:   listing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                   title:         listing.title,
                   description:   listing.description,
                   keywords:      listing.keywords,
@@ -517,8 +507,6 @@ module.exports = function(router) {
 
     if(passesCriticalValidations(listingData)) {
       const preListing = {
-        categoryId: listingData.categoryId || DEFAULT_ANY_CATEGORY_ID,
-        conditionId: listingData.conditionId || DEFAULT_ANY_CONDITION_ID,
         title: listingData.title,
         description: listingData.description,
         price: listingData.price,
@@ -547,8 +535,6 @@ module.exports = function(router) {
                 id:          newListing.id,
                 userId:      newListing.userId,
                 ownerUsername: user.username,
-                categoryId:  newListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                conditionId: newListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                 title:       newListing.title,
                 description: newListing.description,
                 keywords:    newListing.keywords,
@@ -558,7 +544,6 @@ module.exports = function(router) {
                 status:      newListing.status,
                 images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
                 hero:        newListing.heroImg,
-                // imagesRef:   newListing.imagesRef,
                 slug:        newListing.slug,
                 createdAt:   newListing.createdAt,
                 updatedAt:   newListing.updatedAt
@@ -632,8 +617,6 @@ module.exports = function(router) {
           console.log("Creating listing object updates...")
           // Specify fields we allow to be updated
           let allowedUpdates = {
-            categoryId:     listingData.categoryId,
-            conditionId:    listingData.conditionId,
             title:          Utils.sanitizeString(listingData.title),
             description:    Utils.sanitizeString(listingData.description),
             price:          Utils.sanitizeString(listingData.price),
@@ -667,8 +650,6 @@ module.exports = function(router) {
                   id:            updatedListing.id,
                   userId:        updatedListing.userId,
                   ownerUsername: user.username,
-                  categoryId:    updatedListing.categoryId,  // TODO: Decide if UI does the name conversion or the API
-                  conditionId:   updatedListing.conditionId,  // TODO: Decide if UI does the name conversion or the API
                   title:         updatedListing.title,
                   description:   updatedListing.description,
                   keywords:      updatedListing.keywords,
@@ -856,4 +837,3 @@ module.exports = function(router) {
     }
   }
 }
-

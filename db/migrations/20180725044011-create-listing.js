@@ -8,8 +8,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      categoryId:  { type: Sequelize.INTEGER, allowNull: false, field: 'category_id' },
-      conditionId: { type: Sequelize.INTEGER, allowNull: false, field: 'condition_id' },
       title:       { type: Sequelize.STRING, allowNull: false },
       description: { type: Sequelize.STRING, allowNull: false },
       price:       { type: Sequelize.STRING, allowNull: false },

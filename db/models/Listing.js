@@ -6,8 +6,6 @@ const Sequelize = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   // Table name will match the definition name here
   var Listing = sequelize.define('Listing', {
-    categoryId:     { type: DataTypes.INTEGER, field: 'category_id' },  // FK
-    conditionId:    { type: DataTypes.INTEGER, field: 'condition_id' },  // FK
     title:          { type: DataTypes.STRING },
     description:    { type: DataTypes.STRING },
     price:          { type: DataTypes.STRING },
