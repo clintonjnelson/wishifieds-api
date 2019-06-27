@@ -17,6 +17,39 @@ module.exports = function(router) {
   router.use(bodyparser.json());
 
   // Get Tag by name or ID
+  router.get('/tags/search?', function(req, res) {
+    const tagQuery = req.query['query'];
+    const maxResults = req.query['maxresults'] || 100;
+
+    console.log("ABOUT TO Search for a tag per the query: ", tagQuery);
+    Tag
+      .findAll(
+        {
+          where: {
+            name: { [Sequelize.Op.iLike]: tagQuery+'%' },
+          },
+          order: [['name', 'ASC']],
+          limit: maxResults
+        }
+      )
+      .then(function(matchedTags) {
+        if(!matchedTags) {
+          console.log('Tried to get tags. User could not be found by: ', tagQuery);
+          return res.status(404).json({error: false, msg: 'no tag found', matchedTags: {} });
+        }
+
+        console.log("TAGs FOUND: ", matchedTags);
+        const tags = matchedTags.map(function(tag) { return  {id: tag.id, name: tag.name} });
+        // FIXME: LIMIT THE RESULTS BASED ON MAX_RESULTS VALUE
+        return res.json({error: false, tags: tags});
+      })
+      .catch(function(err) {
+        console.log('Database error getting tags by name or id:');
+        return res.status(500).json({error: true, msg: 'database error'});
+      });
+  });
+
+  // Get Tag by name or ID
   router.get('/tags/:nameOrId', function(req, res) {
     var nameOrId = req.params.nameOrId;
 
