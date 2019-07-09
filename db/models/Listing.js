@@ -10,10 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     description:    { type: DataTypes.STRING },
     price:          { type: DataTypes.STRING },
     linkUrl:        { type: DataTypes.STRING, field: 'link_url' },
-    keywords:       { type: DataTypes.STRING },
     userLocationId: { type: DataTypes.INTEGER, field: 'user_location_id' },  // FK constraint someday
     heroImg:        { type: DataTypes.STRING,  field: 'hero_img' },
-    // imagesRef:    { type: DataTypes.STRING, field: 'images_ref' },   // Intended to be a reference to where storied in AWS
     userId:         { type: DataTypes.INTEGER, field: 'user_id' },  // FK
     slug:           { type: DataTypes.STRING },   // Someday will populate
     status:         { type: DataTypes.ENUM('ACTIVE', 'PRIVATE', 'INACTIVE', 'DELETED') },   // ENUM

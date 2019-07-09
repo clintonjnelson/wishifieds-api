@@ -1,11 +1,11 @@
 'use strict';
 
-var bodyparser   = require('body-parser'      );
-var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
-var eatAuth      = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
-var User         = require('../db/models/index.js').User;
-var Tag         = require('../db/models/index.js').Tag;
-var Sequelize    = require('sequelize');
+var bodyparser = require('body-parser');
+var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
+var eatAuth    = require('../lib/routes_middleware/eat_auth.js'  )(process.env.AUTH_SECRET);
+var User       = require('../db/models/index.js').User;
+var Tag        = require('../db/models/index.js').Tag;
+var Sequelize  = require('sequelize');
 
 // :::TAGS:::
 // No one owns tags, anyone can create & use.
@@ -71,12 +71,48 @@ module.exports = function(router) {
       });
   });
 
-  // Create Tag
+  // Create Tag (effectively a "get or insert" functionality); must be a user to create.
   router.post('/tags', eatOnReq, eatAuth, function(req, res) {
     console.log("IN CREATE TAGS ROUTE...");
     console.log("USER IS: ", req.user);
+    var rawTagName = req.body && req.body.tagName;
+    var tagName = rawTagName.trim();
+    if(tagName.length === 0) {
+      return res.status(400).json({error: true, msg: 'no-length-name'});
+    }
 
-    res.json({error: false})
+    Tag
+      .findOne({
+        where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), tagName.toLowerCase()) // case insensitive match
+      })
+      .then(function(foundTag) {
+        console.log("FOUND TAG IS: ", foundTag);
+        // No existing tag with matching name found; create new.
+        if(!foundTag) {
+          Tag
+            .create({name: tagName})
+            .then(function(newTag) {
+              if(!newTag) {
+                console.log("Tag creation unsuccessful. New tag is: ", newTag);
+                return res.status(500).json({error: true, msg: 'created-tag-error'});
+              }
+              console.log("Tag creation successful for new tag: ", newTag);
+              return res.json({tag: newTag});
+            })
+          .catch(function(err) {
+            console.log('Error creating a new tag with name: ', tagName);
+            return res.status(500).json({error: true, msg: 'tag-creation-error'});
+          });
+        }
+        // Existing tag with same name was found; return found tag.
+        else {
+          return res.json({error: false, msg: 'found', tag: foundTag});
+        }
+      })
+      .catch(function(err) {
+        console.log('Error during tag pre-create finding step for a tag with name: ', tagName);
+        return res.status(500).json({error: true, msg: 'precreate-finding-tag'});
+      });
   });
 
 

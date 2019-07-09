@@ -14,11 +14,11 @@ module.exports = {
         username VARCHAR,
         title VARCHAR,
         description TEXT,
-        keywords VARCHAR,
         linkUrl TEXT,
         price VARCHAR,
         userLocationId INTEGER,
         images VARCHAR[],
+        tags TEXT[],
         heroImg TEXT,
         slug VARCHAR,
         createdAt TIMESTAMP WITH TIME ZONE,
@@ -31,7 +31,6 @@ module.exports = {
           u.username,
           l.title,
           l.description,
-          l.keywords,
           l.link_url AS linkUrl,
           l.price,
           l.user_location_id AS userLocationId,
@@ -41,6 +40,10 @@ module.exports = {
             AND i.status = 'ACTIVE'::enum_images_status
             AND i.url IS NOT NULL
           ) AS images,
+          (SELECT array_agg(ARRAY[t.id::text, t.name::text])
+            FROM "tags" as t
+            join listings_tags as lt on tag_id = t.id
+              WHERE lt.listing_id = l.id) AS tags,
           l.hero_img AS heroImg,
           l.slug,
           l.created_at AS createdAt,
@@ -62,6 +65,7 @@ module.exports = {
         )
         -- Search query next, because case-insensitive text partial match searching is slower
         AND (
+          -- FIXME: IMPROVE PERFORMANCE USING lower(%search_string_p%) vs ILIKE
           l.title ILIKE CONCAT('%', search_str_p, '%')
           OR l.description ILIKE CONCAT('%', search_str_p, '%')
         );

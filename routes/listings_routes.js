@@ -12,8 +12,11 @@ var Listings   = db.Listing;
 var Locations  = db.Locations;
 var Images     = db.Image;
 var User       = db.User;
+var Tag        = db.Tag;
+var ListingsTags = db.ListingTag;
 var Message    = db.Message;
 var Favorites  = db.Favorite;
+var ListingTags = db.ListingTag;
 var Sequelize  = require('sequelize');
 
 var DEFAULT_SEARCH_RADIUS_DISTANCE = 100;  // 100 miles is a lot, but will shrink later on
@@ -77,11 +80,11 @@ module.exports = function(router) {
                   ownerUsername:  listing.username,
                   title:          listing.title,
                   description:    listing.description,
-                  keywords:       listing.keywords,
                   linkUrl:        listing.linkurl,
                   price:          listing.price,
                   userLocationId: listing.userlocationid, // TODO: SHOULD THIS BE LOCATION???
                   images:         listing.images,  // sorted in the query
+                  tags:           listing.tags,
                   hero:           listing.heroimg,        // TODO: Send ONE of these
                   slug:           listing.slug,
                   createdAt:      listing.createdat,
@@ -151,9 +154,10 @@ module.exports = function(router) {
           {
             // TODO: Specify the attributes needed to reduce the query size!
             model: Listings,  // include the listing associated to the message
-            include: [{
-              model: User  // include the user associated to the listing
-            }]
+            include: [
+              { model: User }, // include the user associated to the listing
+              { model: Tag, attributes: ['id', 'name'] }
+            ]
           },
         ]
       })
@@ -187,7 +191,6 @@ module.exports = function(router) {
                 ownerUsername: listing['User']['username'],
                 title:         listing.title,
                 description:   listing.description,
-                keywords:      listing.keywords,
                 linkUrl:       listing.linkUrl,
                 price:         listing.price,
                 userLocationId: listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
@@ -195,7 +198,7 @@ module.exports = function(router) {
                                 .filter(function(img){ return img.listingId == listing.id})
                                 .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
                 hero:          listing.heroImg,        // TODO: Send ONE of these
-                // imagesRef:     listing.imagesRef,
+                tags:          listing['Tags'].map(function(tag) { return { id: tag['id'].toString(), name: tag['name'] }; }),
                 slug:          listing.slug,
                 createdAt:     listing.createdAt,
                 updatedAt:     listing.updatedAt
@@ -226,7 +229,13 @@ module.exports = function(router) {
     }
 
     Listings
-      .findOne({where: {id: listingId}, include: [User]})  // Join user on search
+      .findOne({
+        where: {id: listingId},
+        include: [
+          { model: User },
+          { model: Tag, attributes: ['id', 'name'] }
+        ]
+      })  // Join user on search
       .then(function(result) {
         console.log("Listing found is: ", result);
         if(!result || (result && result.length === 0)) {
@@ -250,13 +259,12 @@ module.exports = function(router) {
                 ownerPicUrl: result['User']['profilePicUrl'],  // TOOD: Send for the full listing Header only. Maybe break out later?
                 title:       result.title,
                 description: result.description,
-                keywords:    result.keywords,
                 linkUrl:     result.linkUrl,
                 price:       result.price,
                 userLocationId: result.userLocationId, // TODO: SHOULD THIS BE LOCATION???
                 images:      sortedImgs.map(function(img){ return img.url }),  // get only img urls
+                tags:        result['Tags'].map(function(tag) { return { id: tag['id'].toString(), name: tag['name'] }; }),
                 hero:        result.heroImg,  // TODO: Send ONE of these
-                // imagesRef:   result.imagesRef,
                 slug:        result.slug,
                 createdAt:   result.createdAt,
                 updatedAt:   result.updatedAt
@@ -290,7 +298,10 @@ module.exports = function(router) {
             userId: userId,
             status: 'ACTIVE'
           },
-          include: [User],
+          include: [
+            { model: User },
+            { model: Tag, attributes: ['id', 'name'] }
+          ],
           // raw: true
         })
         .then(function(results) {
@@ -305,8 +316,8 @@ module.exports = function(router) {
               console.log("IMAGES FOUND ARE: ", images);
               var sortedImgs = images
                 .sort(function(a, b){ return a.position - b.position; })
-
               console.log("SORTED IMAGES ARE: ", sortedImgs);
+
               var listings = results.map(function(listing) {
                 console.log("LISTING USER IS: ", listing.User);
                 return {
@@ -315,7 +326,6 @@ module.exports = function(router) {
                   ownerUsername: listing['User']['username'],
                   title:         listing.title,
                   description:   listing.description,
-                  keywords:      listing.keywords,
                   linkUrl:       listing.linkUrl,
                   price:         listing.price,
                   userLocationId: listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
@@ -323,7 +333,7 @@ module.exports = function(router) {
                                   .filter(function(img){ return img.listingId == listing.id})
                                   .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
                   hero:          listing.heroImg,        // TODO: Send ONE of these
-                  // imagesRef:     listing.imagesRef,
+                  tags:          listing['Tags'].map(function(tag) { return { id: tag['id'].toString(), name: tag['name'] }; }),
                   slug:          listing.slug,
                   createdAt:     listing.createdAt,
                   updatedAt:     listing.updatedAt
@@ -511,7 +521,6 @@ module.exports = function(router) {
         description: listingData.description,
         price: listingData.price,
         linkUrl: listingData.linkUrl,
-        keywords: listingData.keywords,
         userLocationId: listingData.userLocationId,
         heroImg: listingData.images[0],  // First image is hero
         userId: user.id,
@@ -531,26 +540,28 @@ module.exports = function(router) {
               console.log("Successfully saved images.");
               newListing['images'] = listingData.images;
 
-              const responseListing = {
-                id:          newListing.id,
-                userId:      newListing.userId,
-                ownerUsername: user.username,
-                title:       newListing.title,
-                description: newListing.description,
-                keywords:    newListing.keywords,
-                linkUrl:     newListing.linkUrl,
-                price:       newListing.price,
-                userLocationId: newListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                status:      newListing.status,
-                images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                hero:        newListing.heroImg,
-                slug:        newListing.slug,
-                createdAt:   newListing.createdAt,
-                updatedAt:   newListing.updatedAt
-              }
+              saveTags(listingData.tags, newListing.id, function() {
+                const responseListing = {
+                  id:          newListing.id,
+                  userId:      newListing.userId,
+                  ownerUsername: user.username,
+                  title:       newListing.title,
+                  description: newListing.description,
+                  linkUrl:     newListing.linkUrl,
+                  price:       newListing.price,
+                  userLocationId: newListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                  status:      newListing.status,
+                  images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
+                  hero:        newListing.heroImg,
+                  slug:        newListing.slug,
+                  tags:        listingData.tags,
+                  createdAt:   newListing.createdAt,
+                  updatedAt:   newListing.updatedAt
+                }
 
-              // Success response & updated Listing (if needed)
-              res.json({error: false, success: true, listing: responseListing});
+                // Success response & updated Listing (if needed)
+                res.json({error: false, success: true, listing: responseListing});
+              });
             }
           })
         })
@@ -616,12 +627,11 @@ module.exports = function(router) {
 
           console.log("Creating listing object updates...")
           // Specify fields we allow to be updated
-          let allowedUpdates = {
+          let allowedListingUpdates = {
             title:          Utils.sanitizeString(listingData.title),
             description:    Utils.sanitizeString(listingData.description),
             price:          Utils.sanitizeString(listingData.price),
             linkUrl:        Utils.sanitizeUrl(listingData.linkUrl),
-            keywords:       Utils.sanitizeString(listingData.keywords),
             userLocationId: listingData.userLocationId,
             heroImg:        listingData.images[0],
             userId:         userId,
@@ -630,8 +640,8 @@ module.exports = function(router) {
           }
 
           // iterate through each thing to update, and set that value on the foundUser object using setter
-          Object.keys(allowedUpdates).forEach(function(field) {
-            foundListing.setDataValue(field, allowedUpdates[field]);
+          Object.keys(allowedListingUpdates).forEach(function(field) {
+            foundListing.setDataValue(field, allowedListingUpdates[field]);
           });
 
           console.log("Listing PRIOR TO UPDATING IS: ", foundListing);
@@ -645,24 +655,27 @@ module.exports = function(router) {
               saveImages(listingData.images, false, listingId, userId, function(wasSuccessful) {
                 console.log("SAVING IMAGES WAS SUCCESSFUL: ", wasSuccessful);
 
-                // Success response & updated Listing (if needed)
-                res.json({error: false, success: true, listing: {
-                  id:            updatedListing.id,
-                  userId:        updatedListing.userId,
-                  ownerUsername: user.username,
-                  title:         updatedListing.title,
-                  description:   updatedListing.description,
-                  keywords:      updatedListing.keywords,
-                  linkUrl:       updatedListing.linkUrl,
-                  price:         updatedListing.price,
-                  userLocationId: updatedListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                  status:        updatedListing.status,
-                  hero:          updatedListing.heroImg,
-                  images:        listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                  slug:          updatedListing.slug,
-                  createdAt:     updatedListing.createdAt,
-                  updatedAt:     updatedListing.updatedAt
-                }})
+                saveTags(listingData.tags, listingId, function(tagsSuccessful) {
+                  console.log("SAVING TAGS SUCCESSFUL?", tagsSuccessful);
+                  // Success response & updated Listing (if needed)
+                  res.json({error: false, success: true, listing: {
+                    id:            updatedListing.id,
+                    userId:        updatedListing.userId,
+                    ownerUsername: user.username,
+                    title:         updatedListing.title,
+                    description:   updatedListing.description,
+                    linkUrl:       updatedListing.linkUrl,
+                    price:         updatedListing.price,
+                    userLocationId: updatedListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
+                    status:        updatedListing.status,
+                    hero:          updatedListing.heroImg,
+                    images:        listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
+                    slug:          updatedListing.slug,
+                    tags:          listingData.tags,  // FIXME: THIS COULD BE MISLEADING SINCE FAILURE WOULD MAKE THIS RESPONSE WRONG!!!!
+                    createdAt:     updatedListing.createdAt,
+                    updatedAt:     updatedListing.updatedAt
+                  }})
+                });
               });
             })
             .catch(function(err) {
@@ -724,11 +737,10 @@ module.exports = function(router) {
 
     // Listing Updates
     if(!newListing) {
-      // Make sure to order by POSITION
       const imagesMetadata = Images
         .findAll({
           where: { listingId: listingId, status: 'ACTIVE' },
-          order: [['position', 'ASC']],
+          order: [['position', 'ASC']]  // Order by POSITION
         })
         .then(function(existingImages) {
           console.log("Initial images found prior to updating are: ", existingImages);
@@ -819,6 +831,48 @@ module.exports = function(router) {
           callback(success);
         });
     }
+  }
+
+  function saveTags(tagsObjArray, listingId, callback) {
+    const tagsIds = tagsObjArray.mao(t => t.id);
+    // Lots of work here
+    // Should pass in existing tags if have them so can compare like do in images
+    ListingTag
+      .findAll({where: {listingId: listingId, status: 'ACTIVE'}})
+      .then(function(foundListingTags) {
+        const foundIds = foundListingTags.map(tag => tag.id);
+        const adds = foundIds.filter(foundId => tagsIds.includes(foundId));  // Existing does not include the new IDs => add new
+        const dels = tagsIds.filter(tagId => foundIds.includes(tagId));  // New does not include existing => delete existing
+
+        if(adds && adds.length) {
+          const preppedTagsToAdd = adds.map(function(tId) { return {tagId: tId, listingId: listingId} });
+          ListingTag
+            .bulkCreate(preppedTagsToAdd)
+            .then(function(success) {
+              console.log("Successfully adds tag-listing associations...");
+              if(dels & dels.length) {
+                ListingTag
+                  .destroy({where: { id: dels }})
+                  .then(function(worked) {
+                    console.log("Successfully deleted old tag-listing associations...");
+                    callback(true);
+                  })
+                  .catch(function(errr) {
+                    console.log("Error deleting old tag-listing associations.");
+                    // IN CASE OF FAILURE, COULD GET EXISTING TAGS TO RETURN.
+                    callback(false)
+                  });
+              }
+            })
+            .catch(function(err) {
+              console.log("Error adding tag-listing associations");
+              // IN CASE OF FAILURE, COULD GET EXISTING TAGS TO RETURN.
+              callback(false);
+            });
+        }
+
+        callback();  // FIXME: This doesn't really indicate success...
+      });
   }
 
   function parseOrGetUserId(usernameOrId, callback) {

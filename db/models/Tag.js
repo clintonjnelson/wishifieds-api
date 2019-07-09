@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps : true,
     tableName: 'tags',
-    freezeTableName: true
+    freezeTableName: true,
+    underscored: true
   });
 
   Tag.associate = function(models) {

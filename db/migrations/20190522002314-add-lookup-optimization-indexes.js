@@ -25,7 +25,8 @@ module.exports = {
       -- bulk text optimized searches
       CREATE INDEX trgm_idx_listings_title ON public.listings USING GiST(title gist_trgm_ops);
       CREATE INDEX trgm_idx_listings_description ON public.listings USING GiST(description gist_trgm_ops);
-      CREATE INDEX trgm_idx_listings_keywords ON public.listings USING GiST(keywords gist_trgm_ops);
+
+      --TODO: CREATE AN INDEX SEARCH USING LISTINGS TAGS!!!!
 
       -- Make postal code searches faster
       CREATE INDEX idx_locations_postal ON public.locations (postal);
@@ -37,21 +38,10 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      DROP INDEX idx_messages_sender_id;
-      DROP INDEX idx_messages_recipient_id;
-      DROP INDEX idx_messages_listing_id;
-      DROP INDEX idx_users_phone_id;
-      DROP INDEX idx_users_default_user_location;
-      DROP INDEX idx_listings_category_id;
-      DROP INDEX idx_listings_condition_id;
-      DROP INDEX idx_listings_user_location_id;
-      DROP INDEX idx_listings_user_id;
-      DROP INDEX idx_images_listing_id;
-      DROP INDEX idx_images_user_id;
-      DROP INDEX idx_favorites_listing_id;
-      DROP INDEX idx_favorites_user_id;
-      DROP INDEX idx_users_locations_user_id;
-      DROP INDEX idx_users_locations_location_id;
+      DROP INDEX trgm_idx_listings_title;
+      DROP INDEX trgm_idx_listings_description;
+      DROP INDEX idx_locations_postal;
+      DROP INDEX gpx_idx_locations_geography;
     `);
   }
 };
