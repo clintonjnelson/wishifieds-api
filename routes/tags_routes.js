@@ -73,11 +73,10 @@ module.exports = function(router) {
 
   // Create Tag (effectively a "get or insert" functionality); must be a user to create.
   router.post('/tags', eatOnReq, eatAuth, function(req, res) {
-    console.log("IN CREATE TAGS ROUTE...");
-    console.log("USER IS: ", req.user);
     var rawTagName = req.body && req.body.tagName;
     var tagName = rawTagName.trim();
-    if(tagName.length === 0) {
+    console.log("IN CREATE TAGS ROUTE WITH TAG NAME: ", tagName);
+    if(!tagName || tagName.length === 0) {
       return res.status(400).json({error: true, msg: 'no-length-name'});
     }
 

@@ -13,10 +13,9 @@ var Locations  = db.Locations;
 var Images     = db.Image;
 var User       = db.User;
 var Tag        = db.Tag;
-var ListingsTags = db.ListingTag;
+var ListingTag = db.ListingTag;
 var Message    = db.Message;
 var Favorites  = db.Favorite;
-var ListingTags = db.ListingTag;
 var Sequelize  = require('sequelize');
 
 var DEFAULT_SEARCH_RADIUS_DISTANCE = 100;  // 100 miles is a lot, but will shrink later on
@@ -834,15 +833,25 @@ module.exports = function(router) {
   }
 
   function saveTags(tagsObjArray, listingId, callback) {
-    const tagsIds = tagsObjArray.mao(t => t.id);
-    // Lots of work here
-    // Should pass in existing tags if have them so can compare like do in images
+    // Parse the tag ids for comparison
+    var tagIds;
+    console.log("ABOUT TO GET TAG IDS FROM: ", tagsObjArray);
+    try { tagIds = tagsObjArray.map(function(t) { return parseInt(t.id); }) }
+    catch (e) {
+      console.log("Error parsing the Tag ID to integer. Tags were: ", tagsObjArray, " Error was: ", e);
+      return callback(false);
+    }
+
     ListingTag
-      .findAll({where: {listingId: listingId, status: 'ACTIVE'}})
-      .then(function(foundListingTags) {
-        const foundIds = foundListingTags.map(tag => tag.id);
-        const adds = foundIds.filter(foundId => tagsIds.includes(foundId));  // Existing does not include the new IDs => add new
-        const dels = tagsIds.filter(tagId => foundIds.includes(tagId));  // New does not include existing => delete existing
+      .findAll({ where: { listingId: listingId }})
+      .then(function(existingListingTags) {
+        const existingTagIds = existingListingTags.map(tag => tag.tagId);
+        const adds = tagIds.filter(tagId => !existingTagIds.includes(tagId));  // Existing does not include the new IDs => add new
+        const dels = existingTagIds.filter(existingId => !tagIds.includes(existingId));  // New does not include existing => delete existing
+
+        console.log("EXISTING TAG IDS ARE: ", existingTagIds);
+        console.log("TAGS TO ADD ARE: ", adds);
+        console.log("TAGS TO DEL ARE: ", dels);
 
         if(adds && adds.length) {
           const preppedTagsToAdd = adds.map(function(tId) { return {tagId: tId, listingId: listingId} });
