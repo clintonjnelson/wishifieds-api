@@ -83,7 +83,7 @@ module.exports = function(router) {
                   price:          listing.price,
                   userLocationId: listing.userlocationid, // TODO: SHOULD THIS BE LOCATION???
                   images:         listing.images,  // sorted in the query
-                  tags:           listing.tags,
+                  tags:           listing['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
                   hero:           listing.heroimg,        // TODO: Send ONE of these
                   slug:           listing.slug,
                   createdAt:      listing.createdat,
