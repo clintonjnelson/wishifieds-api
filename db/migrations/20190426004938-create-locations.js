@@ -12,6 +12,10 @@ module.exports = {
       geography:     { type: Sequelize.GEOGRAPHY('POINT', 4326) },
       geographytype: { type: Sequelize.STRING, allowNull: false, defaultValue: 'POINT', },
       postal:        { type: Sequelize.STRING, allowNull: true },
+      city:          { type: Sequelize.STRING, allowNull: true },
+      state:         { type: Sequelize.STRING, allowNull: true },
+      stateCode:     { type: Sequelize.STRING, allowNull: true, field: 'state_code' },  // Update to ENUM later
+      countryCode:   { type: Sequelize.STRING, allowNull: true, field: 'country_code' },  // Probably ENUM. Default is bad here, but makes sense now.
       createdAt:     { type: Sequelize.DATE,   allowNull: false, field: 'created_at' },
       updatedAt:     { type: Sequelize.DATE,   allowNull: false, field: 'updated_at' },
     });
