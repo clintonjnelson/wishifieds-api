@@ -43,11 +43,15 @@ module.exports = function(router) {
     console.log("USER ON REQ IS: ", req.user);
     var maybeUserId = req.user && req.user.id;  // WARN: May or may NOT have userId available on request
     var maybeUserLoc = req.query['locationId'];
-    var postalQuery = req.query['postal'];  // Centroid: Postal, User Default, Generic
+    var maybeCity = req.query['city'];
+    var maybeStateCode = req.query['stateCode'];
+    var maybePostal = req.query['postal'];  // Centroid: Postal, User Default, Generic
     var distQuery = req.query['distance'];
     var searchStr = req.query['search'].trim();
 
     console.log("MaybeUserId IS: ", maybeUserId);
+    console.log("MaybeCity IS: ", maybeCity);
+    console.log("MaybeStateCode IS: ", maybeStateCode);
     console.log("POSTAL QUERY IS: ", postalQuery);
     console.log("DIST QUERY IS: ", distQuery);
     console.log("LOCATION QUERY IS: ", maybeUserLoc);
@@ -55,12 +59,14 @@ module.exports = function(router) {
     var params = {
       search: searchStr,
       distance: ( (distQuery && distQuery.length != 0) ? distQuery : DEFAULT_SEARCH_RADIUS_DISTANCE),
-      postal: ( (postalQuery && postalQuery.length != 0) ? postalQuery : DEFAULT_SEARCH_ZIPCODE),
+      postal: ( (maybePostal && maybePostal.length != 0) ? maybePostal : DEFAULT_SEARCH_ZIPCODE),
       userLocationId: maybeUserLoc,
-      userId: maybeUserId
+      userId: maybeUserId,
+      city: maybeCity,
+      stateCode: maybeStateCode,
     };
     console.log("PARAMS FOR QUERY ARE: ", params);
-    var sqlQuery = selectSearchQuery(distQuery, postalQuery, params['userId'], params['userLocationId']);
+    var sqlQuery = selectSearchQuery(distQuery, maybePostal, params['userId'], params['userLocationId'], maybeCity, maybeState);
 
     sequelize
       .query(
@@ -105,12 +111,16 @@ module.exports = function(router) {
       });
 
     // Return the appripriate SPROC template per search request params
-    function selectSearchQuery(distance, uiPostal, userId, userLocationId) {
+    function selectSearchQuery(distance, uiPostal, userId, userLocationId, maybeCity, maybeState) {
       var query;
       // Any distance, then location/distance don't matter
       if(distance && distance.toUpperCase() === ANY_DISTANCE) {
         console.log("USING THE ANY DISTANCE SEARCH (ALL LISTINGS MATCH)");
         query = "SELECT * FROM find_listings_any_distance_v1(:search::VARCHAR);"
+      }
+      else if(maybeCity && maybeState) {
+        console.log("USING THE CITY, STATECODE DISTANCE SEARCH (ALL LISTINGS MATCH)");
+        query = "SELECT * FROM find_listings_within_city_statecode_v1(:search::VARCHAR, :city::VARCHAR, :stateCode::VARCHAR :distance::INTEGER);"
       }
       // Zipcode, then that primary/override governs
       else if(uiPostal) {

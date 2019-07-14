@@ -32,4 +32,33 @@ module.exports = function(router) {
 
     res.json();
   });
+
+  router.get('/locations/search', function(req, res) {
+    var city = req.query['city'];
+    var stateCode = req.query['statecode'];
+    var limit = req.query['limit'] || 10;
+    var params = {
+      city: city,
+      statecode: stateCode,
+      limit: limit
+    };
+
+    // CUSTOM QUERY BECAUSE NEED PARTIAL ON UP-TO-TWO THINGS... and maybe not both.
+    console.log("ABOUT TO QUERY FOR LOCATIONS...");
+    sequelize
+      .query(
+        'SELECT * FROM location_search(:city::VARCHAR, :statecode::VARCHAR, :limit::INTEGER)',
+        { replacements: params, type: sequelize.QueryTypes.SELECT }
+      )
+      .then(function(foundLocations) {
+        const results = foundLocations.map(function(loc) {
+          return loc.city + ', ' + loc.stateCode;
+        });
+        console.log("LOCATIONS SEARCH RESULTS:", results);
+        res.json({locations: results});
+      })
+      .catch(function(err) {
+        console.log("Error searching for locations by city, state, limit. Error: ", err);
+      });
+  });
 }
