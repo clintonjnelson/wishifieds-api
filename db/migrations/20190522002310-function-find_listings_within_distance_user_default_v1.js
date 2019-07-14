@@ -54,14 +54,17 @@ module.exports = {
         JOIN public.locations AS loc ON loc.id = ul.location_id
         JOIN public.images AS img ON img.listing_id = l.id
         -- Location filter first, because that will quickly limit results
-        WHERE ST_DWITHIN(
-          loc.geography::geography,  -- geography point
-          (SELECT centerloc.geography
-             FROM public.users AS searchuser
-             JOIN public.users_locations AS centeruserloc ON centeruserloc.id = searchuser.default_user_location
-             JOIN public.locations AS centerloc ON centerloc.id = centeruserloc.location_id
-             WHERE searchuser.id = user_id_p)::geography,  -- geography point
-          (1609.344 * distance_miles_p)::float8  -- distance from miles to meters
+        WHERE WHERE (
+          loc.postal = postal_p
+          OR ST_DWITHIN(
+            loc.geography::geography,  -- geography point
+            (SELECT centerloc.geography
+               FROM public.users AS searchuser
+               JOIN public.users_locations AS centeruserloc ON centeruserloc.id = searchuser.default_user_location
+               JOIN public.locations AS centerloc ON centerloc.id = centeruserloc.location_id
+               WHERE searchuser.id = user_id_p)::geography,  -- geography point
+            (1609.344 * distance_miles_p)::float8  -- distance from miles to meters
+          )
         )
         -- Search query next, because case-insensitive text partial match searching is slower
         AND (

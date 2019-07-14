@@ -1,14 +1,14 @@
 'use strict';
 
 // Example Call:
-// SELECT * FROM find_listings_within_distance_zip_v1('shoe'::VARCHAR, '98059'::VARCHAR(16), 25);
+// SELECT * FROM find_listings_within_city_statecode_v1('shoe'::VARCHAR, 'Seattle'::VARCHAR, 'WA'::VARCHAR);
 
 
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      CREATE OR REPLACE FUNCTION find_listings_within_distance_zip_v1(search_str_p VARCHAR, postal_p VARCHAR(16), distance_miles_p INTEGER)
+      CREATE OR REPLACE FUNCTION find_listings_within_city_statecode_v1(search_str_p VARCHAR, city_p VARCHAR, statecode_p VARCHAR)
       RETURNS table(
         listingId INTEGER,
         userId INTEGER,
@@ -54,21 +54,13 @@ module.exports = {
         JOIN public.users AS u ON u.id = ul.user_id
         JOIN public.locations AS loc ON loc.id = ul.location_id
         JOIN public.images AS img ON img.listing_id = l.id
-        -- Location filter first, because that will quickly limit results. Postal match OR within radius centroid postal.
-        WHERE (
-          loc.postal = postal_p
-          OR ST_DWITHIN(
-            loc.geography::geography,  -- geography point
-            (SELECT geography FROM public.locations WHERE postal = postal_p)::geography,  -- geography point
-            (1609.344 * distance_miles_p)::float8  -- distance from miles to meters
-          )
-        )
-        -- Search query next, because case-insensitive text partial match searching is slower
-        AND (
-          -- FIXME: IMPROVE PERFORMANCE USING lower(%search_string_p%) vs ILIKE
-          l.title ILIKE CONCAT('%', search_str_p, '%')
-          OR l.description ILIKE CONCAT('%', search_str_p, '%')
-        );
+        WHERE loc.city = city_p
+          AND loc.state_code = statecode_p
+          AND (
+            -- FIXME: IMPROVE PERFORMANCE USING lower(%search_string_p%) vs ILIKE
+            l.title ILIKE CONCAT('%', search_str_p, '%')
+            OR l.description ILIKE CONCAT('%', search_str_p, '%')
+          );
       $$ LANGUAGE sql
       SECURITY DEFINER
       COST 10;
@@ -77,7 +69,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      DROP FUNCTION find_listings_within_distance_zip_v1(character varying,character varying,integer);
+      DROP FUNCTION find_listings_within_city_statecode_v1(character varying, character varying, character varying);
     `);
   }
 };
