@@ -1,22 +1,24 @@
 // Example Call:
-// SELECT * FROM location_search('Seattle', 'W', 10);
+// SELECT * FROM location_typeahead_citystate_v1('Seattle', 'W', 10);
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      CREATE OR REPLACE FUNCTION location_search(p_city VARCHAR, p_statecode VARCHAR, p_limit INTEGER)
+      CREATE OR REPLACE FUNCTION location_typeahead_citystate_v1(p_city VARCHAR, p_statecode VARCHAR, p_limit INTEGER)
       RETURNS table(
         id INTEGER,
         city VARCHAR,
-        state_code VARCHAR,
-        citystate VARCHAR
+        stateCode VARCHAR,
+        postal VARCHAR,
+        typeahead VARCHAR
       )
       AS $$
         SELECT DISTINCT ON(loc.city, loc.state_code) --FIX THIS! GETTING DUPS ON SOMETHING, but DISTINCT IS SLOW.
           loc.id,
           loc.city,
-          loc.state_code,
-          CONCAT(loc.city, ', ', loc.state_code) as citystate
+          loc.state_code AS stateCode,
+          loc.postal,
+          CONCAT(loc.city, ', ', loc.state_code) AS typeahead
         FROM public.locations AS loc
         WHERE loc.city iLIKE (p_city || '%')
         AND (
@@ -34,7 +36,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      DROP FUNCTION location_search(character varying,character varying,integer);
+      DROP FUNCTION location_typeahead_citystate_v1(character varying,character varying,integer);
     `);
   }
 };

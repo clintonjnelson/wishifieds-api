@@ -17,6 +17,7 @@ var usersRouter = new express.Router();
 var tasksRouter = new express.Router();
 var imagesRouter = new express.Router();
 var listingsRouter = new express.Router();
+var locationsRouter = new express.Router();
 var messagesRouter = new express.Router();
 var favoritesRouter = new express.Router();
 var usersLocationsRouter = new express.Router();
@@ -38,12 +39,13 @@ app.use(passport.session());            // only for oauth1 to work
 require('./lib/passport_strategies/basic.js')(passport);
 
 // Populate Routes
-require('./routes/auth_routes.js' )(authRouter,  passport);
+require('./routes/auth_routes.js' )(authRouter, passport);
 require('./routes/tags_routes.js')(tagsRouter);
 require('./routes/users_routes.js')(usersRouter);
 require('./routes/tasks_routes.js')(tasksRouter);
 require('./routes/images_routes.js')(imagesRouter);
 require('./routes/listings_routes.js')(listingsRouter);
+require('./routes/locations_routes.js')(locationsRouter);
 require('./routes/messages_routes.js')(messagesRouter);
 require('./routes/favorites_routes.js')(favoritesRouter);
 require('./routes/users_locations_routes.js')(usersLocationsRouter);
@@ -55,6 +57,7 @@ app.use('/api', usersRouter);
 app.use('/api', tasksRouter);
 app.use('/api', imagesRouter);
 app.use('/api', listingsRouter);
+app.use('/api', locationsRouter);
 app.use('/api', messagesRouter);
 app.use('/api', favoritesRouter);
 app.use('/api', usersLocationsRouter);

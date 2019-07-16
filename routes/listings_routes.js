@@ -52,7 +52,7 @@ module.exports = function(router) {
     console.log("MaybeUserId IS: ", maybeUserId);
     console.log("MaybeCity IS: ", maybeCity);
     console.log("MaybeStateCode IS: ", maybeStateCode);
-    console.log("POSTAL QUERY IS: ", postalQuery);
+    console.log("POSTAL QUERY IS: ", maybePostal);
     console.log("DIST QUERY IS: ", distQuery);
     console.log("LOCATION QUERY IS: ", maybeUserLoc);
 
@@ -66,7 +66,7 @@ module.exports = function(router) {
       stateCode: maybeStateCode,
     };
     console.log("PARAMS FOR QUERY ARE: ", params);
-    var sqlQuery = selectSearchQuery(distQuery, maybePostal, params['userId'], params['userLocationId'], maybeCity, maybeState);
+    var sqlQuery = selectSearchQuery(distQuery, maybePostal, params['userId'], params['userLocationId'], maybeCity, maybeStateCode);
 
     sequelize
       .query(
