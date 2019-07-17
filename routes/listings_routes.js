@@ -18,8 +18,7 @@ var Message    = db.Message;
 var Favorites  = db.Favorite;
 var Sequelize  = require('sequelize');
 
-var DEFAULT_SEARCH_RADIUS_DISTANCE = 100;  // 100 miles is a lot, but will shrink later on
-var DEFAULT_SEARCH_ZIPCODE = '98101';
+var DEFAULT_SEARCH_RADIUS_DISTANCE = 'any';  // 100 MILES is a lot, but will shrink later on
 var ANY_DISTANCE = 'ANY';
 // FK Constraints (self-verify existence): UserId
 
@@ -32,11 +31,12 @@ var ANY_DISTANCE = 'ANY';
     // save links to images (later will save links to copies in our own Bucket in AWS)
         // listing_images table where listing_id is an indexed value for fast retrieval
 
-
+// Distance is in MILES
 module.exports = function(router) {
   router.use(bodyparser.json());
 
   router.get('/listings/search', eatOnReq, userOnReq, function(req, res) {
+    // !!!!!!!!!  TODO: SANITIZE THE USER INPUTS BEFORE GO TO QUERY. OR VERIFY SEQUELIZE WORKS. !!!!!!!!!!
     if(req.query['search'].length == 0) {
       return res.json({error: false, success: true, listings: []});  // No search, no results
     }
@@ -44,9 +44,9 @@ module.exports = function(router) {
     var maybeUserId = req.user && req.user.id;  // WARN: May or may NOT have userId available on request
     var maybeUserLoc = req.query['locationId'];
     var maybeCity = req.query['city'];
-    var maybeStateCode = req.query['stateCode'];
+    var maybeStateCode = req.query['statecode'];
     var maybePostal = req.query['postal'];  // Centroid: Postal, User Default, Generic
-    var distQuery = req.query['distance'];
+    var distQuery = req.query['distance'];  // Could be string ('any') or string Integer ('98101')
     var searchStr = req.query['search'].trim();
 
     console.log("MaybeUserId IS: ", maybeUserId);
@@ -58,8 +58,8 @@ module.exports = function(router) {
 
     var params = {
       search: searchStr,
-      distance: ( (distQuery && distQuery.length != 0) ? distQuery : DEFAULT_SEARCH_RADIUS_DISTANCE),
-      postal: ( (maybePostal && maybePostal.length != 0) ? maybePostal : DEFAULT_SEARCH_ZIPCODE),
+      distance: ( (distQuery && distQuery.length != 0) ? distQuery : DEFAULT_SEARCH_RADIUS_DISTANCE),  //
+      postal: maybePostal,
       userLocationId: maybeUserLoc,
       userId: maybeUserId,
       city: maybeCity,
@@ -118,9 +118,14 @@ module.exports = function(router) {
         console.log("USING THE ANY DISTANCE SEARCH (ALL LISTINGS MATCH)");
         query = "SELECT * FROM find_listings_any_distance_v1(:search::VARCHAR);"
       }
+      if(distance && !Number.isNaN(parseInt(distance)) && maybeCity && maybeState) {
+        console.log("USING THE CITY, STATECODE DISTANCE SEARCH (ALL LISTINGS MATCH)");
+        query = "SELECT * FROM find_listings_within_distance_city_statecode_v1(:search::VARCHAR, :city::VARCHAR, :stateCode::VARCHAR, :distance::INTEGER);"
+      }
+      // Typeahead should ensure we have both. Must have both due to duplicate City possibility.
       else if(maybeCity && maybeState) {
         console.log("USING THE CITY, STATECODE DISTANCE SEARCH (ALL LISTINGS MATCH)");
-        query = "SELECT * FROM find_listings_within_city_statecode_v1(:search::VARCHAR, :city::VARCHAR, :stateCode::VARCHAR :distance::INTEGER);"
+        query = "SELECT * FROM find_listings_within_city_statecode_v1(:search::VARCHAR, :city::VARCHAR, :stateCode::VARCHAR);"
       }
       // Zipcode, then that primary/override governs
       else if(uiPostal) {
@@ -137,15 +142,24 @@ module.exports = function(router) {
         console.log("USING THE DISTANCE WITH USER LOC DEFAULT...");
         query = "SELECT * FROM find_listings_within_distance_user_default_v1(:search::VARCHAR, :userId::INTEGER, :distance::INTEGER);"
       }
-      // Must be guest & no specifics, so use generic default zip
+      // Shouldn't be able to get here, but if somehow do, then use the ANY distance search
       else {
         console.log("USING THE DISTANCE WITH GENERIC DEFAULT ZIP...");
-        query = "SELECT * FROM find_listings_within_distance_zip_v1(:search::VARCHAR, :postal::VARCHAR(16), :distance::INTEGER);"
+        query = "SELECT * FROM find_listings_any_distance_v1(:search::VARCHAR);"
       }
 
       console.log("Query to use is: ", query);
       return query;
     }
+
+    // function getDistance(dist) {
+    //   if(Number.isNaN(parseInt(dist))) {
+    //     return dist;  // return the string if can't parse
+    //   }
+    //   else {
+    //     return parseInt(dist); // else, return the integer value
+    //   }
+    // }
   });
 
   // DOES THIS GO HERE??  MAY HAVE ROUTE CLASHES IF IN FAVS ROUTES. PLUS RESOURCE RETURNED IS LISTINGS...
