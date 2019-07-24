@@ -22,6 +22,7 @@ module.exports = {
         tags TEXT[],
         heroImg TEXT,
         slug VARCHAR,
+        geo DOUBLE PRECISION[],
         createdAt TIMESTAMP WITH TIME ZONE,
         updatedAt TIMESTAMP WITH TIME ZONE
       )
@@ -47,6 +48,7 @@ module.exports = {
               WHERE lt.listing_id = l.id) AS tags,
           l.hero_img AS heroImg,
           l.slug,
+          (SELECT Array[ST_Y(loc.geography::geometry), ST_X(loc.geography::geometry)]) as geo,
           l.created_at AS createdAt,
           l.updated_at AS updatedAt
         FROM public.listings AS l
@@ -59,7 +61,8 @@ module.exports = {
           -- FIXME: IMPROVE PERFORMANCE USING lower(%search_string_p%) vs ILIKE
           l.title ILIKE CONCAT('%', search_str_p, '%')
           OR l.description ILIKE CONCAT('%', search_str_p, '%')
-        );
+        )
+        AND l.status = 'ACTIVE';
       $$ LANGUAGE sql
       SECURITY DEFINER
       COST 10;

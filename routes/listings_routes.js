@@ -40,6 +40,7 @@ module.exports = function(router) {
     if(req.query['search'].length == 0) {
       return res.json({error: false, success: true, listings: []});  // No search, no results
     }
+
     console.log("USER ON REQ IS: ", req.user);
     var maybeUserId = req.user && req.user.id;  // WARN: May or may NOT have userId available on request
     var maybeUserLoc = req.query['locationId'];
@@ -48,13 +49,6 @@ module.exports = function(router) {
     var maybePostal = req.query['postal'];  // Centroid: Postal, User Default, Generic
     var distQuery = req.query['distance'];  // Could be string ('any') or string Integer ('98101')
     var searchStr = req.query['search'].trim();
-
-    console.log("MaybeUserId IS: ", maybeUserId);
-    console.log("MaybeCity IS: ", maybeCity);
-    console.log("MaybeStateCode IS: ", maybeStateCode);
-    console.log("POSTAL QUERY IS: ", maybePostal);
-    console.log("DIST QUERY IS: ", distQuery);
-    console.log("LOCATION QUERY IS: ", maybeUserLoc);
 
     var params = {
       search: searchStr,
@@ -68,47 +62,15 @@ module.exports = function(router) {
     console.log("PARAMS FOR QUERY ARE: ", params);
     var sqlQuery = selectSearchQuery(distQuery, maybePostal, params['userId'], params['userLocationId'], maybeCity, maybeStateCode);
 
-    sequelize
-      .query(
-        sqlQuery,
-        { replacements: params,
-          type: sequelize.QueryTypes.SELECT
-        }
-      )
-      .then(function(results, metadata) {
-        console.log("RESULTS ARE: ", results);
-        if(results && results.length > 0) {
-              var listings = results.map(function(listing) {
-                return {
-                  id:             listing.listingid,
-                  userId:         listing.userid,
-                  ownerUsername:  listing.username,
-                  title:          listing.title,
-                  description:    listing.description,
-                  linkUrl:        listing.linkurl,
-                  price:          listing.price,
-                  userLocationId: listing.userlocationid, // TODO: SHOULD THIS BE LOCATION???
-                  images:         listing.images,  // sorted in the query
-                  tags:           listing['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
-                  hero:           listing.heroimg,        // TODO: Send ONE of these
-                  slug:           listing.slug,
-                  createdAt:      listing.createdat,
-                  updatedAt:      listing.updatedat
-                };
-              });
-              console.log("LISTINGS FOUND: ", listings);
+    selectListings(sqlQuery, params, function(err, listings) {
+      if(err || !listings) {
+        console.log('Caught error in searching for listings. Error getting listings: ', err);
+        return res.status(500).json({error: true, success: false});
+      }
 
-              res.json({error: false, success: true, listings: listings });
-        }
-        // No listings found
-        else {
-          res.json({error: false, success: true, listings: []});
-        }
-      })
-      .catch(function(err) {
-        console.log("Caught error in searching for listings. Error getting listings: ", err);
-        res.status(500).json({error: true, success: false});
-      });
+      console.log("LISTINGS FOUND: ", listings);
+      res.json({error: false, listings: listings});
+    });
 
     // Return the appripriate SPROC template per search request params
     function selectSearchQuery(distance, uiPostal, userId, userLocationId, maybeCity, maybeState) {
@@ -151,230 +113,81 @@ module.exports = function(router) {
       console.log("Query to use is: ", query);
       return query;
     }
-
-    // function getDistance(dist) {
-    //   if(Number.isNaN(parseInt(dist))) {
-    //     return dist;  // return the string if can't parse
-    //   }
-    //   else {
-    //     return parseInt(dist); // else, return the integer value
-    //   }
-    // }
   });
 
   // DOES THIS GO HERE??  MAY HAVE ROUTE CLASHES IF IN FAVS ROUTES. PLUS RESOURCE RETURNED IS LISTINGS...
   // Get the favorites for the requesting user
+  // TODO: Turn these queries into a function (recommended) or write them raw in here
   router.get('/listings/favorites', eatOnReq, eatAuth, function(req, res) {
     const userId = req.user.id;
     console.log("IN FAVORITES ROUTE. USER ID IS: ", userId);
-    Favorites
-      .findAll({
-        where: {
-          userId: userId,
-          status: 'ACTIVE'
-        },
-        include: [
-          {
-            // TODO: Specify the attributes needed to reduce the query size!
-            model: Listings,  // include the listing associated to the message
-            include: [
-              { model: User }, // include the user associated to the listing
-              { model: Tag, attributes: ['id', 'name'] }
-            ]
-          },
-        ]
-      })
-      .then(function(favs) {
 
-        console.log("FAVS ARE: ", favs);
-        var results = favs.map(function(fav) {
-          // console.log("fav is: ", fav);
-          // console.log("fav Listing is: ", fav.Listing);
-          // console.log("fav Listing values is: ", fav.Listing.get());
-          return fav.Listing.get();
-        });
-        // Could break here to avoid an unnecessary query if results count = 0
-        var listingIds = results.map(function(listing) { return listing.id; });
-        Images
-          .findAll({
-            where: {listingId: listingIds, status: 'ACTIVE'},
-            order: [['position', 'ASC']]
-          })
-          .then(function(images) {
-            console.log("FAVS IMAGES FOUND ARE: ", images);
-            var sortedImgs = images
-              .sort(function(a, b){ return a.position - b.position; })
+    selectListings(
+      'SELECT * FROM get_favorite_listings_by_user_id(:userId::INTEGER);',
+      { userId: userId },
+      function(err, favorites) {
+      if(err || !favorites) {
+        console.log('Caught error in searching for favotites. Error getting favorite listings: ', err);
+        return res.status(500).json({error: true, success: false});
+      }
 
-            console.log("SORTED IMAGES ARE: ", sortedImgs);
-            var listings = results.map(function(listing) {
-              console.log("FAVS USER IS: ", listing.User);
-              return {
-                id:            listing.id,
-                userId:        listing.userId,
-                ownerUsername: listing['User']['username'],
-                title:         listing.title,
-                description:   listing.description,
-                linkUrl:       listing.linkUrl,
-                price:         listing.price,
-                userLocationId: listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                images:        sortedImgs
-                                .filter(function(img){ return img.listingId == listing.id})
-                                .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
-                hero:          listing.heroImg,        // TODO: Send ONE of these
-                tags:          listing['Tags'].map(function(tag) { return { id: tag['id'].toString(), name: tag['name'] }; }),
-                slug:          listing.slug,
-                createdAt:     listing.createdAt,
-                updatedAt:     listing.updatedAt
-              };
-            });
-            console.log("FAVS FOUND: ", listings);
-
-            res.json({error: false, success: true, listings: listings });
-          })
-          .catch(function(errr) {
-            console.log("Caught error in searching for favorites. Error getting images: ", errr);
-            res.status(500).json({error: true, success: false});
-          });
-      })
-      .catch(function(err) {
-        console.log("Caught error in searching for favorites. Error getting listings: ", err);
-        res.status(500).json({error: true, success: false});
-      });
+      console.log("FAVORITES FOUND: ", favorites);
+      res.json({error: false, listings: favorites});
+    });
   });
 
   // GET by listing ID
   router.get('/listings/:id', function(req, res) {
     const listingId = req.params['id'];
+    console.log("LISTING ID COMING IN IS: ", listingId);
 
     if(!listingId) {
       console.log("Route param of listing ID is required.");
       res.status(400).json({error: true, success: false, msg: 'listing ID is required'});
     }
 
-    Listings
-      .findOne({
-        where: {id: listingId},
-        include: [
-          { model: User },
-          { model: Tag, attributes: ['id', 'name'] }
-        ]
-      })  // Join user on search
-      .then(function(result) {
-        console.log("Listing found is: ", result);
-        if(!result || (result && result.length === 0)) {
-          console.log("No listing found for is: ", listingId);
-          return res.status(404).json({error: true, success: false, msg: 'No listing found.'});
+    selectSingleListing(
+      'SELECT * FROM get_listing_by_listing_id(:listingId::INTEGER);',
+      { listingId: listingId },
+      function(err, listing) {
+        if(err || !listing) {
+          console.log('Caught error in getting listing by ID. Listing ID: ', listingId, '. Error: ', err);
+          return res.status(500).json({error: true, success: false});
         }
-        Images
-          .findAll({
-            where: {listingId: listingId, status: 'ACTIVE'},
-            order: [['position', 'ASC']]
-          })
-          .then(function(images) {
-            console.log("IMAGES FOUND ARE: ", images);
-            var sortedImgs = images.sort(function(a, b){ return a.position - b.position; });
 
-            console.log("SORTED IMAGES ARE: ", sortedImgs);
-            var listing = {
-                id:          result.id,
-                userId:      result.userId,
-                ownerUsername: result['User']['username'],
-                ownerPicUrl: result['User']['profilePicUrl'],  // TOOD: Send for the full listing Header only. Maybe break out later?
-                title:       result.title,
-                description: result.description,
-                linkUrl:     result.linkUrl,
-                price:       result.price,
-                userLocationId: result.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                images:      sortedImgs.map(function(img){ return img.url }),  // get only img urls
-                tags:        result['Tags'].map(function(tag) { return { id: tag['id'].toString(), name: tag['name'] }; }),
-                hero:        result.heroImg,  // TODO: Send ONE of these
-                slug:        result.slug,
-                createdAt:   result.createdAt,
-                updatedAt:   result.updatedAt
-              };
-            res.json({error: false, success: true, listing: listing });
-          })
-          .catch(function(err) {
-            console.log("Caught error in searching for listings. Error getting images: ", err);
-            res.json({error: true, success: false, msg: 'Error getting listing images.'});
-          });
-      })
-      .catch(function(errr) {
-        console.log("Caught error in searching for listing.", errr);
-        res.json({error: true, success: false, msg: 'Error getting listing.'});
+        console.log("FAVORITES FOUND: ", listing);
+        res.json({error: false, listing: listing});
       });
   });
 
-
+  // Make the attributes variable for Advanced searches by a user.
   // GET a User's Listings by their user object
   router.get('/listings/user/:usernameOrId', function(req, res) {
-    parseOrGetUserId(req.params.usernameOrId, function(userId, error) {
-      if(!userId) {
-        console.log("Error finding user: ", error);
-        return res.status(404).json({error: true, success: false, msg: "Could not find user/listings."});
-      }
-      // Make the attributes variable for Advanced searches by a user.
-      // FIXME: THIS IS SUPER INEFFICIENT. WRITE CUSTOMER QUERY TO GATHER IMAGES IN SQL.
-      Listings
-        .findAll({
-          where: {
-            userId: userId,
-            status: 'ACTIVE'
-          },
-          include: [
-            { model: User },
-            { model: Tag, attributes: ['id', 'name'] }
-          ],
-          // raw: true
-        })
-        .then(function(results) {
-          console.log("RESULTS ARE: ", results);
-          var listingIds = results.map(function(listing) { return listing.id; });
-          Images
-            .findAll({
-              where: {listingId: listingIds, status: 'ACTIVE'},
-              order: [['position', 'ASC']]
-            })
-            .then(function(images) {
-              console.log("IMAGES FOUND ARE: ", images);
-              var sortedImgs = images
-                .sort(function(a, b){ return a.position - b.position; })
-              console.log("SORTED IMAGES ARE: ", sortedImgs);
+    var usernameOrId = req.params['usernameOrId'];
+    if(!usernameOrId) {
+      console.log("Error - required usernameOrId query param was not found", error);
+      return res.status(400).json({error: true, success: false, msg: "Missing query param usernameOrId."});
+    }
+    var params = {};
+    var query;
 
-              var listings = results.map(function(listing) {
-                console.log("LISTING USER IS: ", listing.User);
-                return {
-                  id:            listing.id,
-                  userId:        listing.userId,
-                  ownerUsername: listing['User']['username'],
-                  title:         listing.title,
-                  description:   listing.description,
-                  linkUrl:       listing.linkUrl,
-                  price:         listing.price,
-                  userLocationId: listing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                  images:        sortedImgs
-                                  .filter(function(img){ return img.listingId == listing.id})
-                                  .map(function(img){ return img.url }),                  // TODO: Retrieve these on the UI??
-                  hero:          listing.heroImg,        // TODO: Send ONE of these
-                  tags:          listing['Tags'].map(function(tag) { return { id: tag['id'].toString(), name: tag['name'] }; }),
-                  slug:          listing.slug,
-                  createdAt:     listing.createdAt,
-                  updatedAt:     listing.updatedAt
-                };
-              });
-              console.log("LISTINGS FOUND: ", listings);
+    if( isNaN(parseInt(usernameOrId, 10)) ) {
+      params['username'] = usernameOrId;
+      query = 'SELECT * FROM get_listings_by_username(:username::VARCHAR);';
+    }
+    else {
+      params['id'] = parseInt(usernameOrId, 10);
+      query = 'SELECT * FROM get_listings_by_user_id(:id::INTEGER);';
+    }
 
-              res.json({error: false, success: true, listings: listings });
-            })
-            .catch(function(errr) {
-              console.log("Caught error in searching for listings. Error getting images: ", errr);
-              res.status(500).json({error: true, success: false});
-            });;
-        })
-        .catch(function(err) {
-          console.log("Caught error in searching for listings. Error getting listings: ", err);
-          res.status(500).json({error: true, success: false});
-        });
+    selectListings(query, params, function(err, listings) {
+        if(err || !listings) {
+          console.log("Caught error finding user listings. Error getting listings: ", err);
+          return res.status(500).json({error: true, success: false});
+        }
+
+        console.log("LISTINGS FOUND: ", listings);
+        res.json({error: false, success: true, listings: listings });
     });
   });
 
@@ -478,12 +291,7 @@ module.exports = function(router) {
           };
           console.log("Listing Messages response IS: ", response);
 
-          // {
-          //   totalUnread: 1,
-          //   correspondants: [
-          //    { userMsgMeta: {userId: 2, unreadCount: 1, picUrl: 'www'} }
-          //   ]
-          // }
+          // {totalUnread: 1, correspondants: [{ userMsgMeta: {userId: 2, unreadCount: 1, picUrl: 'www'} }]}
           res.json({
             error: false,
             success: true,
@@ -908,19 +716,100 @@ module.exports = function(router) {
       });
   }
 
-  function parseOrGetUserId(usernameOrId, callback) {
-    if( isNaN(parseInt(usernameOrId, 10)) ) {
-      User
-        .findOne({where: {username: usernameOrId}})
-        .then(function(user) {
-          callback(user.id, null);
-        })
-        .catch(function(error) {
-          callback(null, error);
-        });
+  // For functions that return an array of listings
+  function selectListings(sqlFunction, params, callback) {
+    sequelize
+      .query(
+        sqlFunction,
+        { replacements: params,
+          type: sequelize.QueryTypes.SELECT
+        }
+      )
+      .then(function(results, metadata) {
+        console.log("RESULTS ARE: ", results);
+        if(results && results.length > 0) {
+              var listings = results.map(function(listing) {
+                return {
+                  id:             listing.listingid,
+                  userId:         listing.userid,
+                  ownerUsername:  listing.username,
+                  title:          listing.title,
+                  description:    listing.description,
+                  linkUrl:        listing.linkurl,
+                  price:          listing.price,
+                  userLocationId: listing.userlocationid, // TODO: SHOULD THIS BE LOCATION???
+                  images:         listing.images,  // sorted in the query
+                  tags:           listing['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
+                  hero:           listing.heroimg,        // TODO: Send ONE of these
+                  slug:           listing.slug,
+                  geoInfo:        getLatLongFromGeoInfoArr(listing['geoinfo']),
+                  createdAt:      listing.createdat,
+                  updatedAt:      listing.updatedat
+                };
+              });
+              callback(null, listings);
+        }
+        // No listings found
+        else {
+          callback(null, []);
+        }
+      })
+      .catch(function(err) {
+        callback(err, null);
+      });
+  }
+
+  // For functions that return a single listing
+  function selectSingleListing(sqlFunction, params, callback) {
+    sequelize
+      .query(
+        sqlFunction,
+        { replacements: params,
+          type: sequelize.QueryTypes.SELECT
+        }
+      )
+      .then(function(result, metadata) {
+        console.log("RESULT IS: ", result);
+        if(result && result.length == 1) {
+          var listing = {
+            id:             result[0].listingid,
+            userId:         result[0].userid,
+            ownerUsername:  result[0].username,
+            title:          result[0].title,
+            description:    result[0].description,
+            linkUrl:        result[0].linkurl,
+            price:          result[0].price,
+            userLocationId: result[0].userlocationid, // TODO: SHOULD THIS BE LOCATION???
+            images:         result[0].images,  // sorted in the query
+            tags:           result[0]['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
+            hero:           result[0].heroimg,        // TODO: Send ONE of these
+            slug:           result[0].slug,
+            geoInfo:        getLatLongFromGeoInfoArr(result[0]['geoinfo']),
+            createdAt:      result[0].createdat,
+            updatedAt:      result[0].updatedat
+          };
+
+          callback(null, listing);
+        }
+        else if(result && result.length > 1) {
+          console.log("ERROR OCCURRED - GOT BACK MORE THAN ONE RESULT ON A SELECT SINGLE QUERY!!", result);
+        }
+        // No listing found
+        else {
+          callback(null, null);
+        }
+      })
+      .catch(function(err) {
+        callback(err, null);
+      });
+  }
+
+  function getLatLongFromGeoInfoArr(geoInfoArr) {
+    if (geoInfoArr && typeof(geoInfoArr) == 'object' && geoInfoArr.length == 2) {
+      return { latitude: geoInfoArr[0], longitude: geoInfoArr[1] };
     }
     else {
-      callback(parseInt(usernameOrId, 10), null);
+      return {};
     }
   }
 }

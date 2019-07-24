@@ -1,13 +1,14 @@
 'use strict';
 
-// Example Call
-// SELECT * FROM find_listings_within_distance_user_loc_v1('shoe'::VARCHAR, 2::INTEGER, 5::INTEGER);
+// Example Call:
+// SELECT * FROM get_listings_by_username(6);
+
 
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      CREATE OR REPLACE FUNCTION find_listings_within_distance_user_loc_v1(search_str_p VARCHAR, user_location_id_p INTEGER, distance_miles_p INTEGER)
+      CREATE OR REPLACE FUNCTION get_listings_by_username(p_username VARCHAR)
       RETURNS table(
         listingId INTEGER,
         userId INTEGER,
@@ -21,13 +22,14 @@ module.exports = {
         tags TEXT[],
         heroImg TEXT,
         slug VARCHAR,
+        geoinfo DOUBLE PRECISION[],
         createdAt TIMESTAMP WITH TIME ZONE,
         updatedAt TIMESTAMP WITH TIME ZONE
       )
       AS $$
         SELECT DISTINCT ON (l.id)  --FIX THIS! GETTING DUPS ON SOMETHING, but DISTINCT IS SLOW.
           l.id AS listingId,
-            l.user_id AS userId,
+          l.user_id AS userId,
           u.username,
           l.title,
           l.description,
@@ -43,9 +45,10 @@ module.exports = {
           (SELECT array_agg(ARRAY[t.id::text, t.name::text])
             FROM "tags" as t
             join listings_tags as lt on tag_id = t.id
-              WHERE lt.listing_id = 6) AS tags,
+              WHERE lt.listing_id = l.id) AS tags,
           l.hero_img AS heroImg,
           l.slug,
+          (SELECT Array[ST_Y(loc.geography::geometry), ST_X(loc.geography::geometry)]) as geoinfo,
           l.created_at AS createdAt,
           l.updated_at AS updatedAt
         FROM public.listings AS l
@@ -53,24 +56,8 @@ module.exports = {
         JOIN public.users AS u ON u.id = ul.user_id
         JOIN public.locations AS loc ON loc.id = ul.location_id
         JOIN public.images AS img ON img.listing_id = l.id
-        -- Location filter first, because that will quickly limit results
-        WHERE (
-          l.user_location_id = user_location_id_p
-          OR ST_DWITHIN(
-            loc.geography::geography,  -- geography point
-              (SELECT centerloc.geography
-                 FROM public.users_locations AS centeruserloc
-                 JOIN public.locations AS centerloc ON centerloc.id = centeruserloc.location_id
-                 WHERE centeruserloc.id = user_location_id_p)::geography,  -- geography point
-              (1609.344 * distance_miles_p)::float8  -- distance from miles to meters
-          )
-        )
         -- Search query next, because case-insensitive text partial match searching is slower
-        AND (
-          -- FIXME: IMPROVE PERFORMANCE USING lower(%search_string_p%) vs ILIKE
-          l.title ILIKE CONCAT('%', search_str_p, '%')
-          OR l.description ILIKE CONCAT('%', search_str_p, '%')
-        )
+        WHERE u.username = p_username
         AND l.status = 'ACTIVE';
       $$ LANGUAGE sql
       SECURITY DEFINER
@@ -80,7 +67,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
-      DROP FUNCTION find_listings_within_distance_user_loc_v1(character varying,integer,integer);
+      DROP FUNCTION get_listings_by_username(integer);
     `);
   }
 };

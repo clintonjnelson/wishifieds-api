@@ -60,7 +60,8 @@ module.exports = {
             -- FIXME: IMPROVE PERFORMANCE USING lower(%search_string_p%) vs ILIKE
             l.title ILIKE CONCAT('%', search_str_p, '%')
             OR l.description ILIKE CONCAT('%', search_str_p, '%')
-          );
+          )
+          AND l.status = 'ACTIVE';
       $$ LANGUAGE sql
       SECURITY DEFINER
       COST 10;

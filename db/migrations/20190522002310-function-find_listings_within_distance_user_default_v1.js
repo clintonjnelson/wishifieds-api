@@ -54,9 +54,8 @@ module.exports = {
         JOIN public.locations AS loc ON loc.id = ul.location_id
         JOIN public.images AS img ON img.listing_id = l.id
         -- Location filter first, because that will quickly limit results
-        WHERE WHERE (
-          loc.postal = postal_p
-          OR ST_DWITHIN(
+        WHERE (
+          ST_DWITHIN(
             loc.geography::geography,  -- geography point
             (SELECT centerloc.geography
                FROM public.users AS searchuser
@@ -71,7 +70,8 @@ module.exports = {
           -- FIXME: IMPROVE PERFORMANCE USING lower(%search_string_p%) vs ILIKE
           l.title ILIKE CONCAT('%', search_str_p, '%')
           OR l.description ILIKE CONCAT('%', search_str_p, '%')
-        );
+        )
+        AND l.status = 'ACTIVE';
       $$ LANGUAGE sql
       SECURITY DEFINER
       COST 10;
