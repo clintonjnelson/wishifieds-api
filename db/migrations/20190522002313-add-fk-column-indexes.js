@@ -25,7 +25,7 @@ module.exports = {
       CREATE INDEX idx_users_phone_id ON public.users (phone_id);
       CREATE INDEX idx_users_default_user_location ON public.users (default_user_location);
 
-      CREATE INDEX idx_listings_user_location_id ON public.listings (user_location_id);
+      CREATE INDEX idx_listings_location_id ON public.listings (location_id);
       CREATE INDEX idx_listings_user_id ON public.listings (user_id);
 
       CREATE INDEX idx_images_listing_id ON public.images (listing_id);
@@ -49,7 +49,7 @@ module.exports = {
       DROP INDEX idx_messages_listing_id;
       DROP INDEX idx_users_phone_id;
       DROP INDEX idx_users_default_user_location;
-      DROP INDEX idx_listings_user_location_id;
+      DROP INDEX idx_listings_location_id;
       DROP INDEX idx_listings_user_id;
       DROP INDEX idx_images_listing_id;
       DROP INDEX idx_images_user_id;

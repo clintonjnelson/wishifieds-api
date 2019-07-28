@@ -32,8 +32,8 @@ module.exports = function(router) {
         return res.status(500).json({error: true, msg: 'Error getting user\'s locations'});
       });
 
-    function mapLocations(dbUserLoc) {
-      console.log("One location to map is: ", dbUserLoc);
+    function mapLocations(dbUserLoc) {  // This is the UserLocation object; Location object is joined inside
+      console.log("One user location to map is: ", dbUserLoc);
       const loc = dbUserLoc.Location.get();
       console.log("Location found is: ", loc);
       return {
@@ -41,9 +41,9 @@ module.exports = function(router) {
         description:    (dbUserLoc.description || loc.description),  // try both
         status:         dbUserLoc.status,
         isDefault:      dbUserLoc.isDefault,
+        locationId:     loc.id,
         postal:         loc.postal,
-        latitude:       loc.geography.coordinates[0],
-        longitude:      loc.geography.coordinates[1],
+        geoInfo:        { latitude: loc.geography.coordinates[0], longitude: loc.geography.coordinates[1] },
       };
     }
   });
@@ -129,8 +129,7 @@ module.exports = function(router) {
         status:         userLoc.status,
         isDefault:      userLoc.isDefault,
         postal:         loc.postal,
-        latitude:       loc.geography.coordinates[0],
-        longitude:      loc.geography.coordinates[1],
+        geoInfo:        {latitude: loc.geography.coordinates[0], longitude: loc.geography.coordinates[1]},
       };
     }
   });

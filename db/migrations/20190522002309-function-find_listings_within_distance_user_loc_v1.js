@@ -16,7 +16,7 @@ module.exports = {
         description TEXT,
         linkUrl TEXT,
         price VARCHAR,
-        userLocationId INTEGER,
+        locationId INTEGER,
         images VARCHAR[],
         tags TEXT[],
         heroImg TEXT,
@@ -33,7 +33,7 @@ module.exports = {
           l.description,
           l.link_url AS linkUrl,
           l.price,
-          l.user_location_id AS userLocationId,
+          l.location_id AS locationId,
           (SELECT ARRAY_AGG(i.url ORDER BY i.position ASC)
             FROM public.images AS i
             WHERE i.listing_id = l.id
@@ -49,13 +49,13 @@ module.exports = {
           l.created_at AS createdAt,
           l.updated_at AS updatedAt
         FROM public.listings AS l
-        JOIN public.users_locations AS ul ON ul.id = l.user_location_id
-        JOIN public.users AS u ON u.id = ul.user_id
-        JOIN public.locations AS loc ON loc.id = ul.location_id
+        JOIN public.users AS u ON u.id = l.user_id
+        JOIN public.users_locations AS ul ON ul.user_id = u.id AND l.location_id = ul.location_id  -- Join the UL of this user and this listing location
+        JOIN public.locations AS loc ON loc.id = l.location_id
         JOIN public.images AS img ON img.listing_id = l.id
         -- Location filter first, because that will quickly limit results
         WHERE (
-          l.user_location_id = user_location_id_p
+          ul.id = user_location_id_p
           OR ST_DWITHIN(
             loc.geography::geography,  -- geography point
               (SELECT centerloc.geography

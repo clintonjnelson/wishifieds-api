@@ -16,6 +16,7 @@ module.exports = {
       state:         { type: Sequelize.STRING, allowNull: true },
       stateCode:     { type: Sequelize.STRING, allowNull: true, field: 'state_code' },  // Update to ENUM later
       countryCode:   { type: Sequelize.STRING, allowNull: true, field: 'country_code' },  // Probably ENUM. Default is bad here, but makes sense now.
+      locationType:  { type: Sequelize.ENUM('POSTALCODE', 'LISTING', 'CUSTOM'), allowNull: true, field: 'location_type', defaultValue: 'CUSTOM' },
       createdAt:     { type: Sequelize.DATE,   allowNull: false, field: 'created_at' },
       updatedAt:     { type: Sequelize.DATE,   allowNull: false, field: 'updated_at' },
     });

@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     description:    { type: DataTypes.STRING },
     price:          { type: DataTypes.STRING },
     linkUrl:        { type: DataTypes.STRING, field: 'link_url' },
-    userLocationId: { type: DataTypes.INTEGER, field: 'user_location_id' },  // FK constraint someday
+    locationId:     { type: DataTypes.INTEGER, field: 'location_id' },  // FK constraint someday
     heroImg:        { type: DataTypes.STRING,  field: 'hero_img' },
     userId:         { type: DataTypes.INTEGER, field: 'user_id' },  // FK
     slug:           { type: DataTypes.STRING },   // Someday will populate

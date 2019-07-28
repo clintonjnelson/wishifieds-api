@@ -8,7 +8,7 @@
 // Overview:
 //    messages: sender_id (user.id), recipient_id(user.id), listing_id(listing.id)
 //    users: phone_id(phone.id), default_user_location(user_location.id)
-//    listings: category_id(category.id), condition_id(condition.id), user_location_id(user_location.id), user_id(user.id)
+//    listings: category_id(category.id), condition_id(condition.id), location_id(location.id), user_id(user.id)
 //    images: listing_id(listing.id), user_id(user.id)
 //    favorites: user_id(user.id), listing_id(listing.id)
 //    users_locations: user_id(user.id), location_id(location.id)
@@ -24,7 +24,7 @@ module.exports = {
       ALTER TABLE public.users ADD CONSTRAINT fk_users_phone_id_users_id FOREIGN KEY (phone_id) REFERENCES public.phones (id);
       ALTER TABLE public.users ADD CONSTRAINT fk_users_default_user_location_users_locations_id FOREIGN KEY (default_user_location) REFERENCES public.users_locations (id);
 
-      ALTER TABLE public.listings ADD CONSTRAINT fk_listings_user_location_id_users_locations_id FOREIGN KEY (user_location_id) REFERENCES public.users_locations (id);
+      ALTER TABLE public.listings ADD CONSTRAINT fk_listings_location_id_locations_id FOREIGN KEY (location_id) REFERENCES public.locations (id);
       ALTER TABLE public.listings ADD CONSTRAINT fk_listings_user_id_users_id FOREIGN KEY (user_id) REFERENCES public.users (id);
 
       ALTER TABLE public.images ADD CONSTRAINT fk_images_listing_id_listings_id FOREIGN KEY (listing_id) REFERENCES public.listings (id);
@@ -48,7 +48,7 @@ module.exports = {
       ALTER TABLE public.messages DROP CONSTRAINT IF EXISTS fk_messages_listing_id_listings_id;
 
       ALTER TABLE public.users DROP CONSTRAINT IF EXISTS fk_users_phone_id_users_id;
-      ALTER TABLE public.users DROP CONSTRAINT IF EXISTS fk_users_default_user_location_users_locations_id;
+      ALTER TABLE public.users DROP CONSTRAINT IF EXISTS fk_users_default_location_locations_id;
 
       ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS fk_listings_user_location_id_users_locations_id;
       ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS fk_listings_user_id_users_id;

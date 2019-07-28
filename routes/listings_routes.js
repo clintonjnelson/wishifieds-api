@@ -43,7 +43,7 @@ module.exports = function(router) {
 
     console.log("USER ON REQ IS: ", req.user);
     var maybeUserId = req.user && req.user.id;  // WARN: May or may NOT have userId available on request
-    var maybeUserLoc = req.query['locationId'];
+    var maybeLoc = req.query['locationId'];
     var maybeCity = req.query['city'];
     var maybeStateCode = req.query['statecode'];
     var maybePostal = req.query['postal'];  // Centroid: Postal, User Default, Generic
@@ -54,13 +54,13 @@ module.exports = function(router) {
       search: searchStr,
       distance: ( (distQuery && distQuery.length != 0) ? distQuery : DEFAULT_SEARCH_RADIUS_DISTANCE),  //
       postal: maybePostal,
-      userLocationId: maybeUserLoc,
+      locationId: maybeLoc,
       userId: maybeUserId,
       city: maybeCity,
       stateCode: maybeStateCode,
     };
     console.log("PARAMS FOR QUERY ARE: ", params);
-    var sqlQuery = selectSearchQuery(distQuery, maybePostal, params['userId'], params['userLocationId'], maybeCity, maybeStateCode);
+    var sqlQuery = selectSearchQuery(distQuery, maybePostal, params['userId'], params['locationId'], maybeCity, maybeStateCode);
 
     selectListings(sqlQuery, params, function(err, listings) {
       if(err || !listings) {
@@ -73,7 +73,7 @@ module.exports = function(router) {
     });
 
     // Return the appripriate SPROC template per search request params
-    function selectSearchQuery(distance, uiPostal, userId, userLocationId, maybeCity, maybeState) {
+    function selectSearchQuery(distance, uiPostal, userId, locationId, maybeCity, maybeState) {
       var query;
       // Any distance, then location/distance don't matter
       if(distance && distance.toUpperCase() === ANY_DISTANCE) {
@@ -95,9 +95,9 @@ module.exports = function(router) {
         query = "SELECT * FROM find_listings_within_distance_zip_v1(:search::VARCHAR, :postal::VARCHAR(16), :distance::INTEGER);"
       }
       // Specific user location & user (logged in), then use specified
-      else if(userLocationId && userId) {
+      else if(locationId && userId) {
         console.log("USING THE DISTANCE WITH SPECIFIC USER LOCATION...");
-        query = "SELECT * FROM find_listings_within_distance_user_loc_v1(:search::VARCHAR, :userLocationId::INTEGER, :distance::INTEGER);"
+        query = "SELECT * FROM find_listings_within_distance_user_loc_v1(:search::VARCHAR, :locationId::INTEGER, :distance::INTEGER);"
       }
       // User logged in, but no specifics, then use default for user
       else if(userId) {
@@ -347,58 +347,76 @@ module.exports = function(router) {
     console.log("User IS: ", user);
 
     if(passesCriticalValidations(listingData)) {
-      const preListing = {
-        title: listingData.title,
-        description: listingData.description,
-        price: listingData.price,
-        linkUrl: listingData.linkUrl,
-        userLocationId: listingData.userLocationId,
-        heroImg: listingData.images[0],  // First image is hero
-        userId: user.id,
-        slug: "tbd",
-        status: 'ACTIVE',
-      };
+      // TODO: Need to be able to skip this if a locationId is passed in.
+      createNewOrUseExistingLocation(listingData, function(error, locationId) {
+        if(error || !locationId) { return respond400ErrorMsg(res, "Error handline location for listing."); }
 
-      Listings
-        .create(preListing)
-        .then( listingObject => {
-          console.log("NEWLY CREATED LISTING IS: ", listingObject);
-          const newListing = listingObject.dataValues;
+        const preListing = {
+          title: listingData.title,
+          description: listingData.description,
+          price: listingData.price,
+          linkUrl: listingData.linkUrl,
+          locationId: locationId,
+          heroImg: listingData.images[0],  // First image is hero
+          userId: user.id,
+          slug: "tbd",
+          status: 'ACTIVE',
+        };
 
-          // Save Images
-          saveImages(listingData.images, true, newListing.id, newListing.userId, function(wasSuccessful) {    // TODO: UPDATE userId TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
-            if(wasSuccessful) {
-              console.log("Successfully saved images.");
-              newListing['images'] = listingData.images;
+        Listings
+          .create(preListing)
+          .then( listingObject => {
+            console.log("NEWLY CREATED LISTING IS: ", listingObject);
+            const newListing = listingObject.dataValues;
 
-              saveTags(listingData.tags, newListing.id, function() {
-                const responseListing = {
-                  id:          newListing.id,
-                  userId:      newListing.userId,
-                  ownerUsername: user.username,
-                  title:       newListing.title,
-                  description: newListing.description,
-                  linkUrl:     newListing.linkUrl,
-                  price:       newListing.price,
-                  userLocationId: newListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                  status:      newListing.status,
-                  images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                  hero:        newListing.heroImg,
-                  slug:        newListing.slug,
-                  tags:        listingData.tags,
-                  createdAt:   newListing.createdAt,
-                  updatedAt:   newListing.updatedAt
-                }
+            // Save Images
+            saveImages(listingData.images, true, newListing.id, newListing.userId, function(wasSuccessful) {    // TODO: UPDATE userId TO GET USER OFF OF REQUEST (getting from listing data for now for dev speed)
+              if(wasSuccessful) {
+                console.log("Successfully saved images.");
+                newListing['images'] = listingData.images;
 
-                // Success response & updated Listing (if needed)
-                res.json({error: false, success: true, listing: responseListing});
-              });
-            }
+                saveTags(listingData.tags, newListing.id, function() {
+                  const responseListing = {
+                    id:          newListing.id,
+                    userId:      newListing.userId,
+                    ownerUsername: user.username,
+                    title:       newListing.title,
+                    description: newListing.description,
+                    linkUrl:     newListing.linkUrl,
+                    price:       newListing.price,
+                    locationId:  newListing.locationId, // TODO: SHOULD THIS BE LOCATION???
+                    status:      newListing.status,
+                    images:      listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
+                    hero:        newListing.heroImg,
+                    slug:        newListing.slug,
+                    tags:        listingData.tags,
+                    createdAt:   newListing.createdAt,
+                    updatedAt:   newListing.updatedAt
+                  }
+
+                  // Success response & updated Listing (if needed)
+                  res.json({error: false, success: true, listing: responseListing});
+                });
+              }
+            })
           })
+          .catch(function(error) {
+            console.log('Error creating listing. Error: ', error);
+            return res.status(500).json({ error: true });
+          });
+
+          // Making a new UserLocation just for tracking purposes.. DO WE WANT THIS?????
+          UserLocation
+            .create({locationId: locationObject.dataValues.id, userId: user.id})
+            .then(userLocationObject => {
+              console.log("User location object for listing created. DO WE NEED THIS???");
+            })
+            .catch(errr => {
+              console.log("ERROR creating user-location association in prep for new listing: ", err);
+            });
         })
-        .catch(function(error) {
-          console.log('Error creating listing. Error: ', error);
-          return res.status(500).json({ error: true });
+        .catch( err => {
+          console.log("ERROR creating location in prep for new listing: ", err);
         });
     }
     else {
@@ -412,7 +430,7 @@ module.exports = function(router) {
   // Update Listing
   // TODO: ADD BACK THE EATAUTH!!!!!!!!
   router.put('/listings/:listingId', eatOnReq, eatAuth, function(req, res) {
-    console.log("BODY IS: ", req.body);
+    console.log("SAVE lISTING BODY IS: ", req.body);
 
     const user = req.user;
     const userId = user.id;
@@ -437,7 +455,6 @@ module.exports = function(router) {
           }
         })
         .then(function(foundListing) {
-          var foundListingValues = foundListing.dataValues;
           if(!foundListing) {
             console.log('Could not find listing by id: ', listingId);
             return res.status(400).json({error: true, msg: 'Listing not found.'});
@@ -446,86 +463,155 @@ module.exports = function(router) {
 
           // Verify Listing & Requesting User ID's match
           // TODO: break this out into a helper method below routes?
+          var foundListingValues = foundListing.dataValues;
           if(foundListingValues.userId !== userId) {
             console.log('Error: Listing user ID: ', foundListingValues.userId, ' and requesting user ID: ', userId, ' do not match.');
             return res.status(401).json({error: true, msg: 'Unauthorized.'});
           }
 
-          // Save imageUrls/images with reference
-          // TODO: SHOULD LOOK FOR IMAGE BEFORE CREATING COMPLETE NEW ONE
-          // TODO: Should be able to use same URL, but do not want to save multiple of same image file
-          // const imagesRef = foundListing.imagesRef || Utils.generateGenericToken();
+          // Update the value if they selected an existing one
+          if(listingData.id && (foundListingValues.listingId != listingData.id)) {
+            console.log("Found an existing listing... updating that...")
+            updateListing(foundListing, foundListingValues.locationId, function(err, listing) {
+              if(err || !listing) {
+                console.log('Error updating listing. Error: ', err);
+                return respond400ErrorMsg(res, 'error saving user');
+              }
 
-          console.log("Creating listing object updates...")
-          // Specify fields we allow to be updated
-          let allowedListingUpdates = {
-            title:          Utils.sanitizeString(listingData.title),
-            description:    Utils.sanitizeString(listingData.description),
-            price:          Utils.sanitizeString(listingData.price),
-            linkUrl:        Utils.sanitizeUrl(listingData.linkUrl),
-            userLocationId: listingData.userLocationId,
-            heroImg:        listingData.images[0],
-            userId:         userId,
-            slug:           Utils.generateUrlSlug(listingData.title),
-            // status cannot be changed here for now (always active). Later may do deleted, fulfilled, private, etc.
-          }
-
-          // iterate through each thing to update, and set that value on the foundUser object using setter
-          Object.keys(allowedListingUpdates).forEach(function(field) {
-            foundListing.setDataValue(field, allowedListingUpdates[field]);
-          });
-
-          console.log("Listing PRIOR TO UPDATING IS: ", foundListing);
-
-          // TODO: Flow needs to be restructured. Should be a transaction? Images & Listing should succeed.
-              // On success, return either the data (or just a success message?)
-              // On failure, should return an error with info for the UI
-          foundListing
-            .save()
-            .then(function(updatedListing) {
-              saveImages(listingData.images, false, listingId, userId, function(wasSuccessful) {
-                console.log("SAVING IMAGES WAS SUCCESSFUL: ", wasSuccessful);
-
-                saveTags(listingData.tags, listingId, function(tagsSuccessful) {
-                  console.log("SAVING TAGS SUCCESSFUL?", tagsSuccessful);
-                  // Success response & updated Listing (if needed)
-                  res.json({error: false, success: true, listing: {
-                    id:            updatedListing.id,
-                    userId:        updatedListing.userId,
-                    ownerUsername: user.username,
-                    title:         updatedListing.title,
-                    description:   updatedListing.description,
-                    linkUrl:       updatedListing.linkUrl,
-                    price:         updatedListing.price,
-                    userLocationId: updatedListing.userLocationId, // TODO: SHOULD THIS BE LOCATION???
-                    status:        updatedListing.status,
-                    hero:          updatedListing.heroImg,
-                    images:        listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
-                    slug:          updatedListing.slug,
-                    tags:          listingData.tags,  // FIXME: THIS COULD BE MISLEADING SINCE FAILURE WOULD MAKE THIS RESPONSE WRONG!!!!
-                    createdAt:     updatedListing.createdAt,
-                    updatedAt:     updatedListing.updatedAt
-                  }})
-                });
-              });
-            })
-            .catch(function(err) {
-              console.log('Error updating user. Error: ', err);
-              return respond400ErrorMsg(res, 'error saving user');
+              console.log("LISTING RETURNED FROM UPDATE IS: ", listing);
+              return res.json({error: false, success: true, listing: listing});
             });
+          }
+          // New location provided, so create it first
+          createNewOrUseExistingLocation(listingData, function(error, locationId) {
+            if(error || !locationId) { return respond400ErrorMsg(res, "Error handline location for listing."); }
+
+            updateListing(foundListing, locationId, function(err, listing) {
+              if(err || !listing) {
+                console.log('Error updating listing. Error: ', err);
+                return respond400ErrorMsg(res, 'error saving user');
+              }
+
+              console.log("LISTING RETURNED FROM UPDATE IS: ", listing);
+              return res.json({error: false, success: true, listing: listing});
+            });
+          });
         })
         .catch(function(error) {
-          console.log('Error finding listing. Error: ', error);
-          return res.status(404).json({ error: true, msg: 'Error finding listing.' });
+          console.log('Error finding existing listing. Error: ', error);
+          return callback(error, null);
         });
     }
     else {
       return res.status(400).json({error: true, msg: 'validation errors'});
     }
+
+    // Update the listing that was found with new information & save all parts
+    function updateListing(foundListing, locationId, callback) {
+      // Save imageUrls/images with reference
+      // TODO: SHOULD LOOK FOR IMAGE BEFORE CREATING COMPLETE NEW ONE
+      // TODO: Should be able to use same URL, but do not want to save multiple of same image file
+      // const imagesRef = foundListing.imagesRef || Utils.generateGenericToken();
+
+      console.log("Creating listing object updates...")
+      // Specify fields we allow to be updated
+      let allowedListingUpdates = {
+        title:          Utils.sanitizeString(listingData.title),
+        description:    Utils.sanitizeString(listingData.description),
+        price:          Utils.sanitizeString(listingData.price),
+        linkUrl:        Utils.sanitizeUrl(listingData.linkUrl),
+        locationId:     locationId,  // Newly created location
+        heroImg:        listingData.images[0],
+        userId:         userId,
+        slug:           Utils.generateUrlSlug(listingData.title),
+        // status cannot be changed here for now (always active). Later may do deleted, fulfilled, private, etc.
+      }
+
+      // iterate through each thing to update, and set that value on the foundUser object using setter
+      Object.keys(allowedListingUpdates).forEach(function(field) {
+        foundListing.setDataValue(field, allowedListingUpdates[field]);
+      });
+
+      console.log("Listing PRIOR TO UPDATING IS: ", foundListing);
+
+      // TODO: Flow needs to be restructured. Should be a transaction? Images & Listing should succeed.
+          // On success, return either the data (or just a success message?)
+          // On failure, should return an error with info for the UI
+      foundListing
+        .save()
+        .then(function(updatedListing) {
+          saveImages(listingData.images, false, listingId, userId, function(wasSuccessful) {
+            console.log("SAVING IMAGES WAS SUCCESSFUL: ", wasSuccessful);
+
+            saveTags(listingData.tags, listingId, function(tagsSuccessful) {
+                console.log("SAVING TAGS SUCCESSFUL?", tagsSuccessful);
+                // Success response & updated Listing (if needed)
+                callback(null, {id:            updatedListing.id,
+                                userId:        updatedListing.userId,
+                                ownerUsername: user.username,
+                                title:         updatedListing.title,
+                                description:   updatedListing.description,
+                                linkUrl:       updatedListing.linkUrl,
+                                price:         updatedListing.price,
+                                status:        updatedListing.status,
+                                hero:          updatedListing.heroImg,
+                                images:        listingData.images,  // NOTE: IF ISSUES WITH IMAGES UPDATE vs NORMAL, CHECK HERE!! FIXME??
+                                slug:          updatedListing.slug,
+                                tags:          listingData.tags,  // FIXME!!: THIS COULD BE MISLEADING SINCE FAILURE WOULD MAKE THIS RESPONSE WRONG!!!!
+                                location:       { // NOTE: This does not populate the full UI location object, only part of it
+                                                  // FIXME!!: THIS COULD BE MISLEADING SINCE FAILURE WOULD MAKE THIS RESPONSE WRONG!!!!
+                                                 locationId: updatedListing.locationId,
+                                                 geoInfo: {
+                                                   longitude: listingData.location['geoInfo']['longitude'],
+                                                   latitude:  listingData.location['geoInfo']['latitude'],
+                                                 },
+                                               },
+                                createdAt:     updatedListing.createdAt,
+                                updatedAt:     updatedListing.updatedAt
+                                }
+                );
+              });
+            });
+          })
+          .catch(function(err) {
+            console.log("ERROR updating tags.")
+            callback(err, null);
+          });
+    }
   });
 
 
+  function createNewOrUseExistingLocation(listingData, callback) {
+    if(listingData.location.locationId > 0) {
+      return callback(null, locationData.location.locationId);
+    }
+    if(
+      !(listingData.location['geoInfo'] &&
+        listingData.location['geoInfo']['longitude'] &&
+        listingData.location['geoInfo']['latitude'])
+      ) { return callback("Inadequate Lat/Long Geo Coordinates", null); }
 
+    var preLocation = {
+      geographytype: 'POINT',
+      geography: {
+        type: 'Point',
+        // Note: Coordinates have to be (LONG, LAT) for our Geography type
+        coordinates: [ listingData.location['geoInfo']['longitude'], listingData.location['geoInfo']['latitude'] ]
+      },
+      locationType: 'LISTING'
+    };
+
+    Locations
+      .create(preLocation)
+      .then( newLoc => {
+        console.log("New location created for listing: ", newLoc);
+        return callback(null, newLoc.dataValues.id);
+      })
+      .catch( err => {
+        console.log("Error creating location for listing. Error: ", err);
+        return callback(err, null);
+      });
+  }
 
 
   // --------------------------------- HELPERS ---------------------------------
@@ -537,10 +623,11 @@ module.exports = function(router) {
 
   // Critical pre-save checks
   function passesCriticalValidations(listingData) {
+    console.log("LISTING DATA IN CRITICAL VALIDATIONS IS: ", listingData);
     const checks = listingData.title &&
     listingData.description &&
     listingData.price &&
-    listingData.userLocationId &&
+    (listingData.location && (listingData.location['locationId'] > 0 || listingData.location['geoInfo'])) &&
     (listingData.images.length > 0) &&
     noScriptInjection(listingData.title) &&
     noScriptInjection(listingData.description) &&
@@ -730,21 +817,20 @@ module.exports = function(router) {
         if(results && results.length > 0) {
               var listings = results.map(function(listing) {
                 return {
-                  id:             listing.listingid,
-                  userId:         listing.userid,
-                  ownerUsername:  listing.username,
-                  title:          listing.title,
-                  description:    listing.description,
-                  linkUrl:        listing.linkurl,
-                  price:          listing.price,
-                  userLocationId: listing.userlocationid, // TODO: SHOULD THIS BE LOCATION???
-                  images:         listing.images,  // sorted in the query
-                  tags:           listing['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
-                  hero:           listing.heroimg,        // TODO: Send ONE of these
-                  slug:           listing.slug,
-                  geoInfo:        getLatLongFromGeoInfoArr(listing['geoinfo']),
-                  createdAt:      listing.createdat,
-                  updatedAt:      listing.updatedat
+                  id:            listing.listingid,
+                  userId:        listing.userid,
+                  ownerUsername: listing.username,
+                  title:         listing.title,
+                  description:   listing.description,
+                  linkUrl:       listing.linkurl,
+                  price:         listing.price,
+                  images:        listing.images,  // sorted in the query
+                  tags:          listing['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
+                  hero:          listing.heroimg,        // TODO: Send ONE of these
+                  slug:          listing.slug,
+                  location:      buildListingLocation(listing.locationid, listing.geoinfo),
+                  createdAt:     listing.createdat,
+                  updatedAt:     listing.updatedat
                 };
               });
               callback(null, listings);
@@ -772,21 +858,20 @@ module.exports = function(router) {
         console.log("RESULT IS: ", result);
         if(result && result.length == 1) {
           var listing = {
-            id:             result[0].listingid,
-            userId:         result[0].userid,
-            ownerUsername:  result[0].username,
-            title:          result[0].title,
-            description:    result[0].description,
-            linkUrl:        result[0].linkurl,
-            price:          result[0].price,
-            userLocationId: result[0].userlocationid, // TODO: SHOULD THIS BE LOCATION???
-            images:         result[0].images,  // sorted in the query
-            tags:           result[0]['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
-            hero:           result[0].heroimg,        // TODO: Send ONE of these
-            slug:           result[0].slug,
-            geoInfo:        getLatLongFromGeoInfoArr(result[0]['geoinfo']),
-            createdAt:      result[0].createdat,
-            updatedAt:      result[0].updatedat
+            id:            result[0].listingid,
+            userId:        result[0].userid,
+            ownerUsername: result[0].username,
+            title:         result[0].title,
+            description:   result[0].description,
+            linkUrl:       result[0].linkurl,
+            price:         result[0].price,
+            images:        result[0].images,  // sorted in the query
+            tags:          result[0]['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
+            hero:          result[0].heroimg,        // TODO: Send ONE of these
+            slug:          result[0].slug,
+            location:      buildListingLocation(result[0].locationid, result[0]['geoinfo']),
+            createdAt:     result[0].createdat,
+            updatedAt:     result[0].updatedat
           };
 
           callback(null, listing);
@@ -804,12 +889,19 @@ module.exports = function(router) {
       });
   }
 
-  function getLatLongFromGeoInfoArr(geoInfoArr) {
+  // Note: Only builds part of the UI Location object
+  function buildListingLocation(locationId, geoInfoArr) {
     if (geoInfoArr && typeof(geoInfoArr) == 'object' && geoInfoArr.length == 2) {
-      return { latitude: geoInfoArr[0], longitude: geoInfoArr[1] };
+      return {
+        locationId: locationId,
+        geoInfo: {
+          latitude: geoInfoArr[0],
+          longitude: geoInfoArr[1],
+        },
+      };
     }
     else {
-      return {};
+      return {locationId: locationId};
     }
   }
 }

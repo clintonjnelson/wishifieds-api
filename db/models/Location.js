@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     state:         { type: DataTypes.STRING, allowNull: true },
     stateCode:     { type: DataTypes.STRING, allowNull: true, field: 'state_code' },  // Update to ENUM later
     countryCode:   { type: DataTypes.STRING, allowNull: true, field: 'country_code', defaultValue: 'US' },  // Probably ENUM. Default is bad here, but makes sense now.
+    locationType:  { type: DataTypes.ENUM('POSTALCODE', 'LISTING', 'CUSTOM'), field: 'location_type', defaultValue: 'CUSTOM' },  // Probably ENUM. Default is bad here, but makes sense now.
     createdAt:     { type: DataTypes.DATE, field: 'created_at'  }, // Null ok here, PG will set them itself
     updatedAt:     { type: DataTypes.DATE, field: 'updated_at'  }  // Null ok here, PG will set them itself
   }, {

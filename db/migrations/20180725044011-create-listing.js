@@ -11,9 +11,9 @@ module.exports = {
       title:       { type: Sequelize.STRING, allowNull: false },
       description: { type: Sequelize.STRING, allowNull: false },
       price:       { type: Sequelize.STRING, allowNull: false },
-      linkUrl:     { type: Sequelize.STRING, field: 'link_url' },  // FIXME!!! to understore in DB
+      linkUrl:     { type: Sequelize.STRING, field: 'link_url' },
       heroImg:     { type: Sequelize.STRING, allowNull: false, field: 'hero_img'},
-      userlocationId:{ type: Sequelize.INTEGER, allowNull: false, field: 'user_location_id' },
+      locationId:  { type: Sequelize.INTEGER, allowNull: false, field: 'location_id' },
       userId:      { type: Sequelize.INTEGER, allowNull: false, field: 'user_id' },
       slug:        { type: Sequelize.STRING, allowNull: false },
       status:      { type: Sequelize.ENUM('ACTIVE', 'PRIVATE', 'INACTIVE', 'DELETED'), allowNull: false},
