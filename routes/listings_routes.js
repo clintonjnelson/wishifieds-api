@@ -80,7 +80,7 @@ module.exports = function(router) {
         console.log("USING THE ANY DISTANCE SEARCH (ALL LISTINGS MATCH)");
         query = "SELECT * FROM find_listings_any_distance_v1(:search::VARCHAR);"
       }
-      if(distance && !Number.isNaN(parseInt(distance)) && maybeCity && maybeState) {
+      else if(distance && !Number.isNaN(parseInt(distance)) && maybeCity && maybeState) {
         console.log("USING THE CITY, STATECODE DISTANCE SEARCH (ALL LISTINGS MATCH)");
         query = "SELECT * FROM find_listings_within_distance_city_statecode_v1(:search::VARCHAR, :city::VARCHAR, :stateCode::VARCHAR, :distance::INTEGER);"
       }

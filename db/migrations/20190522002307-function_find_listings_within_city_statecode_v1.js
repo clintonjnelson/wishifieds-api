@@ -17,11 +17,12 @@ module.exports = {
         description TEXT,
         linkUrl TEXT,
         price VARCHAR,
-        userLocationId INTEGER,
+        locationId INTEGER,
         images VARCHAR[],
         tags TEXT[],
         heroImg TEXT,
         slug VARCHAR,
+        geoinfo DOUBLE PRECISION[],
         createdAt TIMESTAMP WITH TIME ZONE,
         updatedAt TIMESTAMP WITH TIME ZONE
       )
@@ -47,6 +48,7 @@ module.exports = {
               WHERE lt.listing_id = 6) AS tags,
           l.hero_img AS heroImg,
           l.slug,
+          (SELECT Array[ST_Y(loc.geography::geometry), ST_X(loc.geography::geometry)]) as geoinfo,
           l.created_at AS createdAt,
           l.updated_at AS updatedAt
         FROM public.listings AS l

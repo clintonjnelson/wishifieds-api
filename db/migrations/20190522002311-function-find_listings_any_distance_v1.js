@@ -22,7 +22,7 @@ module.exports = {
         tags TEXT[],
         heroImg TEXT,
         slug VARCHAR,
-        geo DOUBLE PRECISION[],
+        geoinfo DOUBLE PRECISION[],
         createdAt TIMESTAMP WITH TIME ZONE,
         updatedAt TIMESTAMP WITH TIME ZONE
       )
