@@ -50,7 +50,8 @@ module.exports = function(router) {
             city: loc.city,
             stateCode: loc.stateCode,
             postal: loc.postal,
-            typeaheadText: loc.typeahead  // eg: 'Seattle, WA' OR '98101'
+            typeaheadText: loc.typeahead,  // eg: 'Seattle, WA' OR '98101'
+            geoInfo: loc.geoinfo,
           };
         });
         console.log("LOCATIONS SEARCH RESULTS:", results);

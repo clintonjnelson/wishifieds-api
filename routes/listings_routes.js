@@ -18,8 +18,9 @@ var Message    = db.Message;
 var Favorites  = db.Favorite;
 var Sequelize  = require('sequelize');
 
-var DEFAULT_SEARCH_RADIUS_DISTANCE = 'any';  // 100 MILES is a lot, but will shrink later on
-var ANY_DISTANCE = 'ANY';
+const DEFAULT_SEARCH_RADIUS_DISTANCE = 'any';  // 100 MILES is a lot, but will shrink later on
+const LISTING_LOCATION_TYPE = 'LISTING';  // TODO: Maybe "GENERAL_LISTING" for flexibility later?
+const ANY_DISTANCE = 'ANY';
 // FK Constraints (self-verify existence): UserId
 
 // Images should have table structure something like this:
@@ -598,7 +599,7 @@ module.exports = function(router) {
         // Note: Coordinates have to be (LONG, LAT) for our Geography type
         coordinates: [ listingData.location['geoInfo']['longitude'], listingData.location['geoInfo']['latitude'] ]
       },
-      locationType: 'LISTING'
+      locationType: LISTING_LOCATION_TYPE,
     };
 
     Locations

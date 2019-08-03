@@ -10,7 +10,8 @@ module.exports = {
         city VARCHAR,
         stateCode VARCHAR,
         postal VARCHAR,
-        typeahead VARCHAR
+        typeahead VARCHAR,
+        geoinfo DOUBLE PRECISION[]
       )
       AS $$
         SELECT DISTINCT ON(loc.city, loc.state_code) --FIX THIS! GETTING DUPS ON SOMETHING, but DISTINCT IS SLOW.
@@ -18,7 +19,8 @@ module.exports = {
           loc.city,
           loc.state_code AS stateCode,
           loc.postal,
-          CONCAT(loc.city, ', ', loc.state_code) AS typeahead
+          CONCAT(loc.city, ', ', loc.state_code) AS typeahead,
+          (SELECT Array[ST_Y(loc.geography::geometry), ST_X(loc.geography::geometry)]) as geoinfo
         FROM public.locations AS loc
         WHERE loc.city iLIKE (p_city || '%')
         AND (
