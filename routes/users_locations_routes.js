@@ -42,8 +42,11 @@ module.exports = function(router) {
         status:         dbUserLoc.status,
         isDefault:      dbUserLoc.isDefault,
         locationId:     loc.id,
-        postal:         loc.postal,
-        geoInfo:        { latitude: loc.geography.coordinates[0], longitude: loc.geography.coordinates[1] },
+        geoInfo:        { latitude: loc.geography.coordinates[1], longitude: loc.geography.coordinates[0] },
+        city:           loc['city'],
+        stateCode:      loc['stateCode'],
+        postal:         loc['postal'],
+        locationType:   loc['locationType'],
       };
     }
   });
