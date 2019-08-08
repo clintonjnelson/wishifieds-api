@@ -9,7 +9,8 @@ var Utils      = require('../lib/utils.js');
 var db         = require('../db/models/index.js');
 var sequelize  = db.sequelize;
 var Listings   = db.Listing;
-var Locations  = db.Locations;
+var Locations  = db.Location;
+var UserLocation = db.UserLocation
 var Images     = db.Image;
 var User       = db.User;
 var Tag        = db.Tag;
@@ -350,6 +351,18 @@ module.exports = function(router) {
     if(passesCriticalValidations(listingData)) {
       // TODO: Need to be able to skip this if a locationId is passed in.
       createNewOrUseExistingLocation(listingData, function(error, locationId) {
+        // Making a new UserLocation for tracking purposes... DO WE WANT THIS?????
+        if(!listingData.location['locationId'] || listingData.location['locationId'] != locationId) {
+          UserLocation
+            .create({locationId: locationId, userId: user.id})
+            .then(userLocationObject => {
+              console.log("User location object for listing created. DO WE NEED THIS???");
+            })
+            .catch(errr => {
+              console.log("ERROR creating user-location association in prep for new listing: ", err);
+            });
+        }
+
         if(error || !locationId) { return respond400ErrorMsg(res, "Error handline location for listing."); }
 
         const preListing = {
@@ -396,7 +409,7 @@ module.exports = function(router) {
                   }
 
                   // Success response & updated Listing (if needed)
-                  res.json({error: false, success: true, listing: responseListing});
+                  return res.json({error: false, success: true, listing: responseListing});
                 });
               }
             })
@@ -405,20 +418,7 @@ module.exports = function(router) {
             console.log('Error creating listing. Error: ', error);
             return res.status(500).json({ error: true });
           });
-
-          // Making a new UserLocation just for tracking purposes.. DO WE WANT THIS?????
-          UserLocation
-            .create({locationId: locationObject.dataValues.id, userId: user.id})
-            .then(userLocationObject => {
-              console.log("User location object for listing created. DO WE NEED THIS???");
-            })
-            .catch(errr => {
-              console.log("ERROR creating user-location association in prep for new listing: ", err);
-            });
         })
-        .catch( err => {
-          console.log("ERROR creating location in prep for new listing: ", err);
-        });
     }
     else {
       return res.status(400).json({error: true, msg: 'validation errors'});
@@ -583,8 +583,8 @@ module.exports = function(router) {
 
 
   function createNewOrUseExistingLocation(listingData, callback) {
-    if(listingData.location.locationId > 0) {
-      return callback(null, locationData.location.locationId);
+    if(listingData.location['locationId'] > 0) {
+      return callback(null, listingData.location['locationId']);
     }
     if(
       !(listingData.location['geoInfo'] &&
@@ -784,23 +784,27 @@ module.exports = function(router) {
                   .destroy({where: { id: dels }})
                   .then(function(worked) {
                     console.log("Successfully deleted old tag-listing associations...");
-                    callback(true);
+                    return callback(true);
                   })
                   .catch(function(errr) {
                     console.log("Error deleting old tag-listing associations.");
                     // IN CASE OF FAILURE, COULD GET EXISTING TAGS TO RETURN.
-                    callback(false)
+                    return callback(false);
                   });
+              }
+              else {
+                return callback(true);
               }
             })
             .catch(function(err) {
               console.log("Error adding tag-listing associations");
               // IN CASE OF FAILURE, COULD GET EXISTING TAGS TO RETURN.
-              callback(false);
+              return callback(false);
             });
         }
-
-        callback();  // FIXME: This doesn't really indicate success...
+        else {
+          return callback();  // FIXME: This doesn't really indicate success...
+        }
       });
   }
 
@@ -826,7 +830,7 @@ module.exports = function(router) {
                   linkUrl:       listing.linkurl,
                   price:         listing.price,
                   images:        listing.images,  // sorted in the query
-                  tags:          listing['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
+                  tags:          mapTags(listing['tags']),
                   hero:          listing.heroimg,        // TODO: Send ONE of these
                   slug:          listing.slug,
                   location:      buildListingLocation(listing.locationid, listing.geoinfo),
@@ -867,7 +871,7 @@ module.exports = function(router) {
             linkUrl:       result[0].linkurl,
             price:         result[0].price,
             images:        result[0].images,  // sorted in the query
-            tags:          result[0]['tags'].map(function(tag) {return { id: tag[0], name: tag[1] } }),
+            tags:          mapTags(result[0]['tags']),
             hero:          result[0].heroimg,        // TODO: Send ONE of these
             slug:          result[0].slug,
             location:      buildListingLocation(result[0].locationid, result[0]['geoinfo']),
@@ -888,6 +892,13 @@ module.exports = function(router) {
       .catch(function(err) {
         callback(err, null);
       });
+  }
+
+  function mapTags(tags) {
+    if(!tags) { return []; }
+    else {
+      return tags.map(function(tag) {return { id: tag[0], name: tag[1] } });
+    }
   }
 
   // Note: Only builds part of the UI Location object

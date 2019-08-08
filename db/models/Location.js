@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     createdAt:     { type: DataTypes.DATE, field: 'created_at'  }, // Null ok here, PG will set them itself
     updatedAt:     { type: DataTypes.DATE, field: 'updated_at'  }  // Null ok here, PG will set them itself
   }, {
-    timestamps : false,
+    timestamps : true,
     tableName: 'locations',
     freezeTableName: true,
     underscored: true
