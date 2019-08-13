@@ -6,10 +6,12 @@ var eatAuth      = require('../lib/routes_middleware/eat_auth.js'  )(process.env
 var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
 var db           = require('../db/models/index.js');
 var Locations    = db.Location;
+var User         = db.User;
 var UserLocation = db.UserLocation;
 var sequelize    = db.sequelize;
 
 const DEFAULT_ZIPCODE = '98101';
+const USER_LOCATION_TYPE = 'USER';
 
 module.exports = function(router) {
 
@@ -82,6 +84,63 @@ module.exports = function(router) {
                   return res.json({error: false, msg: ''});
                 })
             });
+        });
+    });
+  });
+
+  // Owner UPDATE their default user location
+  router.patch('/users/:id/default_location', eatOnReq, eatAuth, ownerAuth('id'), function(req, res) {
+    console.log("Made it to the UPDATE default user location endpoint.");
+
+    // TODO: Better validations here
+    var userFromReq = req.user;
+    console.log("USER FROM REQ IS: ", userFromReq);
+
+    var userId = req.params.id;
+    var locationInfo = req.body.locationInfo;
+
+    // Get location (likely create a new one), assign to the user's default, create user_locaton as well
+    createNewOrUseExistingLocation(locationInfo, function(error, locationId) {
+      if(error || !locationId) {
+        console.log("Error getting updated location: ", locationId, " ERROR: ", error);
+      }
+      UserLocation
+        .update(
+          {locationId: locationId},
+          { where: {
+              userId: userId,
+              isDefault: true
+            }
+          }
+        )
+        .then(function(numberUpdated, results) {
+          console.log("User's default UserLocation now points to a new location. Meta: ", numberUpdated);
+          return res.json({error: false, msg: ''});
+          // return User
+          //   .findById(userId, {transaction: t})
+          //   //.findByPk(userLocationId, {transaction: t})  // Use for Sequelize v5+
+          //   .then(function(foundUser) {
+          //     console.log("Found the user location to set to default: ", foundUser);
+          //     foundUser.setDataValue('defaultUserLocation', locationId);
+          //     return foundUser
+          //       .save({transaction: t})
+          //       .then(function(savedUser) {
+          //         console.log("Default location Saved!!! :-D");
+          //         return res.json({error: false, msg: ''});
+          //       })
+          //       .catch(function(err) {
+          //         console.log("Error saving user location: ", err);
+          //         return res.status(500).json({error: true, msg: 'error-updating-user-location'});
+          //       });
+          //   })
+          //   .catch(function(err) {
+          //     console.log("Error finding user for updating default location: ", err);
+          //     return res.status(404).json({error: true, msg: 'error-updating-user-default-location'});
+          //   });;
+        })
+        .catch(function(err) {
+          console.log("Error updating user location: ", err);
+          return res.status(500).json({error: true, msg: 'error-updating-user-location'});
         });
     });
   });
@@ -164,4 +223,42 @@ module.exports = function(router) {
         }
       });
   });
+
+  // TODO: REFACTOR TO SHARED (USED ALSO IN LISTINGS ROUTED)
+  // locationData: {locatioId: -1, geoInfo: {latitude: 46.5, longitude: -122.5}}  // Existing or new
+  function createNewOrUseExistingLocation(locationInfo, callback) {
+    console.log("IN THE CREATE OR USE EXISTING LOCATION FUNCTION WITH LOCATIONINFO: ", locationInfo);
+    // Use existing location
+    if(locationInfo['locationId'] > 0) {
+      console.log("Using existing location ", locationInfo['locationId'], " instead of creating one...")
+      return callback(null, locationInfo['locationId']);
+    }
+    // Create new, because existing listingId is not valid ID
+    if(
+      !(locationInfo['geoInfo'] &&
+        locationInfo['geoInfo']['longitude'] &&
+        locationInfo['geoInfo']['latitude'])
+      ) { return callback("Inadequate Lat/Long Geo Coordinates", null); }
+
+    var preLocation = {
+      geographytype: 'POINT',
+      geography: {
+        type: 'Point',
+        // Note: Coordinates have to be (LONG, LAT) for our Geography type
+        coordinates: [ locationInfo['geoInfo']['longitude'], locationInfo['geoInfo']['latitude'] ]
+      },
+      locationType: USER_LOCATION_TYPE,
+    };
+
+    Locations
+      .create(preLocation)
+      .then( newLoc => {
+        console.log("New location created for listing: ", newLoc);
+        return callback(null, newLoc.dataValues.id);
+      })
+      .catch( err => {
+        console.log("Error creating location for listing. Error: ", err);
+        return callback(err, null);
+      });
+  }
 }

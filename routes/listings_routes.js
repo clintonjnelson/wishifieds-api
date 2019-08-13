@@ -582,6 +582,7 @@ module.exports = function(router) {
   });
 
 
+  // TODO: REFACTOR TO SHARED (USED ALSO IN USER_LOCATIONS FOR DEFAULT LOCATION UPDATES)
   function createNewOrUseExistingLocation(listingData, callback) {
     if(listingData.location['locationId'] > 0) {
       return callback(null, listingData.location['locationId']);
@@ -901,7 +902,7 @@ module.exports = function(router) {
     }
   }
 
-  // Note: Only builds part of the UI Location object
+  // Note: Only builds part of the UI Location object; used for turning DB info into UI model
   function buildListingLocation(locationId, geoInfoArr) {
     if (geoInfoArr && typeof(geoInfoArr) == 'object' && geoInfoArr.length == 2) {
       return {
