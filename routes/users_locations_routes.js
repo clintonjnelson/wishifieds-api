@@ -116,27 +116,6 @@ module.exports = function(router) {
         .then(function(numberUpdated, results) {
           console.log("User's default UserLocation now points to a new location. Meta: ", numberUpdated);
           return res.json({error: false, msg: ''});
-          // return User
-          //   .findById(userId, {transaction: t})
-          //   //.findByPk(userLocationId, {transaction: t})  // Use for Sequelize v5+
-          //   .then(function(foundUser) {
-          //     console.log("Found the user location to set to default: ", foundUser);
-          //     foundUser.setDataValue('defaultUserLocation', locationId);
-          //     return foundUser
-          //       .save({transaction: t})
-          //       .then(function(savedUser) {
-          //         console.log("Default location Saved!!! :-D");
-          //         return res.json({error: false, msg: ''});
-          //       })
-          //       .catch(function(err) {
-          //         console.log("Error saving user location: ", err);
-          //         return res.status(500).json({error: true, msg: 'error-updating-user-location'});
-          //       });
-          //   })
-          //   .catch(function(err) {
-          //     console.log("Error finding user for updating default location: ", err);
-          //     return res.status(404).json({error: true, msg: 'error-updating-user-default-location'});
-          //   });;
         })
         .catch(function(err) {
           console.log("Error updating user location: ", err);
