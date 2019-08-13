@@ -31,7 +31,7 @@ module.exports = function(sequelize, DataTypes) {
                      },
     phoneId:         { type: DataTypes.INTEGER, unique: true, field: 'phone_id' },
     profilePicUrl:   { type: DataTypes.STRING, field: 'profile_pic_url' },
-    defaultUserLocation: { type: DataTypes.INTEGER, field: 'default_user_location', allowNull: true },
+    defaultUserLocation: { type: DataTypes.INTEGER, field: 'default_user_location', allowNull: true }, // Association with user & location; location can be updated on this. Type of location MUST BE "USER" (in theory)
 
     // Checks
     confirmed:       { type: DataTypes.STRING },

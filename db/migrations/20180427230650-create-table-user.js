@@ -18,7 +18,7 @@ module.exports = {
       username:            { type: Sequelize.STRING, unique: true },
       phoneId:             { type: Sequelize.INTEGER, unique: true, field: 'phone_id' },
       profilePicUrl:       { type: Sequelize.STRING, allowNull: true, field: 'profile_pic_url' },
-      defaultUserLocation: { type: Sequelize.INTEGER, field: 'default_user_location', allowNull: true },
+      defaultUserLocation: { type: Sequelize.INTEGER, field: 'default_user_location', allowNull: true },  // Points to the association, but location end of association can be pointed to new location & maintain default
 
       // Checks
       confirmed:           { type: Sequelize.STRING },
