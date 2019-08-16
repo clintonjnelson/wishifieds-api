@@ -1,16 +1,15 @@
-# hobby app
+Hobby App
+=========
 
 ![travis status] [travis-image]
 ![Codacy status] [codacy-image]
 
 
-**Glossary of Components**
-- User Page: Displays the user's listings, messages, etc.
-- Listing Page: This is so there is a route specific to a listing; like full listing, but separate route.
-- Listing Full: This is a display component to show a listing big (different than page)
-- Listing Card: Smaller version of listing display
-- Add Listing: Uses editing listing & full listing (for preview) components to enable creation of new one.
-
+TODO
+----
+- The usual Angular version/dependencies upgrades & subsequent refactors to stay current
+- BIG refactor to use RxJS standard piped patterns everywhere (argh, Angular!)
+- TESTS!!! (gotta prove the concept first)
 
 
 [travis-image]: https://travis-ci.org/clintonjnelson/node_server_template.png?branch=master
