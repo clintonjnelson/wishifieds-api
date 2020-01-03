@@ -23,6 +23,7 @@ module.exports = {
         heroImg TEXT,
         slug VARCHAR,
         geoinfo DOUBLE PRECISION[],
+        badges TEXT[],
         createdAt TIMESTAMP WITH TIME ZONE,
         updatedAt TIMESTAMP WITH TIME ZONE
       )
@@ -43,12 +44,17 @@ module.exports = {
             AND i.url IS NOT NULL
           ) AS images,
           (SELECT array_agg(ARRAY[t.id::text, t.name::text])
-            FROM "tags" as t
+            FROM public.tags as t
             join listings_tags as lt on tag_id = t.id
               WHERE lt.listing_id = l.id) AS tags,
           l.hero_img AS heroImg,
           l.slug,
           (SELECT Array[ST_Y(loc.geography::geometry), ST_X(loc.geography::geometry)]) as geoinfo,
+          (SELECT ARRAY_AGG(ARRAY[b.badge_type::text, b.link_url::text])
+            FROM public.badges AS b
+            WHERE b.user_id = l.user_id
+            AND b.status = 'ACTIVE'::enum_badges_status
+          ) AS badges,
           l.created_at AS createdAt,
           l.updated_at AS updatedAt
         FROM public.listings AS l

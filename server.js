@@ -11,7 +11,8 @@ var helmet      = require('helmet');
 var models      = require('./db/models/index.js');
 
 // Routers
-var authRouter  = new express.Router();
+var authRouter = new express.Router();
+var oauthRouter = new express.Router();
 var tagsRouter = new express.Router();
 var usersRouter = new express.Router();
 var tasksRouter = new express.Router();
@@ -37,9 +38,11 @@ app.use(passport.session());            // only for oauth1 to work
 
 // Load passport with strategies
 require('./lib/passport_strategies/basic.js')(passport);
+require('./lib/passport_strategies/facebook.js')(passport);
 
 // Populate Routes
 require('./routes/auth_routes.js' )(authRouter, passport);
+require('./routes/oauth_routes.js')(oauthRouter, passport)
 require('./routes/tags_routes.js')(tagsRouter);
 require('./routes/users_routes.js')(usersRouter);
 require('./routes/tasks_routes.js')(tasksRouter);
@@ -52,6 +55,7 @@ require('./routes/users_locations_routes.js')(usersLocationsRouter);
 
 // Add /api prefix to routes
 app.use('/api', authRouter);
+app.use('/api', oauthRouter);
 app.use('/api', tagsRouter);
 app.use('/api', usersRouter);
 app.use('/api', tasksRouter);

@@ -1,23 +1,24 @@
 'use strict';
 
-var bodyparser = require('body-parser'      );
-var eatOnReq   = require('../lib/routes_middleware/eat_on_req.js');
-var eatAuth    = require('../lib/routes_middleware/eat_auth.js'   )(process.env.AUTH_SECRET);
-var userOnReq  = require('../lib/routes_middleware/user_on_req.js')(process.env.AUTH_SECRET);
-var ownerAuth  = require('../lib/routes_middleware/owner_auth.js');
-var Utils      = require('../lib/utils.js');
-var db         = require('../db/models/index.js');
-var sequelize  = db.sequelize;
-var Listings   = db.Listing;
-var Locations  = db.Location;
+var bodyparser   = require('body-parser'      );
+var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
+var eatAuth      = require('../lib/routes_middleware/eat_auth.js'   )(process.env.AUTH_SECRET);
+var userOnReq    = require('../lib/routes_middleware/user_on_req.js')(process.env.AUTH_SECRET);
+var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
+var Utils        = require('../lib/utils.js');
+var db           = require('../db/models/index.js');
+var sequelize    = db.sequelize;
+var Listings     = db.Listing;
+var Locations    = db.Location;
 var UserLocation = db.UserLocation
-var Images     = db.Image;
-var User       = db.User;
-var Tag        = db.Tag;
-var ListingTag = db.ListingTag;
-var Message    = db.Message;
-var Favorites  = db.Favorite;
-var Sequelize  = require('sequelize');
+var Images       = db.Image;
+var User         = db.User;
+var Badge        = db.Badge;
+var Tag          = db.Tag;
+var ListingTag   = db.ListingTag;
+var Message      = db.Message;
+var Favorites    = db.Favorite;
+var Sequelize    = require('sequelize');
 
 const DEFAULT_SEARCH_RADIUS_DISTANCE = 'any';  // 100 MILES is a lot, but will shrink later on
 const LISTING_LOCATION_TYPE = 'LISTING';  // TODO: Maybe "GENERAL_LISTING" for flexibility later?
@@ -876,6 +877,7 @@ module.exports = function(router) {
             hero:          result[0].heroimg,        // TODO: Send ONE of these
             slug:          result[0].slug,
             location:      buildListingLocation(result[0].locationid, result[0]['geoinfo']),
+            badges:        mapBadges(result[0]['badges']),  // currently, ONLY on single listing response
             createdAt:     result[0].createdat,
             updatedAt:     result[0].updatedat
           };
@@ -899,6 +901,13 @@ module.exports = function(router) {
     if(!tags) { return []; }
     else {
       return tags.map(function(tag) {return { id: tag[0], name: tag[1] } });
+    }
+  }
+
+  function mapBadges(badges) {
+    if(!badges || badges.length < 1) { return []; }
+    else {
+      return badges.map(function(badge) { return { badgeType: badge[0], linkUrl: badge[1] } });
     }
   }
 

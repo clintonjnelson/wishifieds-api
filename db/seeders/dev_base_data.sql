@@ -81,6 +81,14 @@ VALUES
 --NOTE, WILL NEED TO LATER DO A SEPARATE UPDATE OF THE USER LOCATION ONCE THE FK ARE IN PLACE & CANNOT ASSIGN IT BEFORE EXISTS
 
 
+--
+-- Data for Name: badges; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+INSERT INTO "badges" (id, badge_type, link_url, user_id, status, created_at, updated_at)
+VALUES
+(1, 'FACEBOOK', 'https://www.facebook.com', 3, 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00'),
+(2, 'FACEBOOK', 'https://www.facebook.com', 4, 'ACTIVE', '2019-03-09 22:41:16.129+00', '2019-03-09 22:41:16.129+00');
+
 
 --
 -- Data for Name: users_locations; Type: TABLE DATA; Schema: public; Owner: postgres

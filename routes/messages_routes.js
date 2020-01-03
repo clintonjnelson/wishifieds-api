@@ -10,6 +10,8 @@ var Message = db.Message;
 var User = db.User;
 var isEqual = require('../lib/utils.js').isToStringEqual;
 var Op = require('sequelize').Op;
+var MailService = require('../lib/mailing/mail_service.js');
+var EmailBuilder = require('../lib/mailing/email_content_builder');
 
 
 
@@ -261,6 +263,8 @@ module.exports = function(router) {
   });
 }
 
+// ********************************** HELPERS **********************************
+
 
 function passesMessageValidations(messageData, sender) {
   try{
@@ -391,4 +395,42 @@ function mapUnreadMessagesResponse(msg) {
     createdAt: msg.createdAt,
     listingId: msg.listingId,
   }
+}
+
+// Logic to send email notifiction if user is set to get them for app messages
+// TODO: Eventually, probably use the mail service or a new notification service to handle
+// Fire & forget, because we don't want to interrupt a user's flow based on side effects to other user.
+function sendMessageNotificationEmailIfUserIsSubscribed(userId, messageInfo) {
+  // MessageInfo should probably have: link-to-page, listing title, truncated content, etc
+  User.findOne({where: {userId: userId}})
+      .then(function(foundUser) {
+
+
+
+        // configure mail for sending
+        var mailOptions = {
+          from:    'Wishifieds Listing Message Notification <youvegotmessage@wishifieds.com>',
+          to:      foundUser.email,   // Email provided by user
+          subject: 'Wishifieds - Someone Messaged You On a Listing',
+          html:    EmailBuilder.passwordReset.buildHtmlEmailString({ resetToken: resetToken, email: user.email, host: req.headers.origin }),
+          // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
+        };
+
+        MailService.sendEmail(mailOptions, function(errr, result) {
+          if(errr) {
+            console.log("Error sending email: ", errr);
+            return res.status(500).json({error: true, msg: 'email-failure'});
+          }
+
+          console.log('Email sent with result of: ', result);
+          res.json({success: true});
+        });
+
+
+
+
+      })
+      .catch(function(err) {
+        console.log("Error finding user to send message notification email to: ", err);
+      })
 }

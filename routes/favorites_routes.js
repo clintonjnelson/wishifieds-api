@@ -23,7 +23,6 @@ module.exports = function(router) {
     const listingIds = req.query['listingIds'] && req.query['listingIds'].split(',');
 
     if(!listingIds || !listingIds.length) { return respond400ErrorMsg(res, 'Listing id is required.'); }
-
     console.log("IN FAVORITES ROUTE. USER ID IS: ", userId);
     Favorites
       .findAll({

@@ -54,11 +54,13 @@ db.Sequelize = Sequelize;
 // Models
 //db.User.hasOne(db.Phone, {foreignKey: 'user_id'});
 // db.Phone.belongsTo(db.User);  // Doesn't this do same thing as above?
-db.User.hasMany(       db.Listing,      {foreignKey: 'user_id',     sourceKey: 'id'});
+db.User.hasMany(          db.Listing,      {foreignKey: 'user_id',     sourceKey: 'id'});
+db.User.hasMany(          db.Badge,        {foreignKey: 'user_id',     sourceKey: 'id'});
 db.Message.belongsTo(     db.Listing,      {foreignKey: 'listing_id',  sourceKey: 'id'});
 db.Listing.hasMany(       db.Favorite,     {foreignKey: 'listing_id',  sourceKey: 'id'});
 db.Listing.hasMany(       db.Message,      {foreignKey: 'listing_id',  sourceKey: 'id'});
 db.Listing.belongsTo(     db.User,         {foreignKey: 'user_id',     targetKey: 'id'});
+db.Badge.belongsTo(       db.User,         {foreignKey: 'user_id',     targetKey: 'id'});
 db.Favorite.belongsTo(    db.User,         {foreignKey: 'user_id',     targetKey: 'id'});
 db.Favorite.belongsTo(    db.Listing,      {foreignKey: 'listing_id',  targetKey: 'id'});
 db.Message.belongsTo(     db.User,         {foreignKey: 'sender_id',   targetKey: 'id'});

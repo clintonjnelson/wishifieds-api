@@ -11,6 +11,7 @@ var userMappers  = require('../lib/model_mappers/user_mapper.js');
 var Utils        = require('../lib/utils.js');
 var db           = require('../db/models/index.js');
 var User         = db.User;
+var Badge        = db.Badge;
 var Images       = db.Image;
 var Locations    = db.Location;
 var UserLocation = db.UserLocation;
@@ -82,15 +83,22 @@ module.exports = function(router) {
     // TODO: If OwnerAuth stays, this must be owner, and already have Owner user at res.user
     console.log("ABOUT TO QUERY USER BY usernameOrId");
     User
-      .findOne({where: makeUsernameOrIdQuery(usernameOrId) })
+      .findOne({
+        where: makeUsernameOrIdQuery(usernameOrId),
+        include: [{
+          model: Badge,
+          where: { status: 'ACTIVE' },
+          required: false
+        }],
+      })
       .then(function(user) {
         if(!user) {
           console.log('Tried to get user. User could not be found by: ', usernameOrId, '. User is: ', user);
           return res.status(204).json({error: false, msg: 'no user found', user: {} });
         }
 
-        console.log("USER FOUND: ", user);
-        return res.json(userMappers.mapUser(user));  // FIXME: return {data:...} or {user:...}. Not raw object
+        console.log("USER AND BADGES FOUND: ", user);
+        return res.json(userMappers.mapUser(user, user.Badges));  // FIXME: return {data:...} or {user:...}. Not raw object
       })
       .catch(function(err) {
         console.log('Database error getting user by username or id:');
@@ -333,6 +341,29 @@ module.exports = function(router) {
     }
   });
 
+  // GET profile_pic for a requested user id
+  // TODO: Maybe get off of normal user route, but with special flag specifying fields?
+  router.delete('/users/:userId/badges/:badgeType', eatOnReq, eatAuth, function(req, res) {
+    const userId = req.params['userId'];
+    var badgeType;
+    try { badgeType = req.params['badgeType'].toUpperCase(); }
+    catch(e) {
+      console.log("Error deleting user badge. BadgeType not specified. Error: ", error);
+      return res.status(400).json({error: true, msg: 'badge-type-required'});
+    }
+
+    Badge
+      .destroy({ where: { userId: userId, badgeType: badgeType }})
+      .then(function(deletedBadge) {
+        console.log("Deleted the badge! Response is: ", deletedBadge);
+
+        return res.json({error: false, msg: 'success'});
+      })
+      .catch(function(err) {
+        console.log('Error deleting', badgeType, ' badge for user: ', userId);
+        return res.status(500).json({error: true, msg: 'database error'});
+      });
+  });
 
 //--------------------- HELPERS ------------------------
   function makeUsernameOrIdQuery(usernameOrId) {
