@@ -57,7 +57,8 @@ module.exports = {
         JOIN public.locations AS loc ON loc.id = l.location_id
         JOIN public.images AS img ON img.listing_id = l.id
         -- Search query next, because case-insensitive text partial match searching is slower
-        WHERE u.id = p_user_id
+        WHERE f.user_id = p_user_id
+        -- AND f.status = 'ACTIVE'  -- DO WE WANT THIS FILTER?
         AND l.status = 'ACTIVE';
       $$ LANGUAGE sql
       SECURITY DEFINER
