@@ -474,7 +474,7 @@ module.exports = function(router) {
           // Update the value if they selected an existing one
           if(listingData.id && (foundListingValues.listingId != listingData.id)) {
             console.log("Found an existing listing... updating that...")
-            updateListing(foundListing, foundListingValues.locationId, function(err, listing) {
+            return updateListing(foundListing, foundListingValues.locationId, function(err, listing) {
               if(err || !listing) {
                 console.log('Error updating listing. Error: ', err);
                 return respond400ErrorMsg(res, 'error saving user');
@@ -501,7 +501,7 @@ module.exports = function(router) {
         })
         .catch(function(error) {
           console.log('Error finding existing listing. Error: ', error);
-          return callback(error, null);
+          callback(error, null);
         });
     }
     else {
@@ -577,7 +577,7 @@ module.exports = function(router) {
           })
           .catch(function(err) {
             console.log("ERROR updating tags.")
-            callback(err, null);
+            return callback(err, null);
           });
     }
   });
