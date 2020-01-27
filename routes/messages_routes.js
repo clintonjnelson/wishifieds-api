@@ -13,8 +13,6 @@ var Op = require('sequelize').Op;
 var MailService = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder');
 
-
-
 module.exports = function(router) {
   router.use(bodyparser.json());
 
@@ -41,18 +39,21 @@ module.exports = function(router) {
         },
         order: db.Sequelize.literal(orderStatement),
         include: [
+          // Join user avatar for the sender of message
           {
-            // TODO: Specify the attributes needed to reduce the query size!
-            model: Listing,  // include the listing associated to the message
-            include: [{
-              model: User  // include the user associated to the listing
-            }]
+            model: User,
+            attributes: ['profile_pic_url']
           },
-          // Maybe don't want profile pic url yet on the message avatars
-          // {
-          //   model: User,
-          //   attributes: ['profilePicUrl']  // Include the user associated to the message
-          // }
+          // Join the listing on the message
+          {
+            model: Listing,  // include the listing associated to the message
+            // Join the user associated to the listing
+            // include: [{
+            //   model: User,
+            //   // TODO: Reduce the amount of joined variables
+            //   attributes: ['id'],
+            // }]
+          },
         ],
         raw: true
       })
@@ -110,12 +111,19 @@ module.exports = function(router) {
       .findAll({
         where: { status: 'UNREAD', recipientId: userId },
         order: db.Sequelize.literal(orderStatement),
-        include: [{
-          model: Listing,  // Include Listing & Listing's Owner User info
-          include: [{
+        include: [
+          // Join user avatar for the sender of message
+          {
             model: User,
-            where: { id: userId }
-          }]
+            attributes: ['profile_pic_url']
+          },
+          {
+            model: Listing,  // Include Listing & Listing's Owner User info
+            include: [{
+              model: User,
+              where: { id: userId }
+          }
+        ]
         }],
         raw: true
       })
@@ -146,12 +154,8 @@ module.exports = function(router) {
 
     db.sequelize
       .query(
-        'SELECT COUNT(*) ' +
-          'FROM "messages" ' +
-            'JOIN "listings" ON "messages".listing_id = "listings".id ' +
-            'JOIN "users" ON "listings".user_id = "users".id ' +
-          'WHERE "users".id = $userid ' +
-          "AND \"messages\".status = 'UNREAD';",
+        // Used to just count total from user's own wishlistings, not correspondance with others
+        "SELECT COUNT(*) FROM \"messages\" WHERE \"messages\".recipient_id = $userid AND \"messages\".status = 'UNREAD';",
         {
           bind: { userid: userId },
           type: db.Sequelize.QueryTypes.SELECT
@@ -394,6 +398,7 @@ function mapUnreadMessagesResponse(msg) {
     status: msg.status,
     createdAt: msg.createdAt,
     listingId: msg.listingId,
+    senderPicUrl: msg['User.profile_pic_url'],
   }
 }
 

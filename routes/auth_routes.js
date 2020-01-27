@@ -20,7 +20,8 @@ module.exports = function(router, passport) {
       username: user.username,
       userId:   user.id,
       email:    user.email,
-      role:     user.role
+      role:     user.role,
+      profilePicUrl: user.profilePicUrl,
     });
   });
 
@@ -50,7 +51,8 @@ module.exports = function(router, passport) {
           username: user.username,
           userId:   user.id,
           email:    user.email,
-          role:     user.role
+          role:     user.role,
+          profilePicUrl: user.profilePicUrl
         });
       });
     })(req, res, next);
@@ -175,7 +177,8 @@ module.exports = function(router, passport) {
                                 username: updatedUser.username,
                                 userId:   updatedUser.id,
                                 email:    updatedUser.email,
-                                role:     updatedUser.role }
+                                role:     updatedUser.role,
+                                profilePicUrl: updatedUser.profilePicUrl }
                       });
             });
           });

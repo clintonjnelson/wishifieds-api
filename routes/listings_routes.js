@@ -5,7 +5,7 @@ var eatOnReq     = require('../lib/routes_middleware/eat_on_req.js');
 var eatAuth      = require('../lib/routes_middleware/eat_auth.js'   )(process.env.AUTH_SECRET);
 var userOnReq    = require('../lib/routes_middleware/user_on_req.js')(process.env.AUTH_SECRET);
 var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
-var Utils        = require('../lib/utils.js');
+var Utils        = require('../lib/utils.js');  // Has sanitization stuff in it
 var db           = require('../db/models/index.js');
 var sequelize    = db.sequelize;
 var Listings     = db.Listing;
@@ -158,7 +158,7 @@ module.exports = function(router) {
           return res.status(500).json({error: true, success: false});
         }
 
-        console.log("FAVORITES FOUND: ", listing);
+        console.log("LISTING FOUND: ", listing);
         res.json({error: false, listing: listing});
       });
   });
@@ -367,10 +367,10 @@ module.exports = function(router) {
         if(error || !locationId) { return respond400ErrorMsg(res, "Error handline location for listing."); }
 
         const preListing = {
-          title: listingData.title,
-          description: listingData.description,
+          title: Utils.sanitizeString(listingData.title),
+          description: Utils.sanitizeString(listingData.description),
           price: listingData.price,
-          linkUrl: listingData.linkUrl,
+          linkUrl: Utils.sanitizeUrl(listingData.linkUrl),
           locationId: locationId,
           heroImg: listingData.images[0],  // First image is hero
           userId: user.id,
@@ -395,6 +395,7 @@ module.exports = function(router) {
                     id:          newListing.id,
                     userId:      newListing.userId,
                     ownerUsername: user.username,
+                    ownerPicUrl: user.profilePicUrl,
                     title:       newListing.title,
                     description: newListing.description,
                     linkUrl:     newListing.linkUrl,
@@ -551,6 +552,7 @@ module.exports = function(router) {
                 callback(null, {id:            updatedListing.id,
                                 userId:        updatedListing.userId,
                                 ownerUsername: user.username,
+                                ownerPicUrl:   user.profilePicUrl,
                                 title:         updatedListing.title,
                                 description:   updatedListing.description,
                                 linkUrl:       updatedListing.linkUrl,
@@ -827,6 +829,7 @@ module.exports = function(router) {
                   id:            listing.listingid,
                   userId:        listing.userid,
                   ownerUsername: listing.username,
+                  ownerPicUrl:   listing.ownerpicurl,
                   title:         listing.title,
                   description:   listing.description,
                   linkUrl:       listing.linkurl,
@@ -868,6 +871,7 @@ module.exports = function(router) {
             id:            result[0].listingid,
             userId:        result[0].userid,
             ownerUsername: result[0].username,
+            ownerPicUrl:   result[0].ownerpicurl,
             title:         result[0].title,
             description:   result[0].description,
             linkUrl:       result[0].linkurl,

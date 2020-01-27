@@ -34,14 +34,14 @@ var s3ImagesUpload = multer({
     fileSize: 3000000
   }
 });
+const httpRegex = /(?<=\(|\("|\(')(http.*?(?=\)|"\)|'\)))/igm;
 
 module.exports = function(router) {
   // Use bodyparser JSON for rest of endpoints
   router.use(bodyparser.json());
 
+  // TODO: Optimize this for better performance.
   // POST because needs to send a full URL
-  // ALSO ALLOW TYPE: PNG/JPG/JPEG/....
-  // TODO: SCRUB THE IMAGES OR REMOVE ANY SCRIPT-TYPE CONTENT FROM THEM.
   router.post('/external/getimages', function(req, res) {
     if(process.env.ENVIRONMENT === 'offline') {
       console.log("IN OFFLINE MODE - returning mock local images as external.")
@@ -66,7 +66,7 @@ module.exports = function(router) {
         const fullPageLoadHtml = await page.content();
 
         const parsedImgs = [];
-        const regex = /((?<=(="|:"))([^"]*(\.png|\.jpg|\.jpeg|\.bmp|\.gif|\.tif|\.svg).*?(?=")))+/igm;
+        const regex = /((?<=(="|:"))([^"]*(\.png|\.jpg|\.jpeg|\.bmp|\.gif|\.tif).*?(?=")))+/igm; //|\.svg Hacking risk
 
         var result;
         while((result = regex.exec(fullPageLoadHtml)) !== null) {
@@ -77,8 +77,10 @@ module.exports = function(router) {
         const results = Array.from(new Set(parsedImgs));
 
         const limited = results
+          .filter( imgUrl => badStuffFilter(imgUrl))  // remove bad stuff
           .map( imgUrl => cleanupUrl(imgUrl, site) )
-          .filter( url => imagesFilter(url));
+          .filter( fullUrl => imagesFilter(fullUrl))  // remove junk
+          .map( fullUrl => sanitizeUrl(fullUrl)); // sanitize the good
 
         console.log("Final:", limited);
         browser.close();  // REMOVED AWAIT!! Close, but don't want for success close. Close - fire & forget.
@@ -122,10 +124,15 @@ module.exports = function(router) {
 
 
   //---------------------- HELPERS ----------------------
+  function badStuffFilter(url) {
+    return url &&
+      !url.includes('javascript:') &&  // BAD
+      !url.includes('data:');  // prevent data urls that can have JS injection
+  }
+
   function cleanupUrl(url, site) {
     // look starting with ( or (" or ('  AND ending with the opposite (closing)
     // Make sure it has the "http" in the middle, and grab everything after until closing
-    const httpRegex = /(?<=\(|\("|\(')(http.*?(?=\)|"\)|'\)))/igm;
     if(url) {
       if(url.startsWith('http')) {
         return url;
@@ -141,7 +148,7 @@ module.exports = function(router) {
       else if(url.startsWith('//')) {
         return ('https:' + url);
       }
-      // Add namespace, but filter out below if it's the www.w3.org namespace
+      // Add namespace, but filter out later if it's the www.w3.org namespace
       else {
         return site + url;  // image is internal to site & needs to be combined with namespace
       }
@@ -149,6 +156,10 @@ module.exports = function(router) {
     else {
       return url;
     }
+  }
+
+  function sanitizeUrl(url) {
+    return url.replace(/<>"/g, '');
   }
 
   function imagesFilter(url) {
