@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     title:          { type: DataTypes.STRING },
     description:    { type: DataTypes.STRING },
     price:          { type: DataTypes.STRING },
-    linkUrl:        { type: DataTypes.STRING, field: 'link_url' },
+    linkUrl:        { type: DataTypes.TEXT, field: 'link_url' },
     locationId:     { type: DataTypes.INTEGER, field: 'location_id' },  // FK constraint someday
     heroImg:        { type: DataTypes.STRING,  field: 'hero_img' },
     userId:         { type: DataTypes.INTEGER, field: 'user_id' },  // FK
