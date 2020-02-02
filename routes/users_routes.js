@@ -365,6 +365,26 @@ module.exports = function(router) {
       });
   });
 
+  // TODO: THIS ROUTE HAS NOT BEEN VERIFIED AS FUNCTIONAL YET!
+  router.get('/users/:usernameOrId/badges', eatOnReq, eatAuth, function(req, res){
+    const userId = req.params['userId'];
+    if(!userId) { return res.status(400).json({error: true, msg: 'no-user'}); }
+
+    Badge
+      .findAll({where: {userId: userId} })
+      .then(function(badges) {
+        if(!badges || badges.length < 1) {
+          return res.json({success: true, badges: []});
+        }
+
+        console.log("Badges found: ", badges);
+        return res.json({
+          success: true,
+          badges: badges.map(b => { return { badgeType: b['badgeType'], linkUrl: b['linkUrl'] } })
+        });
+      })
+  });
+
 //--------------------- HELPERS ------------------------
   function makeUsernameOrIdQuery(usernameOrId) {
     let query = {};

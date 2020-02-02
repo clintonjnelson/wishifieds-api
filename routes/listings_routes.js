@@ -908,6 +908,7 @@ module.exports = function(router) {
     }
   }
 
+  // TODO: Move to mappers!! Used in both Listings & Users routes
   function mapBadges(badges) {
     if(!badges || badges.length < 1) { return []; }
     else {
