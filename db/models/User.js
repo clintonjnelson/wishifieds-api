@@ -38,6 +38,10 @@ module.exports = function(sequelize, DataTypes) {
     status:          { type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'PENDING'), defaultValue: 'PENDING'},
     termsconditions: { type: DataTypes.BOOLEAN },
 
+    // Settings
+    emailNotifications:  { type: DataTypes.BOOLEAN, defaultValue: true, field: 'email_notifications' },  // If need more granular, have separate table for types opted in/out
+    smsNotifications:    { type: DataTypes.BOOLEAN, defaultValue: true, field: 'sms_notifications' },  // If need more granular, have separate table for types opted in/out
+
     // Timestamps
     createdAt:       { type: DataTypes.DATE, field: 'created_at' }, // Null ok here, PG will set them itselfk
     updatedAt:       { type: DataTypes.DATE, field: 'updated_at' }, // Null ok here, PG will set them itselfk

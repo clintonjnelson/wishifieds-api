@@ -25,6 +25,10 @@ module.exports = {
       status:              { type: Sequelize.ENUM('ACTIVE', 'INACTIVE', 'PENDING'), allowNull: false },
       termsconditions:     { type: Sequelize.BOOLEAN },
 
+      // Settings
+      emailNotifications:  { type: Sequelize.BOOLEAN, defaultValue: true, field: 'email_notifications' },  // If need more granular, have separate table for types opted in/out
+      smsNotifications:    { type: Sequelize.BOOLEAN, defaultValue: true, field: 'sms_notifications' },  // If need more granular, have separate table for types opted in/out
+
       // Timestamps
       createdAt:           { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.NOW, field: 'created_at' },
       updatedAt:           { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.NOW, field: 'updated_at' },

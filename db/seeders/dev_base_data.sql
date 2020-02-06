@@ -76,8 +76,8 @@ VALUES
 
 INSERT INTO "users" (id, eat, email, password, prt, prtexpiration, role, username, phone_id, default_user_location, confirmed, status, termsconditions, created_at, updated_at, profile_pic_url)
 VALUES
-(4, '1da0e53d588c741ca179ca1444d3eaab8f62d1465abf42ba', 'jen2@example.com', '$2b$08$UzkW20d1Nw3xCl1C.gcNCu8Z1hmstkoLO/zyJTVsAz2tHd0z1Tnbe', NULL, NULL, 'USER', 'jen2', NULL, NULL, '$2b$08$ZADkSYLMtxsvHfqnjhgw4ePF3/9F0/.GQtAJYJ3M5NPjSTosoBGHi', 'PENDING', NULL, '2019-03-09 22:41:39.551+00', '2019-03-09 22:41:39.611+00', '/assets/profile_default.png'),
-(3, '817f7ac260c654fdb75275d2986f3510905121318447f5f7', 'jen@example.com', '$2b$08$f6GVAxDVZOCyrDhkxCGmf.6g7vHVXgsUg/NGC0T1RBAg4lI2mF5wa', NULL, NULL, 'USER', 'jen', NULL, NULL, '$2b$08$owHPRgwk.pxhqPbo2WxHOOrF1yvEml7T.brksIrULfxeozWERT4km', 'PENDING', NULL, '2019-03-09 22:34:34.305+00', '2019-03-09 22:54:39.349+00', '/assets/profile_default.png');
+(4, '1da0e53d588c741ca179ca1444d3eaab8f62d1465abf42ba', 'jen2@example.com', '$2b$08$UzkW20d1Nw3xCl1C.gcNCu8Z1hmstkoLO/zyJTVsAz2tHd0z1Tnbe', NULL, NULL, 'USER', 'jen2', NULL, NULL, '$2b$08$ZADkSYLMtxsvHfqnjhgw4ePF3/9F0/.GQtAJYJ3M5NPjSTosoBGHi', 'PENDING', NULL, '2019-03-09 22:41:39.551+00', '2019-03-09 22:41:39.611+00', '/assets/pic1.jpg'),
+(3, '817f7ac260c654fdb75275d2986f3510905121318447f5f7', 'jen@example.com', '$2b$08$f6GVAxDVZOCyrDhkxCGmf.6g7vHVXgsUg/NGC0T1RBAg4lI2mF5wa', NULL, NULL, 'USER', 'jen', NULL, NULL, '$2b$08$owHPRgwk.pxhqPbo2WxHOOrF1yvEml7T.brksIrULfxeozWERT4km', 'PENDING', NULL, '2019-03-09 22:34:34.305+00', '2019-03-09 22:54:39.349+00', '/assets/pic2.jpg');
 --NOTE, WILL NEED TO LATER DO A SEPARATE UPDATE OF THE USER LOCATION ONCE THE FK ARE IN PLACE & CANNOT ASSIGN IT BEFORE EXISTS
 
 

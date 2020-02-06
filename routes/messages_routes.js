@@ -10,6 +10,8 @@ var Message = db.Message;
 var User = db.User;
 var isEqual = require('../lib/utils.js').isToStringEqual;
 var Op = require('sequelize').Op;
+var Utils        = require('../lib/utils.js');
+var MessagesMapper  = require('../lib/model_mappers/messages_mapper.js');
 var MailService = require('../lib/mailing/mail_service.js');
 var EmailBuilder = require('../lib/mailing/email_content_builder');
 
@@ -71,7 +73,6 @@ module.exports = function(router) {
           li.messages.forEach( mg => { console.log("MESSAGE ID: ", mg.id); });
         });
         //console.log("FINAL ORDER LISTINGS IS: ", listingsWithMessages);
-
 
         res.json({error: false, listingsWithMessages: listingsWithMessages});
       })
@@ -176,7 +177,7 @@ module.exports = function(router) {
   router.post('/messages', eatOnReq, eatAuth, function(req, res) {
     console.log("In messages post. Body is: ", req.body);
 
-
+    const host = req.headers.origin;
     const messageData = req.body.message;
     const user = req.user;
     console.log("Message data is: ", messageData);
@@ -194,17 +195,77 @@ module.exports = function(router) {
     // Sender on UI should equal sender on API!
     // Message should have content
     // construct the format for saving
+    const sanitizedContent = Utils.sanitizeString(messageData.content);
     const preMessage = {
       senderId:     user.id,
       recipientId:  messageData.recipientId,
       listingId:    messageData.listingId,
-      content:      messageData.content
+      content:      sanitizedContent
     };
 
     Message
       .create(preMessage)
       .then( message => {
         console.log("NEWLY CREATED MESSAGE IS: ", message);
+        if(!message) {
+          console.log("Created message was empty. Error: ", error);
+          return res.status(400).json({error: true, msg: 'Could not create message.'});
+        }
+
+        // Notify recipient, IF they have notifications enabled
+        db.sequelize
+          .query(
+            'SELECT recipient.email AS email, l.title AS listingTitle, l.user_id AS ownerid' +
+              ' FROM users AS recipient' +
+              ' JOIN users AS sender ON sender.id = $senderid' +
+              ' JOIN listings AS l ON l.id = $listingid' +
+              ' WHERE recipient.id = $recipientid' +
+              ' AND recipient.email_notifications IS TRUE' +
+              " AND l.status = 'ACTIVE';",
+            {
+              bind: {
+                senderid: user.id,
+                recipientid: messageData.recipientId,
+                listingid: messageData.listingId
+              },
+              type: db.Sequelize.QueryTypes.SELECT
+          })
+          .then(function(queryRes) {
+            console.log("Query response for message email data is: ", queryRes);
+            if(queryRes && queryRes.length == 1) {
+              const sendableEmailData = queryRes[0];  // Get first & only result
+              const listingLink = host + '/' + user.username + '/listings/' + messageData.listingId;
+              console.log("Listing link URL is: ", listingLink);
+
+              // Create the content
+              const emailContentHtml = EmailBuilder.listingMessage.buildHtmlEmailString(
+                sendableEmailData['listingtitle'],
+                listingLink,
+                user.username,
+                sanitizedContent
+              );
+              const emailContentText = EmailBuilder.listingMessage.buildPlainTextEmailString(
+                sendableEmailData['listingtitle'],
+                listingLink,
+                user.username,
+                sanitizedContent
+              );
+
+              console.log("Sending email now:", emailContentHtml);
+              return MailService.sendEmail({
+                  from: user.username,
+                  to: sendableEmailData['email'],
+                  subject: "Wishifieds Msg - " + sendableEmailData['listingtitle'],
+                  html: emailContentHtml,
+                  text: emailContentText,
+                },
+                function(error, data) { console.log('Email sent for message:', message.id);}
+              );
+            }
+            else {
+              console.log("Error getting info to send message email to listing owner: ", sendableEmailData);
+            }
+          });
 
         res.json({error: false, success: true, message: message});
       })
@@ -213,6 +274,42 @@ module.exports = function(router) {
         return res.status(400).json({error: true, msg: 'Could not create message.'});
       });
   });
+  // User
+  //         .findById({
+  //           where: {'$UserSettings.emailNotifications$': true},
+  //           include: [{
+  //             model: UserSettings,
+  //             required: true
+  //           }]
+  //         })
+  //         .then(function(recipient) {
+  //           if(recipient) {
+
+
+  // db.sequelize
+  //         .query(
+  //           // Used to just count total from user's own wishlistings, not correspondance with others
+  //           // sender name
+  //           // listingID
+  //           //
+  //           //
+  //           //
+
+  //           "SELECT COUNT(*) FROM \"messages\" WHERE \"messages\".recipient_id = $userid AND \"messages\".status = 'UNREAD';",
+  //           {
+  //             bind: { userid: userId },
+  //             type: db.Sequelize.QueryTypes.SELECT
+  //           }
+  //         )
+  //         .then(function(result) {
+  //           MailService.sendEmail({
+  //               from: user.username,
+  //               to: recipient.username,
+  //               subject: "New Message on a Wish: ",  // NEED WISH TITLE HERE
+  //               html: ,  // NEED TO FORMAT A TEMPLATE WITH PIECES TO INPUT: Sender's message, link to listing
+  //               text: ,  // NEED TO FORMAT A TEMPLATE WITH PIECES TO INPUT: Sender's message, link to listing
+  //             })
+  //         })
 
   // Update Messages Unread => Read
   router.patch('/messages/markread', eatOnReq, eatAuth, function(req, res) {
@@ -301,7 +398,7 @@ function buildUnreadMessagesResponse(dateOrderedResults) {
   var byListing = {};  // initially build an object by ID with redundant info inside
   dateOrderedResults.forEach( msg => {
     if(!byListing[msg.listingId])
-    return mapUnreadMessagesResponse(msg);
+    return MessagesMapper.mapMessageHasUser(msg);
   });
 }
 
@@ -319,7 +416,7 @@ function getMessagesByListingForUser(username) {
     }
 
     // Get listing object by id, and add the message to its messages
-    totalObj[current.listingId].messages.push(mapUnreadMessagesResponse(current));
+    totalObj[current.listingId].messages.push(MessagesMapper.mapMessageHasUser(current));
 
     return totalObj;
   }
@@ -386,19 +483,6 @@ function userSortByUnreads(userId) {
       console.log("END; returning 1 to flip them (b created before a)");
       return 1;
     }
-  }
-}
-
-function mapUnreadMessagesResponse(msg) {
-  return {
-    id: msg.id,
-    senderId: msg.senderId,
-    recipientId: msg.recipientId,
-    content: msg.content,
-    status: msg.status,
-    createdAt: msg.createdAt,
-    listingId: msg.listingId,
-    senderPicUrl: msg['User.profile_pic_url'],
   }
 }
 

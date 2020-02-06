@@ -6,6 +6,7 @@ var eatAuth      = require('../lib/routes_middleware/eat_auth.js'   )(process.en
 var userOnReq    = require('../lib/routes_middleware/user_on_req.js')(process.env.AUTH_SECRET);
 var ownerAuth    = require('../lib/routes_middleware/owner_auth.js');
 var Utils        = require('../lib/utils.js');  // Has sanitization stuff in it
+var MessagesMapper = require('../lib/model_mappers/messages_mapper.js');
 var db           = require('../db/models/index.js');
 var sequelize    = db.sequelize;
 var Listings     = db.Listing;
@@ -245,7 +246,7 @@ module.exports = function(router) {
           res.json({
             error: false,
             success: true,
-            listingMessages: allMessages,  // FIXME - MAP THIS TO UI MODEL
+            listingMessages: MessagesMapper.mapMessages(allMessages, user),// allMessages,  // FIXME - MAP THIS TO UI MODEL
             unreadCounts: unreadCounts  // FIXME - THIS IS WRONG!!!!
           });
         })

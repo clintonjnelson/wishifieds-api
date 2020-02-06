@@ -215,9 +215,9 @@ module.exports = function(router, passport) {
         console.log("USER SAVED, NOW TO SEND EMAIL...");
         // Send confirmation email
         var mailOptions = {
-          from:    'Syynpost Confirmation <info@syynpost.com>',
+          from:    'Wishifieds Confirmation <info@wishifieds.com>',
           to:      user.email,      // User-provided basic-auth email
-          subject: 'Syynpost Confirmation',
+          subject: 'Wishifieds Confirmation',
           html:    EmailBuilder.confirmation.buildHtmlEmailString({confirmationToken: urlSafeToken, email: user.email, host: req.headers.origin}),
           // text: EmailBuilder.buildPasswordResetPlainTextEmailString(),
         };
