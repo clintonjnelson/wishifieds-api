@@ -9,6 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       userId:    { type: Sequelize.INTEGER, allowNull: false, field: 'user_id' },  // FK
+      refId:     { type: Sequelize.STRING, allowNull: true, field: 'ref_id' },
       badgeType: { type: Sequelize.ENUM('FACEBOOK'), allowNull: false, field: 'badge_type' },
       linkUrl:   { type: Sequelize.STRING, field: 'link_url' },
       status:    { type: Sequelize.ENUM('ACTIVE', 'INACTIVE', 'DELETED'), defaultValue: "ACTIVE" },

@@ -1,5 +1,5 @@
 'use strict';
-var bodyparser          = require('body-parser'         );
+var bodyparser          = require('body-parser');
 var eatOnReq            = require('../../lib/routes_middleware/eat_on_req.js');
 var eatAuth             = require('../../lib/routes_middleware/eat_auth.js')(process.env.AUTH_SECRET);
 var loadEatUser         = require('../../lib/routes_middleware/load_eat_user.js')(process.env.AUTH_SECRET);
@@ -23,14 +23,14 @@ module.exports = function(router, passport, apiData) {
   }
 
   // 1) Request comes into here
-  router.get('/validate_credibility/' + apiData.passportType,  // use to be /auto/
+  router.get('/validate_credibility/' + apiData['passportType'],  // use to be /auto/
     eatOnReq,
     eatAuth,                                        // verify & load user in req
     makeOauthReqWithEat(router, passport, apiData)  // Build & send request to FB
   );
 
   // 2) Redirects to here after auth
-  router.get('/validate_credibility/' + apiData.passportType + '/callback',
+  router.get('/validate_credibility/' + apiData['passportType'] + '/callback',
     eatOnReq,
     loadEatUser,
     passport.authenticate(apiData.passportType,  // Handles credibility validation as middleware in here!

@@ -234,19 +234,26 @@ module.exports = function(router) {
               { senderId: correspondantId },
               { recipientId: correspondantId }]
           },
+          include: [User],
+          // {
+          //     model: User,
+          //     on: {'$message.sender_id$': {[sequelize.Op]: sequelize.col('user.id')} },
+          //     as: 'sender',
+          // }
           order: [['createdAt', 'ASC']],// Sequelize.literal('"Message"."created_at" DESC'), // [[Message, 'createdAt', 'ASC']],// Sequelize.literal('created_at ASC'),  // [['createdAt', 'ASC']] doesn't work
           raw: true  // JUST give the values back
         })
         .then(function(allMessages) {
+          console.log("ALL MESSAGES FOUND ARE: ", allMessages);
+
           var unreadCounts = allMessages.reduce(getUserListingMsgsMeta(user.id), {});  // Returns object of {userId1: count1, userId2: count2, ...}
           console.log("UNREADS COUNT IS: ", unreadCounts);
-          console.log("FINAL MESSAGES TO SEND ARE: ", allMessages);
 
           // listingMessages: [ {msg1}, {msg2}, ... ]
           res.json({
             error: false,
             success: true,
-            listingMessages: MessagesMapper.mapMessages(allMessages, user),// allMessages,  // FIXME - MAP THIS TO UI MODEL
+            listingMessages: MessagesMapper.mapMessages(allMessages),// allMessages,  // FIXME - MAP THIS TO UI MODEL
             unreadCounts: unreadCounts  // FIXME - THIS IS WRONG!!!!
           });
         })

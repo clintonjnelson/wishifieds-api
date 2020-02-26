@@ -147,12 +147,19 @@ module.exports = function(router) {
 
   // Create new user
   router.post('/users', function(req, res) {
+    console.log("REQ BODY IS: ", req.body);
+    if(!req.body.termsCond) {
+      return res.status(403).json({ error: true, msg: 'terms-cond'  });  // not agree? Forbidden. Sorry.
+    }
+
     var newEmail = req.body.email;
     var newName = req.body.username || newEmail.split('@')[0]; // TODO: need a username generator here
+    var dataConsentDate = req.body.dataConsentDate || new Date().toISOString();
     var preUser = {  // Explicitly populate to avoid exploit
       username: newName,
       email: newEmail,
-      profilePicUrl: DEFAULT_AVATAR_URL
+      profilePicUrl: DEFAULT_AVATAR_URL,
+      dataConsentDate: dataConsentDate,
     };
 
     if(!newEmail || !EMAIL_REGEX.test(newEmail)) {
@@ -190,8 +197,8 @@ module.exports = function(router) {
                 .then(function(userLoc){
                   console.log("UserLocation saved as: ", userLoc);
                   console.log("about to save the default user location to the user...");
-                  user.setDataValue('default_user_location', userLoc.id)
-                    .save()
+                  user.setDataValue('defaultUserLocation', userLoc.id)
+                  user.save()
                     .then(function(savedUser){
                       console.log('UserLocation saved to User: ', savedUser);
                     });
@@ -382,7 +389,7 @@ module.exports = function(router) {
           success: true,
           badges: badges.map(b => { return { badgeType: b['badgeType'], linkUrl: b['linkUrl'] } })
         });
-      })
+      });
   });
 
 //--------------------- HELPERS ------------------------

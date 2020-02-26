@@ -24,10 +24,11 @@ module.exports = {
       confirmed:           { type: Sequelize.STRING },
       status:              { type: Sequelize.ENUM('ACTIVE', 'INACTIVE', 'PENDING'), allowNull: false },
       termsconditions:     { type: Sequelize.BOOLEAN },
+      dataConsentDate:     { type: Sequelize.STRING(40), allowNull: false, field: 'data_consent_date' },
 
       // Settings
       emailNotifications:  { type: Sequelize.BOOLEAN, defaultValue: true, field: 'email_notifications' },  // If need more granular, have separate table for types opted in/out
-      smsNotifications:    { type: Sequelize.BOOLEAN, defaultValue: true, field: 'sms_notifications' },  // If need more granular, have separate table for types opted in/out
+      smsNotifications:    { type: Sequelize.BOOLEAN, defaultValue: false, field: 'sms_notifications' },  // If need more granular, have separate table for types opted in/out
 
       // Timestamps
       createdAt:           { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.NOW, field: 'created_at' },

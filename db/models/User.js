@@ -37,6 +37,7 @@ module.exports = function(sequelize, DataTypes) {
     confirmed:       { type: DataTypes.STRING },
     status:          { type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'PENDING'), defaultValue: 'PENDING'},
     termsconditions: { type: DataTypes.BOOLEAN },
+    dataConsentDate: { type: DataTypes.STRING(40), field: 'data_consent_date' },
 
     // Settings
     emailNotifications:  { type: DataTypes.BOOLEAN, defaultValue: true, field: 'email_notifications' },  // If need more granular, have separate table for types opted in/out

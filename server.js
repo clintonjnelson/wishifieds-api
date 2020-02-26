@@ -93,13 +93,14 @@ if(process.env.NODE_ENV === 'dev') {
 models.sequelize.sync()
   .then(function() {
     // DB connection success => start server
-    app.listen(process.env.PORT || process.env.HTTP_PORT || 3000, function() {
-      console.log('server running on port ' + (process.env.PORT || process.env.HTTP_PORT || 3000));
-    });
-
     if(process.env.NODE_ENV === 'dev') {
-      https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 8443, '127.0.0.1', function() {
+      https.createServer(sslOptions, app).listen(process.env.HTTPS_PORT || 8443, 'localhost', function() {
         console.log("https server running on port " + (process.env.HTTPS_PORT ||  8443));
+      });
+    }
+    else {
+      app.listen(process.env.PORT || process.env.HTTP_PORT || 3000, function() {
+        console.log('server running on port ' + (process.env.PORT || process.env.HTTP_PORT || 3000));
       });
     }
   });
