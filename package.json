@@ -47,7 +47,7 @@
     "sequelize-cli": "^4.0.0"
   },
   "dependencies": {
-    "@angular/cli": "1.2.7",
+    "@angular/cli": "15.0.4",
     "@angular/core": "4.0.1",
     "aws-sdk": "2.429.0",
     "bcrypt": "2.0.1",
